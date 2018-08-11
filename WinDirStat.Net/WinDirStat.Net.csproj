@@ -1,0 +1,220 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7577AAA1-EF63-40F5-BFC1-EB8BA1F46FD7}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>WinDirStat.Net</RootNamespace>
+    <AssemblyName>WinDirStat.Net</AssemblyName>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;COMPRESSED_DATA</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;COMPRESSED_DATA</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\App.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>App.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationFramework.Aero2" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="Controls\FlashyProgressBar.cs" />
+    <Compile Include="Drawing\ColorSpace.cs" />
+    <Compile Include="Controls\ImageMenuItem.cs" />
+    <Compile Include="Settings\Geometry\Point2F.cs" />
+    <Compile Include="Settings\Geometry\Point2I.cs" />
+    <Compile Include="Settings\Geometry\Rectangle2I.cs" />
+    <Compile Include="Settings\Geometry\Rgb24Color.cs" />
+    <Compile Include="Settings\WinDirSettings.Defaults.cs" />
+    <Compile Include="Settings\WinDirSettings.IO.cs" />
+    <Compile Include="Utils\BitField32.cs" />
+    <Compile Include="Utils\MathUtils.cs" />
+    <Compile Include="Settings\IconCacheMode.cs" />
+    <Compile Include="Settings\Geometry\Rectangle2S.cs" />
+    <Compile Include="Settings\TreemapOptions.cs" />
+    <Compile Include="Windows\FolderBrowserDialog.cs" />
+    <Compile Include="Drawing\ITreemapItem.cs" />
+    <Compile Include="Drawing\PreviewTreemapItem.cs" />
+    <Compile Include="Data\ExtensionRecordComparer.cs" />
+    <Compile Include="Sorting\SortView.cs" />
+    <Compile Include="Sorting\SortViewColumn.cs" />
+    <Compile Include="Sorting\SortListView.cs" />
+    <Compile Include="Sorting\SortViewKeys.cs" />
+    <Compile Include="Drawing\Treemap.cs" />
+    <Compile Include="Settings\TreemapStyle.cs" />
+    <Compile Include="Controls\GraphView.xaml.cs">
+      <DependentUpon>GraphView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Converters\CollapsedWhenBoolean.cs" />
+    <Compile Include="Converters\ScanTimeFormatter.cs" />
+    <Compile Include="Converters\TextToHorizontalAlignment.cs" />
+    <Compile Include="Data\FileEnumerator.Native.cs" />
+    <Compile Include="Data\Nodes\FileNode.VisualInfo.cs" />
+    <Compile Include="Settings\WinDirSettings.cs" />
+    <Compile Include="Utils\ListExtensions.cs" />
+    <Compile Include="Utils\CompactList.cs" />
+    <Compile Include="Utils\TimedLock.cs" />
+    <Compile Include="Data\ExtensionRecords.cs" />
+    <Compile Include="Data\FileEnumerator.cs" />
+    <Compile Include="Data\IconCache.cs" />
+    <Compile Include="Data\SortMethods.cs" />
+    <Compile Include="Data\Nodes\Collections\FileNodeCollection.cs" />
+    <Compile Include="Data\Nodes\FileNodeComparer.cs" />
+    <Compile Include="Data\Nodes\FileNodeType.cs" />
+    <Compile Include="Data\Nodes\FreeSpaceNode.cs" />
+    <Compile Include="Settings\Geometry\Rgba32Color.cs" />
+    <Compile Include="TreeView\EditTextBox.cs" />
+    <Compile Include="TreeView\ExtensionMethods.cs" />
+    <Compile Include="TreeView\GeneralAdorner.cs" />
+    <Compile Include="TreeView\InsertMarker.cs" />
+    <Compile Include="TreeView\LinesRenderer.cs" />
+    <Compile Include="TreeView\FileGridView.cs" />
+    <Compile Include="TreeView\FileNodeView.cs" />
+    <Compile Include="TreeView\FileTreeView.cs" />
+    <Compile Include="TreeView\FileTreeViewItem.cs" />
+    <Compile Include="Data\Nodes\FileNode.FlatList.cs" />
+    <Compile Include="Data\Nodes\Collections\IFileNodeCollection.cs" />
+    <Compile Include="TreeView\TreeTraversal.cs" />
+    <Compile Include="TreeView\TreeFlattener.cs" />
+    <Compile Include="Data\WinDirDocument.cs" />
+    <Compile Include="Data\Nodes\Collections\EmptyFileNodeCollection.cs" />
+    <Compile Include="Data\Nodes\FolderNode.cs" />
+    <Compile Include="Data\Nodes\FileNode.TreeNode.cs" />
+    <Compile Include="Data\Nodes\FileNode.cs" />
+    <Compile Include="Data\Nodes\RootNode.cs" />
+    <Compile Include="Utils\BitmapUtils.cs" />
+    <Compile Include="Converters\EmptyWhenNegative.cs" />
+    <Compile Include="Controls\SubtreePercentage.cs" />
+    <Compile Include="Converters\AttributesFormatter.cs" />
+    <Compile Include="Converters\ByteFormatter.cs" />
+    <Compile Include="Utils\ByteFormatter.cs" />
+    <Compile Include="Utils\PathUtils.cs" />
+    <Page Include="Controls\GraphView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="Themes\Generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+      <ContainsDesignTimeResources>true</ContainsDesignTimeResources>
+    </Page>
+    <Page Include="Themes\SortView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <None Include="Properties\App.manifest" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NtfsReader\NtfsReader.csproj">
+      <Project>{dbacefc5-0234-4317-b096-f212ecae1dd1}</Project>
+      <Name>NtfsReader</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="App.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\FileIcons\FileCollection.png" />
+    <Resource Include="Resources\FileIcons\UnknownFile.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\DimmedGraph.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Open.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\FileIcons\FreeSpace.png" />
+    <Resource Include="Resources\FileIcons\Shortcut.png" />
+    <Resource Include="Resources\FileIcons\UnknownSpace.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Delete.png" />
+    <Resource Include="Resources\Icons\Exit.png" />
+    <Resource Include="Resources\Icons\Recycle.png" />
+    <Resource Include="Resources\Icons\Refresh.png" />
+    <Resource Include="Resources\Icons\Save.png" />
+    <Resource Include="Resources\Icons\Search.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
