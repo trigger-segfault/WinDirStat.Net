@@ -28,6 +28,7 @@ A .NET/WPF implementation of [WinDirStat](https://windirstat.net/). Name needs t
 * C# overhead means higher memory usage, especially with 64-bit mode.
 * Slightly slower scanning than [altWinDirStat](https://github.com/ariccio/altWinDirStat).
 * Scrollbars are too damn tiny beacuse of WPF (Will fix with style override)
+* Folders with *just* files still use the `<Files>` subfolder. (Will try to fix)
 
 ### Priority Todo List
 
