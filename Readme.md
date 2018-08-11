@@ -3,11 +3,18 @@ A .NET/WPF implementation of [WinDirStat](https://windirstat.net/). Name needs t
 
 ![Preview](https://i.imgur.com/HbW3gz1.png)
 
+### Credits
+
+* NTFS reading done by [NTFS Reader](https://sourceforge.net/projects/ntfsreader/) library with GNU 2.1 license.
+* File Tree View modified from [ICSharpCode.TreeView](https://github.com/icsharpcode/SharpDevelop/tree/master/src/Libraries/SharpTreeView/ICSharpCode.TreeView).
+* Currently using some Windows 10 icons. (MUST FIX SOON)
+
 ### Pros
 
 * WPF allows for more advanced flashy features
 * Includes NTFS MFT parsing for extremely fast reads of the primary or non-Windows-owned drives (Requires elevated priviledges)
-* Smoother UI, less freezing
+* Smoother, more responsive UI, less freezing.
+* New blur effect when scaling treemap render.
 * Faster scanning than original WinDirStat.
 
 ### Cons
