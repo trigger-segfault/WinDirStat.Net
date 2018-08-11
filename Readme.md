@@ -3,7 +3,7 @@
 <!--[![Latest Release](https://img.shields.io/github/release/trigger-death/WinDirStat.Net.svg?style=flat&label=version)](https://github.com/trigger-death/WinDirStat.Net/releases/latest)
 [![Latest Release Date](https://img.shields.io/github/release-date-pre/trigger-death/WinDirStat.Net.svg?style=flat&label=released)](https://github.com/trigger-death/WinDirStat.Net/releases/latest)-->
 [![Total Downloads](https://img.shields.io/github/downloads/trigger-death/WinDirStat.Net/total.svg?style=flat)](https://github.com/trigger-death/WinDirStat.Net/releases)
-[![Creation Date](https://img.shields.io/badge/created-august%202017-A642FF.svg?style=flat)](https://github.com/trigger-death/WinDirStat.Net/commit/3aa1fde1cfb165ea8bc119df2944ede41f063179)
+[![Creation Date](https://img.shields.io/badge/created-august%202018-A642FF.svg?style=flat)](https://github.com/trigger-death/WinDirStat.Net/commit/3aa1fde1cfb165ea8bc119df2944ede41f063179)
 
 A .NET/WPF implementation of [WinDirStat](https://windirstat.net/). Name needs to be changed due to it conflicting with the original WinDirStat's webpage url.
 
