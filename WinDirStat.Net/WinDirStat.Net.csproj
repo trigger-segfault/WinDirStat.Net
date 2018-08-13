@@ -70,8 +70,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Controls\FlashyProgressBar.cs" />
+    <Compile Include="Data\Nodes\DriveSpaceNode.cs" />
+    <Compile Include="Data\Nodes\RootDriveNode.cs" />
+    <Compile Include="Data\Nodes\UnknownNode.cs" />
     <Compile Include="Drawing\ColorSpace.cs" />
     <Compile Include="Controls\ImageMenuItem.cs" />
+    <Compile Include="Drawing\TreemapItem.cs" />
     <Compile Include="Settings\Geometry\Point2F.cs" />
     <Compile Include="Settings\Geometry\Point2I.cs" />
     <Compile Include="Settings\Geometry\Rectangle2I.cs" />
@@ -83,6 +87,7 @@
     <Compile Include="Settings\IconCacheMode.cs" />
     <Compile Include="Settings\Geometry\Rectangle2S.cs" />
     <Compile Include="Settings\TreemapOptions.cs" />
+    <Compile Include="Utils\SpeedTester.cs" />
     <Compile Include="Windows\FolderBrowserDialog.cs" />
     <Compile Include="Drawing\ITreemapItem.cs" />
     <Compile Include="Drawing\PreviewTreemapItem.cs" />

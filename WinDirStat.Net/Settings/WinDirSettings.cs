@@ -139,6 +139,10 @@ namespace WinDirStat.Net.Settings {
 		public ReadOnlyCollection<Rgb24Color> SubtreePalette {
 			get => Array.AsReadOnly(subtreePalette);
 		}
+		
+		public Rgb24Color GetFilePaletteColor(int index) {
+			return filePalette[index];
+		}
 
 		public void SetFilePalette(IEnumerable<Rgb24Color> filePalette) {
 			this.filePalette = EqualizeColors(filePalette);

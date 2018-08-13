@@ -22,6 +22,7 @@ using System.Windows.Threading;
 using WinDirStat.Net.Controls;
 using WinDirStat.Net.Data;
 using WinDirStat.Net.Data.Nodes;
+using WinDirStat.Net.Drawing;
 using WinDirStat.Net.SortingView;
 using WinDirStat.Net.TreeView;
 using WinDirStat.Net.Utils;
@@ -64,13 +65,63 @@ namespace WinDirStat.Net {
 		public MainWindow() {
 			FileInfo fileInfo = new FileInfo(@"C:\fragmentation.txt");
 			DirectoryInfo dirInfo = new DirectoryInfo(@"C:\fragmentation.txt");
+			InstanceOverheadTest<object>();
 			InstanceOverheadTest<FileNode>(() => new FileNode(fileInfo));
 			InstanceOverheadTest<FolderNode>(() => new FolderNode(dirInfo));
+			/*FileInfo fileInfo = new FileInfo(@"C:\fragmentation.txt");
+			DirectoryInfo dirInfo = new DirectoryInfo(@"C:\Program Files");
+			InstanceOverheadTest<char[]>(() => "Hello World".ToLower().ToLower().ToCharArray());
+			InstanceOverheadTest<string>(() => "Hello World".ToLower());
+			InstanceOverheadTest<FileNode>(() => new FileNode(fileInfo));
+			InstanceOverheadTest<FolderNode>(() => new FolderNode(dirInfo));
+			ITreemapItem fileNode = new FileNode(fileInfo);
+			ITreemapItem folderNode = new FolderNode(dirInfo);
+			ITreemapItem rootNode = new RootNode(document, dirInfo);
+			((FolderNode) rootNode).AddChild((RootNode) rootNode, (FileNode) folderNode, dirInfo.FullName, true);
+			((FolderNode) rootNode).AddChild((RootNode) rootNode, (FileNode) fileNode, fileInfo.FullName, true);
+			ITreemapItem previewItem = new PreviewTreemapItem3(rootNode);
+			using (SpeedTester tester = new SpeedTester(10000000)) {
+				//tester.Callback = (r) => Console.WriteLine($"{r.Name}: calls per ms {r.CallsPerMicrosecond:n}");
+				tester.Run(nameof(FileNode), () => fileNode = (FileNode) fileNode);
+				tester.Run(nameof(FolderNode), () => folderNode = (FileNode) folderNode);
+				tester.Run(nameof(RootNode), () => rootNode = (FileNode) rootNode);
+				tester.Run(nameof(FileNode), () => fileNode = (FileNode) fileNode);
+				tester.Run(nameof(FolderNode), () => folderNode = (FolderNode) folderNode);
+				tester.Run(nameof(RootNode), () => rootNode = (RootNode) rootNode);
+				tester.Run(nameof(PreviewTreemapItem), () => previewItem = (PreviewTreemapItem) previewItem);
+
+				tester.Run("FileNode loop test", () => {
+					for (int i = 0; i < rootNode.ChildCount; i++) {
+						ITreemapItem child = rootNode[i];
+					}
+				});
+				tester.Run("PreviewTreemapItem loop test", () => {
+					for (int i = 0; i < previewItem.ChildCount; i++) {
+						ITreemapItem child = previewItem[i];
+					}
+				});
+			}
+
+			using (SpeedTester tester = new SpeedTester(50)) {
+				tester.Run("RootNode Enqueue test", () => {
+					Queue<ITreemapItem> items = new Queue<ITreemapItem>();
+					for (int i = 0; i < 100000; i++) {
+						items.Enqueue(rootNode);
+					}
+				});
+				tester.Run("PreviewTreemapItem Enqueue test", () => {
+					Queue<ITreemapItem> items = new Queue<ITreemapItem>();
+					for (int i = 0; i < 100000; i++) {
+						items.Enqueue(previewItem);
+					}
+				});
+			}*/
 			//Environment.Exit(0);
 
 
 			document = new WinDirDocument();
 			document.ScanEnded += OnScanEnded;
+			//document.Settings.ValidateInterval = TimeSpan.FromDays(1);
 
 			InitializeComponent();
 
@@ -79,13 +130,13 @@ namespace WinDirStat.Net {
 			tree.ShowRootExpander = false;
 			tree.ShowRoot = true;
 			
-			StartScan(@"C:\");
+			StartScan(@"F:\");
 		}
 
 		private void OnScanEnded(object sender, ScanEventArgs e) {
 			switch (e.ScanState) {
 			case ScanState.Finished:
-				//graphView.Root = document.RootNode;
+				graphView.Root = document.RootNode;
 				//extensionList.ItemsSource = document.Extensions;
 				break;
 			case ScanState.Failed:
@@ -155,12 +206,20 @@ namespace WinDirStat.Net {
 		}
 
 		private void OnFileSelectionChanged(object sender, SelectionChangedEventArgs e) {
+			OnFileTreeGotFocus(sender, e);
+		}
+
+		private void OnExtensionSelectionChanged(object sender, SelectionChangedEventArgs e) {
+			OnExtensionListGotFocus(sender, e);
+		}
+
+		private void OnFileTreeGotFocus(object sender, RoutedEventArgs e) {
 			if (tree.SelectedItems != null && tree.SelectedItems.Count > 0 && document.IsFinished) {
 				graphView.HighlightSelection(tree.SelectedItems.Cast<FileNode>());
 			}
 		}
 
-		private void OnExtensionSelectionChanged(object sender, SelectionChangedEventArgs e) {
+		private void OnExtensionListGotFocus(object sender, RoutedEventArgs e) {
 			if (extensionList.SelectedItem != null && document.IsFinished) {
 				graphView.HighlightExtension(((ExtensionRecord) extensionList.SelectedItem).Extension);
 			}

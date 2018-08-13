@@ -154,6 +154,10 @@ namespace WinDirStat.Net.Data.Nodes {
 
 			/// <summary>The icon used by the node.</summary>
 			internal ImageSource icon;
+
+			public VisualInfo Clone() {
+				return (VisualInfo) MemberwiseClone();
+			}
 #endif
 		}
 
@@ -178,13 +182,13 @@ namespace WinDirStat.Net.Data.Nodes {
 		internal void UnloadVisuals() {
 			if (visualInfo != null) {
 				//Debug.Assert(!visualInfo.IsWatched);
-				if (visualInfo.children != null) {
+				/*if (visualInfo.children != null) {
 					FileNode[] removedChildren = visualInfo.children.ToArray();
 					visualInfo.children.Clear();
 					foreach (FileNode child in removedChildren) {
 						child.UnloadVisuals();
 					}
-				}
+				}*/
 				Debug.WriteLine("Remove VisualInfo: " + name);
 				visualInfo = null;
 			}

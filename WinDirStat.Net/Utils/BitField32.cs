@@ -159,7 +159,7 @@ namespace WinDirStat.Net.Utils {
 			Value |= ((value & byte.MaxValue) << bit);
 		}
 
-		public void SetSByte(int firstBit, int lastBit, byte value) {
+		public void SetByte(int firstBit, int lastBit, byte value) {
 			int mask = GetMask(firstBit, lastBit);
 			Value &= ~(mask << firstBit);
 			Value |= ((value & mask) << firstBit);

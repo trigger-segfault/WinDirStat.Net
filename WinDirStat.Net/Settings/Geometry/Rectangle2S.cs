@@ -76,6 +76,14 @@ namespace WinDirStat.Net.Settings.Geometry {
 			return new Rectangle2S(left, top, right - left, bottom - top);
 		}
 
+		public static explicit operator GdiRectangle(Rectangle2S rect) {
+			return new GdiRectangle(
+				(rect.X == ushort.MaxValue ? -1 : rect.X),
+				(rect.Y == ushort.MaxValue ? -1 : rect.Y),
+				rect.Width,
+				rect.Height);
+		}
+
 		public static implicit operator Rectangle2S(GdiRectangle rect) {
 			return new Rectangle2S(rect.X, rect.Y, rect.Width, rect.Height);
 		}

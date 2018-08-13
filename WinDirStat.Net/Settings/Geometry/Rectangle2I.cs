@@ -101,6 +101,24 @@ namespace WinDirStat.Net.Settings.Geometry {
 			set => Height = value - Y;
 		}
 
+		public void Inflate(int x, int y) {
+			X -= x;
+			Y -= y;
+			Width += x * 2;
+			Height += y * 2;
+		}
+
+		public void Deflate(int x, int y) {
+			X += x;
+			Y += y;
+			Width -= x * 2;
+			Height -= y * 2;
+		}
+
+		public static explicit operator GdiRectangle(Rectangle2I rect) {
+			return new GdiRectangle(rect.X, rect.Y, rect.Width, rect.Height);
+		}
+
 		public static implicit operator Rectangle2I(GdiRectangle rect) {
 			return new Rectangle2I(rect.X, rect.Y, rect.Width, rect.Height);
 		}

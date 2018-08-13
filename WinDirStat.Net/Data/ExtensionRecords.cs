@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using WinDirStat.Net.Controls;
+using WinDirStat.Net.Data.Nodes;
 using WinDirStat.Net.Settings.Geometry;
 
 namespace WinDirStat.Net.Data {
@@ -22,14 +23,20 @@ namespace WinDirStat.Net.Data {
 		private ImageSource icon;
 		private long size;
 		private int fileCount;
+		internal readonly List<FolderNode> containers;
 
 		public ExtensionRecord(string extension) {
 			this.extension = extension.ToLower();
+			containers = new List<FolderNode>();
 			color = new Rgb24Color(150, 150, 150);
 			if (IsEmptyExtension)
 				name = "File";
 			else
 				name = extension.TrimStart('.').ToUpper() + " File";
+		}
+
+		public List<FolderNode> Containers {
+			get => containers;
 		}
 
 		public string Extension {

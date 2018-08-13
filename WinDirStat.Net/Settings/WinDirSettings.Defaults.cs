@@ -57,12 +57,12 @@ namespace WinDirStat.Net.Settings {
 			TreemapOptions = TreemapOptions.Default;
 			SetFilePalette(DefaultFilePalette);
 			SetSubtreePalette(DefaultSubtreePalette);
-			ShowUnknown = false;
 			ShowFreeSpace = false;
+			ShowUnknown = false;
 			RAMInterval = DefaultRAMInterval;
 			StatusInterval = DefaultStatusInterval;
 			ValidateInterval = DefaultValidateInterval;
-			RenderPriority = ThreadPriority.BelowNormal;
+			RenderPriority = ThreadPriority.AboveNormal;
 			ScanPriority = ThreadPriority.AboveNormal;
 		}
 

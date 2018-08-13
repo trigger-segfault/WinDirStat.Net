@@ -72,7 +72,7 @@ namespace WinDirStat.Net.Data.Nodes {
 			}
 		}
 
-		protected virtual void OnIsVisibleChanged() { }
+		protected void OnIsVisibleChanged() { }
 
 		private void UpdateChildIsVisible(bool updateFlattener) {
 			if (vi.children != null && vi.children.Count > 0) {
@@ -148,40 +148,9 @@ namespace WinDirStat.Net.Data.Nodes {
 		}
 
 		#endregion
-
-		/*internal protected virtual void OnChildrenResetting() {
-			foreach (FileNode node in vi.children) {
-				if (node.vi.parent == this)
-					Debug.Assert(node.vi.parent == this);
-
-				//if (node.vi.isHidden)
-				//	continue;
-
-				node.vi.parent = null;
-				Debug.WriteLine("Resetting {0} from {1}", node, this);
-				FileNode removeEnd = node;
-				while (removeEnd.vi.children != null && removeEnd.vi.children.Count > 0)
-					removeEnd = removeEnd.vi.children.Last();
-
-				List<FileNode> removedNodes = null;
-				int visibleIndexOfRemoval = 0;
-				if (node.vi.isVisible) {
-					visibleIndexOfRemoval = GetVisibleIndexForNode(node);
-					removedNodes = node.VisibleDescendantsAndSelf().ToList();
-				}
-
-				RemoveNodes(node, removeEnd);
-
-				if (removedNodes != null) {
-					var flattener = GetListRoot().vi.treeFlattener;
-					if (flattener != null) {
-						flattener.NodesRemoved(visibleIndexOfRemoval, removedNodes);
-					}
-				}
-			}
-		}*/
+		
 		#region OnChildrenChanged
-		internal protected virtual void OnCollectionReset(List<FileNode> newList, List<FileNode> oldList) {
+		internal protected void OnCollectionReset(List<FileNode> newList, List<FileNode> oldList) {
 			foreach (FileNode node in oldList) {
 				if (node.vi.parent == this)
 					Debug.Assert(node.vi.parent == this);
@@ -234,7 +203,7 @@ namespace WinDirStat.Net.Data.Nodes {
 			}
 			//RaiseIsLastChangedIfNeeded(e);
 		}
-		internal protected virtual void OnChildrenChanged(NotifyCollectionChangedEventArgs e) {
+		internal protected void OnChildrenChanged(NotifyCollectionChangedEventArgs e) {
 			//if (Name == "Users")
 			Debug.WriteLine(e.Action);
 			/*if (e.Action == NotifyCollectionChangedAction.Move) {
@@ -359,7 +328,7 @@ namespace WinDirStat.Net.Data.Nodes {
 		#region Expanding / LazyLoading
 		
 		public bool ShowExpander {
-			get => HasChildren;
+			get => HasVirtualChildren;
 		}
 
 		public bool IsExpanded {
@@ -379,8 +348,8 @@ namespace WinDirStat.Net.Data.Nodes {
 			}
 		}
 
-		protected virtual void OnExpanding() { }
-		protected virtual void OnCollapsing() { }
+		//protected virtual void OnExpanding() { }
+		//protected virtual void OnCollapsing() { }
 
 		/*public bool LazyLoading {
 			get => lazyLoading;
@@ -402,15 +371,15 @@ namespace WinDirStat.Net.Data.Nodes {
 		/// Gets whether this node can be expanded recursively.
 		/// If not overridden, this property returns false if the node is using lazy-loading, and true otherwise.
 		/// </summary>
-		public virtual bool CanExpandRecursively {
+		public bool CanExpandRecursively {
 			get => false;// ItemCount <= 500;
 		}
 
-		/*public virtual bool ShowIcon {
+		/*public bool ShowIcon {
 			get { return Icon != null; }
 		}
 
-		protected virtual void LoadChildren() {
+		protected void LoadChildren() {
 			throw new NotSupportedException(GetType().Name + " does not support lazy loading");
 		}
 
@@ -476,7 +445,7 @@ namespace WinDirStat.Net.Data.Nodes {
 
 		#region Editing
 
-		public virtual bool IsEditable {
+		public bool IsEditable {
 			get => false;
 		}
 
@@ -490,11 +459,11 @@ namespace WinDirStat.Net.Data.Nodes {
 			}
 		}
 
-		public virtual string LoadEditText() {
+		public string LoadEditText() {
 			return null;
 		}
 
-		public virtual bool SaveEditText(string value) {
+		public bool SaveEditText(string value) {
 			return true;
 		}
 
@@ -502,7 +471,7 @@ namespace WinDirStat.Net.Data.Nodes {
 
 		#region Checkboxes (Disabled)
 
-		/*public virtual bool IsCheckable {
+		/*public bool IsCheckable {
 			get => false;
 		}
 
@@ -556,7 +525,7 @@ namespace WinDirStat.Net.Data.Nodes {
 		/// <summary>
 		/// Gets whether the node should render transparently because it is 'cut' (but not actually removed yet).
 		/// </summary>
-		/*public virtual bool IsCut {
+		/*public bool IsCut {
 			get => false;
 		}*/
 		/*
@@ -655,23 +624,23 @@ namespace WinDirStat.Net.Data.Nodes {
 			}
 		 */
 
-		/*public virtual bool CanDelete(WinDirNode[] nodes) {
+		/*public bool CanDelete(WinDirNode[] nodes) {
 			return false;
 		}
 
-		public virtual void Delete(WinDirNode[] nodes) {
+		public void Delete(WinDirNode[] nodes) {
 			throw new NotSupportedException(GetType().Name + " does not support deletion");
 		}
 
-		public virtual void DeleteWithoutConfirmation(WinDirNode[] nodes) {
+		public void DeleteWithoutConfirmation(WinDirNode[] nodes) {
 			throw new NotSupportedException(GetType().Name + " does not support deletion");
 		}
 
-		public virtual bool CanCut(WinDirNode[] nodes) {
+		public bool CanCut(WinDirNode[] nodes) {
 			return CanCopy(nodes) && CanDelete(nodes);
 		}
 
-		public virtual void Cut(WinDirNode[] nodes) {
+		public void Cut(WinDirNode[] nodes) {
 			var data = GetDataObject(nodes);
 			if (data != null) {
 				// TODO: default cut implementation should not immediately perform deletion, but use 'IsCut'
@@ -680,31 +649,31 @@ namespace WinDirStat.Net.Data.Nodes {
 			}
 		}
 
-		public virtual bool CanCopy(WinDirNode[] nodes) {
+		public bool CanCopy(WinDirNode[] nodes) {
 			return false;
 		}
 
-		public virtual void Copy(WinDirNode[] nodes) {
+		public void Copy(WinDirNode[] nodes) {
 			var data = GetDataObject(nodes);
 			if (data != null)
 				Clipboard.SetDataObject(data, copy: true);
 		}
 
-		protected virtual IDataObject GetDataObject(WinDirNode[] nodes) {
+		protected IDataObject GetDataObject(WinDirNode[] nodes) {
 			return null;
 		}
 
-		public virtual bool CanPaste(IDataObject data) {
+		public bool CanPaste(IDataObject data) {
 			return false;
 		}
 
-		public virtual void Paste(IDataObject data) {
+		public void Paste(IDataObject data) {
 			throw new NotSupportedException(GetType().Name + " does not support copy/paste");
 		}*/
 		#endregion
 
 		#region Drag and Drop (Disabled)
-		/*public virtual void StartDrag(DependencyObject dragSource, WinDirNode[] nodes) {
+		/*public void StartDrag(DependencyObject dragSource, WinDirNode[] nodes) {
 			// The default drag implementation works by reusing the copy infrastructure.
 			// Derived classes should override this method
 			var data = GetDataObject(nodes);
@@ -724,7 +693,7 @@ namespace WinDirStat.Net.Data.Nodes {
 		/// If the method returns more than one of (Copy|Move|Link), the tree view will choose one effect based
 		/// on the allowed effects and keyboard status.
 		/// </summary>
-		public virtual DragDropEffects GetDropEffect(DragEventArgs e, int index) {
+		public DragDropEffects GetDropEffect(DragEventArgs e, int index) {
 			// Since the default drag implementation uses Copy(),
 			// we'll use Paste() in our default drop implementation.
 			if (CanPaste(e.Data)) {
@@ -747,7 +716,7 @@ namespace WinDirStat.Net.Data.Nodes {
 			Drop(e, index);
 		}
 
-		public virtual void Drop(DragEventArgs e, int index) {
+		public void Drop(DragEventArgs e, int index) {
 			// Since the default drag implementation uses Copy(),
 			// we'll use Paste() in our default drop implementation.
 			Paste(e.Data);
@@ -784,19 +753,22 @@ namespace WinDirStat.Net.Data.Nodes {
 
 		#region INotifyPropertyChanged Members
 
-		public event PropertyChangedEventHandler PropertyChanged;/* {
-			add => vi.PropertyChanged += value;
-			remove => vi.PropertyChanged -= value;
-		}*/
+		public event PropertyChangedEventHandler PropertyChanged {
+			add { }
+			remove { }
+			//add => vi.PropertyChanged += value;
+			//remove => vi.PropertyChanged -= value;
+		}
+		//public event PropertyChangedEventHandler PropertyChanged;
 
 		internal void RaisePropertyChanged(string name) {
 			//visualInfo?.RaisePropertyChanged(this, new PropertyChangedEventArgs(name));
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+			//PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 		}
 
 		internal void AutoRaisePropertyChanged([CallerMemberName] string name = null) {
 			//visualInfo?.RaisePropertyChanged(this, new PropertyChangedEventArgs(name));
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+			//PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 		}
 
 		#endregion
@@ -823,10 +795,10 @@ namespace WinDirStat.Net.Data.Nodes {
 		/// <summary>
 		/// Gets called when the item is double-clicked.
 		/// </summary>
-		public virtual void ActivateItem(RoutedEventArgs e) {
+		public void ActivateItem(RoutedEventArgs e) {
 		}
 
-		public virtual void ShowContextMenu(ContextMenuEventArgs e) {
+		public void ShowContextMenu(ContextMenuEventArgs e) {
 		}
 
 		public override string ToString() {

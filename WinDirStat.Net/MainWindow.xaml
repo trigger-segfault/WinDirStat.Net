@@ -297,10 +297,55 @@
                         </ColumnDefinition.Style>
                     </ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <tv:FileTreeView x:Name="tree" Grid.Column="0" Root="{Binding RootNode}"
-                                 SortMode="Size" SortDirection="Descending" Sort="OnFileSort" SelectionChanged="OnFileSelectionChanged">
+                <!-- Root="{Binding RootNode}"-->
+                <tv:FileTreeView x:Name="tree" Grid.Column="0"
+                                 SortMode="Size" SortDirection="Descending" Sort="OnFileSort" SelectionChanged="OnFileSelectionChanged" GotFocus="OnFileTreeGotFocus">
                     <tv:FileTreeView.View>
-                        <sort:SortView x:Name="gridView">
+                        <sort:SortView>
+                            <sort:SortViewColumn Width="250" Header="Name"
+                                                 SortMode="Name">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <tv:FileNodeView />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </sort:SortViewColumn>
+                            <sort:SortViewColumn Width="120" Header="Subtree Percentage"
+                                                 SortMode="Subtree" DefaultSortDirection="Descending">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <local:SubtreePercentage Percentage="{Binding Percent}"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </sort:SortViewColumn>
+                            <sort:SortViewColumn Width="62" Header="Percent" TextAlignment="Right"
+                                                 SortMode="Percent" DefaultSortDirection="Descending"
+                                                 CellDataTemplate="{StaticResource FilePercentTemplate}"/>
+                            <sort:SortViewColumn Width="70" Header="Size" TextAlignment="Right"
+                                                 SortMode="Size" DefaultSortDirection="Descending"
+                                                 CellBinding="{Binding Size, Converter={conv:ByteFormatter}}"/>
+                            <sort:SortViewColumn Width="80" Header="Items" TextAlignment="Right"
+                                                 SortMode="Items" DefaultSortDirection="Descending"
+                                                 CellBinding="{Binding ItemCount, Converter={conv:EmptyWhenNegative}}"/>
+                            <sort:SortViewColumn Width="80" Header="Files" TextAlignment="Right"
+                                                 SortMode="Files" DefaultSortDirection="Descending"
+                                                 CellBinding="{Binding FileCount, Converter={conv:EmptyWhenNegative}}"/>
+                            <sort:SortViewColumn Width="75" Header="Subdirs" TextAlignment="Right"
+                                                 SortMode="Subdirs" DefaultSortDirection="Descending"
+                                                 CellBinding="{Binding SubdirCount, Converter={conv:EmptyWhenNegative}}"/>
+                            <sort:SortViewColumn Width="130" Header="Last Change"
+                                                 SortMode="LastChange" DefaultSortDirection="Descending"
+                                                 CellBinding="{Binding LastChangeTime}"/>
+                            <sort:SortViewColumn Width="50" Header="Attributes"
+                                                 SortMode="Attributes"
+                                                 CellBinding="{Binding Attributes, Converter={conv:AttributesFormatter}}"/>
+                        </sort:SortView>
+                    </tv:FileTreeView.View>
+                </tv:FileTreeView>
+                <tv:FileTreeView Grid.Column="0" Root="{Binding FileRoot, ElementName=graphView}"
+                                 SortMode="Size" SortDirection="Descending">
+                    <tv:FileTreeView.View>
+                        <sort:SortView>
                             <sort:SortViewColumn Width="250" Header="Name"
                                                  SortMode="Name">
                                 <GridViewColumn.CellTemplate>
@@ -344,7 +389,7 @@
                 <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" ResizeDirection="Columns"/>
                 <sort:SortListView x:Name="extensionList" Grid.Column="2"
                                    SortMode="Bytes" SortDirection="Descending" Sort="OnExtensionSort"
-                                   ItemsSource="{Binding FinishedExtensions}" SelectionChanged="OnExtensionSelectionChanged" SelectionMode="Single">
+                                   ItemsSource="{Binding FinishedExtensions}" SelectionChanged="OnExtensionSelectionChanged" SelectionMode="Single" GotFocus="OnExtensionListGotFocus">
                     <sort:SortListView.View>
                         <sort:SortView x:Name="extensionsGridView">
                             <sort:SortViewColumn Width="86" Header="Extension" SortMode="Extension">
@@ -383,8 +428,9 @@
             </Grid>
             <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" ResizeDirection="Rows"/>
             <Border Grid.Row="2" BorderThickness="1" BorderBrush="{StaticResource ListBorder}">
+                <!--Root="{Binding FinishedRootNode}"-->
                 <local:GraphView x:Name="graphView" ForceDimmed="{Binding IsRefreshing}"
-                                 Root="{Binding FinishedRootNode}"
+                                 
                                  Options="{Binding Settings.TreemapOptions}"
                                  RenderPriority="{Binding Settings.RenderPriority}"
                                  MouseDown="OnGraphFileSelected"/>

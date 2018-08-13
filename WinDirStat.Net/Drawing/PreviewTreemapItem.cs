@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WinDirStat.Net.Data;
+using WinDirStat.Net.Data.Nodes;
 using WinDirStat.Net.Settings.Geometry;
+using WinDirStat.Net.Utils;
 
 namespace WinDirStat.Net.Drawing {
 	public class PreviewTreemapItem : ITreemapItem {
@@ -56,7 +60,7 @@ namespace WinDirStat.Net.Drawing {
 
 		public Rectangle2I Rectangle {
 			get => rectangle;
-			set => rectangle = (Rectangle2S) value;
+			set => rectangle = value;
 		}
 
 		public Rgb24Color Color {
@@ -68,7 +72,7 @@ namespace WinDirStat.Net.Drawing {
 		}
 
 		public int ChildCount {
-			get => children.Count;
+			get => (children != null ? children.Count : 0);
 		}
 
 		public PreviewTreemapItem this[int index] {
@@ -86,7 +90,7 @@ namespace WinDirStat.Net.Drawing {
 		public static PreviewTreemapItem Build(Color[] palette) {
 			int col = 0;
 			Color color;
-			
+
 			PreviewTreemapItem c4 = new PreviewTreemapItem();
 			color = NextColor(ref col, palette);
 			for (int i = 0; i < 30; i++)

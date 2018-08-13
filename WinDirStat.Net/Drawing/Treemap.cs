@@ -14,6 +14,7 @@ using SystemColors = System.Drawing.SystemColors;
 using WinDirStat.Net.Settings.Geometry;
 using WinDirStat.Net.Settings;
 using System.Threading;
+using System.Drawing;
 
 namespace WinDirStat.Net.Drawing {
 	public partial class Treemap {
@@ -72,18 +73,44 @@ namespace WinDirStat.Net.Drawing {
 			}
 		}
 
-		public static void HighlightRectangles(WriteableBitmap bitmap, Rectangle2I rc, Rgba32Color color, IEnumerable<Rectangle2I> items) {
-			Default.HighlightRectanglesInternal(bitmap, rc, color, items);
+		public static void HighlightRectangles(WriteableBitmap bitmap, Bitmap gdiBitmap, Rectangle2I rc, Rgba32Color color, IEnumerable<Rectangle2I> items) {
+			Default.HighlightRectanglesInternal(bitmap, gdiBitmap, rc, color, items);
 		}
 
-		private unsafe void HighlightRectanglesInternal(WriteableBitmap bitmap, Rectangle2I rc, Rgba32Color color, IEnumerable<Rectangle2I> items) {
+		private void HighlightRectanglesInternal(WriteableBitmap bitmap, Bitmap gdiBitmap, Rectangle2I rc, Rgba32Color color, IEnumerable<Rectangle2I> items) {
 			if (rc.Width <= 0 || rc.Height <= 0)
 				return;
 
 			renderArea = rc;
+			
+			using (Graphics g = Graphics.FromImage(gdiBitmap))
+			using (Brush brush = new SolidBrush((Color) color)) {
+				g.Clear(Color.Transparent);
+
+				foreach (Rectangle2I rect in items)
+					HighlightRectangle(g, rect, brush);
+
+				BitmapData data = gdiBitmap.LockBits((Rectangle) rc, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+
+				try {
+					if (Application.Current.Dispatcher.Thread == Thread.CurrentThread) {
+						Int32Rect int32Rect = new Int32Rect(rc.X, rc.Y, rc.Width, rc.Height);
+						bitmap.WritePixels(int32Rect, data.Scan0, data.Stride * rc.Height, data.Stride);
+					}
+					else {
+						Application.Current.Dispatcher.Invoke(() => {
+							Int32Rect int32Rect = new Int32Rect(rc.X, rc.Y, rc.Width, rc.Height);
+							bitmap.WritePixels(int32Rect, data.Scan0, data.Stride * rc.Height, data.Stride);
+						});
+					}
+				}
+				finally {
+					gdiBitmap.UnlockBits(data);
+				}
+			}
 
 			// That bitmap in turn will be created from this array
-			Rgba32Color[] bitmapBits = new Rgba32Color[rc.Width * rc.Height];
+			/*Rgba32Color[] bitmapBits = new Rgba32Color[rc.Width * rc.Height];
 
 
 			Memset(bitmapBits, Rgba32Color.Transparent);
@@ -99,21 +126,111 @@ namespace WinDirStat.Net.Drawing {
 					Int32Rect int32Rect = new Int32Rect(rc.X, rc.Y, rc.Width, rc.Height);
 					bitmap.WritePixels(int32Rect, bitmapBitsPtr, rc.Width * rc.Height * 4, bitmap.BackBufferStride);
 				});
-			}
+			}*/
 		}
 
-		public static void HighlightAll(WriteableBitmap bitmap, Rectangle2I rc, ITreemapItem root, Rgba32Color color, Predicate<ITreemapItem> match) {
-			Default.HighlightAllInternal(bitmap, rc, root, color, match);
+		public static void HighlightRectangles(WriteableBitmap bitmap, Rectangle2I rc, Rgba32Color color, IEnumerable<Rectangle2I> items) {
+			Default.HighlightRectanglesInternal(bitmap, rc, color, items);
 		}
 
-		private unsafe void HighlightAllInternal(WriteableBitmap bitmap, Rectangle2I rc, ITreemapItem root, Rgba32Color color, Predicate<ITreemapItem> match) {
+		private unsafe void HighlightRectanglesInternal(WriteableBitmap bitmap, Rectangle2I rc, Rgba32Color color, IEnumerable<Rectangle2I> items) {
 			if (rc.Width <= 0 || rc.Height <= 0)
 				return;
 
 			renderArea = rc;
 
+			using (Bitmap gdiBitmap = new Bitmap(rc.Width, rc.Height, PixelFormat.Format32bppArgb))
+			using (Graphics g = Graphics.FromImage(gdiBitmap))
+			using (Brush brush = new SolidBrush((Color) color)) {
+				g.Clear(Color.Transparent);
+
+				foreach (Rectangle2I rect in items)
+					HighlightRectangle(g, rect, brush);
+
+				//BitmapData data = gdiBitmap.LockBits((Rectangle) rc, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+
+				try {
+					/*if (Application.Current.Dispatcher.Thread == Thread.CurrentThread) {
+						Int32Rect int32Rect = new Int32Rect(rc.X, rc.Y, rc.Width, rc.Height);
+						bitmap.WritePixels(int32Rect, data.Scan0, data.Stride * rc.Height, data.Stride);
+					}
+					else {
+						Application.Current.Dispatcher.Invoke(() => {
+							Int32Rect int32Rect = new Int32Rect(rc.X, rc.Y, rc.Width, rc.Height);
+							bitmap.WritePixels(int32Rect, data.Scan0, data.Stride * rc.Height, data.Stride);
+						});
+					}*/
+				}
+				finally {
+					//gdiBitmap.UnlockBits(data);
+				}
+			}
+
 			// That bitmap in turn will be created from this array
-			Rgba32Color[] bitmapBits = new Rgba32Color[rc.Width * rc.Height];
+			/*Rgba32Color[] bitmapBits = new Rgba32Color[rc.Width * rc.Height];
+
+
+			Memset(bitmapBits, Rgba32Color.Transparent);
+
+			fixed (Rgba32Color* pBitmapBits = bitmapBits) {
+
+				foreach (Rectangle2I rect in items)
+					HighlightRectangle(pBitmapBits, rect, color);
+
+				IntPtr bitmapBitsPtr = (IntPtr) pBitmapBits;
+
+				Application.Current.Dispatcher.Invoke(() => {
+					Int32Rect int32Rect = new Int32Rect(rc.X, rc.Y, rc.Width, rc.Height);
+					bitmap.WritePixels(int32Rect, bitmapBitsPtr, rc.Width * rc.Height * 4, bitmap.BackBufferStride);
+				});
+			}*/
+		}
+
+		public static void HighlightAll(WriteableBitmap bitmap, Bitmap gdiBitmap, Rectangle2I rc, ITreemapItem root, Rgba32Color color, Predicate<ITreemapItem> match) {
+			Default.HighlightAllInternal(bitmap, gdiBitmap, rc, root, color, match);
+		}
+
+		private void HighlightAllInternal(WriteableBitmap bitmap, Bitmap gdiBitmap, Rectangle2I rc, ITreemapItem root, Rgba32Color color, Predicate<ITreemapItem> match) {
+			if (rc.Width <= 0 || rc.Height <= 0)
+				return;
+
+			renderArea = rc;
+
+			using (Graphics g = Graphics.FromImage(gdiBitmap))
+			using (Brush brush = new SolidBrush((Color) color)) {
+				g.Clear(Color.Transparent);
+
+				Stopwatch sw1 = Stopwatch.StartNew();
+				LoopHighlightAll(g, root, brush, match);
+				Console.WriteLine($"Took {sw1.ElapsedMilliseconds:n}ms to LoopHighlightAll");
+
+				sw1.Restart();
+				BitmapData data = gdiBitmap.LockBits((Rectangle) rc, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+				Console.WriteLine($"Took {sw1.ElapsedMilliseconds:n}ms to LockBits");
+
+				try {
+					Stopwatch sw = Stopwatch.StartNew();
+					if (Application.Current.Dispatcher.Thread == Thread.CurrentThread) {
+						Int32Rect int32Rect = new Int32Rect(rc.X, rc.Y, rc.Width, rc.Height);
+						bitmap.WritePixels(int32Rect, data.Scan0, data.Stride * rc.Height, data.Stride);
+					}
+					else {
+						Application.Current.Dispatcher.Invoke(() => {
+							Int32Rect int32Rect = new Int32Rect(rc.X, rc.Y, rc.Width, rc.Height);
+							bitmap.WritePixels(int32Rect, data.Scan0, data.Stride * rc.Height, data.Stride);
+						});
+					}
+					Console.WriteLine($"Took {sw.ElapsedMilliseconds:n}ms to WritePixels");
+				}
+				finally {
+					Stopwatch sw = Stopwatch.StartNew();
+					gdiBitmap.UnlockBits(data);
+					Console.WriteLine($"Took {sw.ElapsedMilliseconds:n}ms to UnlockBits");
+				}
+			}
+
+			// That bitmap in turn will be created from this array
+			/*Rgba32Color[] bitmapBits = new Rgba32Color[rc.Width * rc.Height];
 
 
 			Memset(bitmapBits, Rgba32Color.Transparent);
@@ -125,10 +242,10 @@ namespace WinDirStat.Net.Drawing {
 
 			fixed (Rgba32Color* pBitmapBits = bitmapBits) {
 
-				/*if (root.IsLeaf && match(root))
+				if (root.IsLeaf && match(root))
 					HighlightRectangle(pBitmapBits, root.Rectangle, color);
 				//RecurseHighlightAll(pBitmapBits, root, color, match);
-				LoopHighlightAll(pBitmapBits, root, color, match);*/
+				LoopHighlightAll(pBitmapBits, root, color, match);
 
 				IntPtr bitmapBitsPtr = (IntPtr) pBitmapBits;
 
@@ -141,6 +258,97 @@ namespace WinDirStat.Net.Drawing {
 						Int32Rect int32Rect = new Int32Rect(rc.X, rc.Y, rc.Width, rc.Height);
 						bitmap.WritePixels(int32Rect, bitmapBitsPtr, rc.Width * rc.Height * 4, bitmap.BackBufferStride);
 					});
+				}
+			}*/
+		}
+
+		public static void HighlightAll(WriteableBitmap bitmap, Rectangle2I rc, ITreemapItem root, Rgba32Color color, Predicate<ITreemapItem> match) {
+			Default.HighlightAllInternal(bitmap, rc, root, color, match);
+		}
+
+		private unsafe void HighlightAllInternal(WriteableBitmap bitmap, Rectangle2I rc, ITreemapItem root, Rgba32Color color, Predicate<ITreemapItem> match) {
+			if (rc.Width <= 0 || rc.Height <= 0)
+				return;
+
+			renderArea = rc;
+
+
+			using (Bitmap gdiBitmap = new Bitmap(rc.Width, rc.Height, PixelFormat.Format32bppArgb))
+			using (Graphics g = Graphics.FromImage(gdiBitmap))
+			using (Brush brush = new SolidBrush((Color) color)) {
+				g.Clear(Color.Transparent);
+
+				LoopHighlightAll(g, root, brush, match);
+
+				BitmapData data = gdiBitmap.LockBits((Rectangle) rc, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+
+				try {
+					if (Application.Current.Dispatcher.Thread == Thread.CurrentThread) {
+						Int32Rect int32Rect = new Int32Rect(rc.X, rc.Y, rc.Width, rc.Height);
+						bitmap.WritePixels(int32Rect, data.Scan0, data.Stride * rc.Height, data.Stride);
+					}
+					else {
+						Application.Current.Dispatcher.Invoke(() => {
+							Int32Rect int32Rect = new Int32Rect(rc.X, rc.Y, rc.Width, rc.Height);
+							bitmap.WritePixels(int32Rect, data.Scan0, data.Stride * rc.Height, data.Stride);
+						});
+					}
+				}
+				finally {
+					gdiBitmap.UnlockBits(data);
+				}
+			}
+
+			// That bitmap in turn will be created from this array
+			/*Rgba32Color[] bitmapBits = new Rgba32Color[rc.Width * rc.Height];
+
+
+			Memset(bitmapBits, Rgba32Color.Transparent);
+
+			if (root.IsLeaf && match(root))
+				HighlightRectangle(bitmapBits, root.Rectangle, color);
+			//RecurseHighlightAll(pBitmapBits, root, color, match);
+			LoopHighlightAll(bitmapBits, root, color, match);
+
+			fixed (Rgba32Color* pBitmapBits = bitmapBits) {
+
+				if (root.IsLeaf && match(root))
+					HighlightRectangle(pBitmapBits, root.Rectangle, color);
+				//RecurseHighlightAll(pBitmapBits, root, color, match);
+				LoopHighlightAll(pBitmapBits, root, color, match);
+
+				IntPtr bitmapBitsPtr = (IntPtr) pBitmapBits;
+
+				if (Application.Current.Dispatcher.Thread == Thread.CurrentThread) {
+					Int32Rect int32Rect = new Int32Rect(rc.X, rc.Y, rc.Width, rc.Height);
+					bitmap.WritePixels(int32Rect, bitmapBitsPtr, rc.Width * rc.Height * 4, bitmap.BackBufferStride);
+				}
+				else {
+					Application.Current.Dispatcher.Invoke(() => {
+						Int32Rect int32Rect = new Int32Rect(rc.X, rc.Y, rc.Width, rc.Height);
+						bitmap.WritePixels(int32Rect, bitmapBitsPtr, rc.Width * rc.Height * 4, bitmap.BackBufferStride);
+					});
+				}
+			}*/
+		}
+
+		private void LoopHighlightAll(Graphics g, ITreemapItem root, Brush brush, Predicate<ITreemapItem> match) {
+			Queue<ITreemapItem> parents = new Queue<ITreemapItem>();
+			parents.Enqueue(root);
+
+			while (parents.Count != 0) {
+				ITreemapItem parent = parents.Dequeue();
+				for (int i = 0; i < parent.ChildCount; i++) {
+					ITreemapItem child = parent[i];
+					if (child.Rectangle.Width > 0 && child.Rectangle.Height > 0) {
+						if (child.IsLeaf) {
+							if (match(child))
+								HighlightRectangle(g, child.Rectangle, brush);
+						}
+						else {
+							parents.Enqueue(child);
+						}
+					}
 				}
 			}
 		}
@@ -202,6 +410,18 @@ namespace WinDirStat.Net.Drawing {
 						RecurseHighlightAll(bitmap, child, color, match);
 					}
 				}
+			}
+		}
+
+		private void HighlightRectangle(Graphics g, Rectangle2I rc, Brush brush) {
+			if (rc.Width >= 7 && rc.Height >= 7) {
+				g.FillRectangle(brush, (Rectangle) Rectangle2I.FromLTRB(rc.Left, rc.Top, rc.Right, rc.Top + 3));
+				g.FillRectangle(brush, (Rectangle) Rectangle2I.FromLTRB(rc.Left, rc.Bottom - 3, rc.Right, rc.Bottom));
+				g.FillRectangle(brush, (Rectangle) Rectangle2I.FromLTRB(rc.Left, rc.Top + 3, rc.Left + 3, rc.Bottom - 3));
+				g.FillRectangle(brush, (Rectangle) Rectangle2I.FromLTRB(rc.Right - 3, rc.Top + 3, rc.Right, rc.Bottom - 3));
+			}
+			else if (rc.Width > 0 && rc.Height > 0) {
+				g.FillRectangle(brush, (Rectangle) rc);
 			}
 		}
 

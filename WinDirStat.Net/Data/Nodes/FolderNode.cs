@@ -16,10 +16,11 @@ using System.Threading;
 namespace WinDirStat.Net.Data.Nodes {
 	public class FolderNode : FileNode {
 
-		private static readonly char[] FileCollectionName = "<Files>".ToArray();
+		//private static readonly char[] FileCollectionName = "<Files>".ToArray();
+		private const string FileCollectionName = "<Files>";
 
 #if COMPRESSED_DATA
-		private const byte InvalidatedFlag = 0x01;
+		/*private const byte InvalidatedFlag = 0x01;
 		private const byte ValidatingFlag = 0x02;
 		private const byte PopulatedFlag = 0x04;
 		private const byte DoneFlag = 0x08;
@@ -37,13 +38,13 @@ namespace WinDirStat.Net.Data.Nodes {
 				flags |= flag;
 			else
 				flags &= unchecked((byte) ~flag);
-		}
+		}*/
 #endif
 
-		private readonly FileNodeType type;
+		//private readonly FileNodeType type;
 		//viprivate FileNodeCollection visualChildren;
-		private int fileCount;
-		private int subdirCount;
+		internal int fileCount;
+		internal int subdirCount;
 
 #if !COMPRESSED_DATA
 		private bool populated;
@@ -51,7 +52,7 @@ namespace WinDirStat.Net.Data.Nodes {
 		private volatile bool validating;
 		private volatile bool done;
 #else
-		private bool invalidated {
+		/*private bool invalidated {
 			get => GetFlag(InvalidatedFlag);
 			set => SetFlag(InvalidatedFlag, value);
 		}
@@ -66,6 +67,18 @@ namespace WinDirStat.Net.Data.Nodes {
 		private bool done {
 			get => GetFlag(DoneFlag);
 			set => SetFlag(DoneFlag, value);
+		}*/
+		protected bool invalidated {
+			get => bitfield.GetBit(13);
+			set => bitfield.SetBit(13, value);
+		}
+		protected bool validating {
+			get => bitfield.GetBit(14);
+			set => bitfield.SetBit(14, value);
+		}
+		protected bool done {
+			get => bitfield.GetBit(16);
+			set => bitfield.SetBit(16, value);
 		}
 
 #endif
@@ -94,7 +107,7 @@ namespace WinDirStat.Net.Data.Nodes {
 		/// <para/>
 		/// This list is also sorted by size during the final validation.
 		/// </remarks>
-		protected CompactList<FileNode> virtualChildren = new CompactList<FileNode>(0);
+		//protected internal CompactList<FileNode> virtualChildren = new CompactList<FileNode>(0);
 		/// <summary>
 		/// This is only non-null during the loading process. Afterwords this list is no longer used.
 		/// </summary>
@@ -104,20 +117,49 @@ namespace WinDirStat.Net.Data.Nodes {
 		//private readonly object childrenLock = new object();
 
 		private FolderNode() {
-			type = FileNodeType.FileCollection;
-			cName = FileCollectionName;
+			virtualChildren = new List<FileNode>(0);
+			Type = FileNodeType.FileCollection;
+			//cName = FileCollectionName;
+			name = FileCollectionName;
 		}
 
 		protected FolderNode(INtfsNode node, FileNodeType type) : base(node) {
-			this.type = type;
+			this.Type = type;
+			virtualChildren = new List<FileNode>(0);
 		}
 
 		protected FolderNode(FileSystemInfo info, FileNodeType type) : base(info) {
-			this.type = type;
+			this.Type = type;
+			virtualChildren = new List<FileNode>(0);
 		}
 
 		protected FolderNode(IFileFindData data, FileNodeType type) : base(data) {
-			this.type = type;
+			this.Type = type;
+			virtualChildren = new List<FileNode>(0);
+		}
+
+		public FolderNode(FolderNode node, FolderNode parent) : base(node, parent) {
+			fileCount = node.fileCount;
+			subdirCount = node.subdirCount;
+			virtualChildren = new List<FileNode>(node.virtualChildren.Count);
+			foreach (FileNode child in node.virtualChildren) {
+				FileNode newChild;
+				if (child is FolderNode folder)
+					newChild = new FolderNode(folder, this);
+				else
+					newChild = new FileNode(child, this);
+				virtualChildren.Add(newChild);
+			}
+			if (Type != FileNodeType.Root) {
+				//populated = node.populated;
+				invalidated = node.invalidated;
+				done = node.done;
+				validating = node.validating;
+				if (node.populated) {
+					vi.isExpanded = node.IsExpanded;
+					LoadChildren(Root);
+				}
+			}
 		}
 
 		public FolderNode(INtfsNode node) : this(node, FileNodeType.Directory) {
@@ -130,7 +172,7 @@ namespace WinDirStat.Net.Data.Nodes {
 		}
 		
 		internal void AddChild(RootNode root, FileNode node, string path, bool asyncLoad) {
-			if (node.Type == FileNodeType.File && type != FileNodeType.FileCollection) {
+			if (node.Type == FileNodeType.File && Type != FileNodeType.FileCollection) {
 				if (fileCollection == null) {
 					fileCollection = new FolderNode();
 					AddChild(root, fileCollection, null, asyncLoad);
@@ -138,9 +180,11 @@ namespace WinDirStat.Net.Data.Nodes {
 				fileCollection.AddChild(root, node, null, asyncLoad);
 			}
 			else {
+				if (node.Type == FileNodeType.FreeSpace && !root.Document.Settings.ShowFreeSpace)
+					return;
 				lock (virtualChildren) {
 					if (virtualChildren == null) {
-						virtualChildren = new CompactList<FileNode>();
+						virtualChildren = new List<FileNode>();
 					}
 					Debug.Assert(node.virtualParent == null);
 					node.virtualParent = this;
@@ -157,19 +201,13 @@ namespace WinDirStat.Net.Data.Nodes {
 						lock (virtualChildren)
 							//SortInsert(root, node);
 							vi.children.Add(node);
-						if (node.Type == FileNodeType.FreeSpace)
-							node.IsHidden = !root.Document.Settings.ShowFreeSpace;
+							//node.IsHidden = !root.Document.Settings.ShowFreeSpace;
 					});
 				}
 				else if (virtualChildren.Count == 1) {
 					VisualPropertyChanged(nameof(ShowExpander));
 				}
 			}
-		}
-
-		private void EnsureVisualChildren() {
-			if (vi.children == null)
-				vi.children = new FileNodeCollection(this);
 		}
 
 		private void Invalidate() {
@@ -201,17 +239,17 @@ namespace WinDirStat.Net.Data.Nodes {
 				subdirCount = 0;
 				size = 0;
 				foreach (FileNode child in VirtualChildren) {
-					if (child.Type == FileNodeType.FreeSpace) {
+					/*if (child.Type == FileNodeType.FreeSpace) {
 						if (root.Document.Settings.ShowFreeSpace)
 							size += child.Size;
 						continue;
-					}
+					}*/
 					if (child is FolderNode childDir)
 						percentagesChanged |= childDir.Validate(root, force);
 					size += child.Size;
 					//lastAccessTime = Max(lastAccessTime, child.LastAccessTime);
 					lastChangeTime = Max(lastChangeTime, child.LastChangeTime);
-					if (child.Type == FileNodeType.File) {
+					if (child.Type == FileNodeType.File || child.Type == FileNodeType.FreeSpace) {
 						fileCount++;
 					}
 					else {
@@ -257,7 +295,7 @@ namespace WinDirStat.Net.Data.Nodes {
 			return percentagesChanged;
 		}
 
-		internal void UpdateShowFreeSpace(bool showFreeSpace) {
+		/*internal void UpdateShowFreeSpace(bool showFreeSpace) {
 			// This must only be called when the value has actually switched
 			Debug.Assert(Type == FileNodeType.Root);
 			RootNode root = (RootNode) this;
@@ -283,138 +321,19 @@ namespace WinDirStat.Net.Data.Nodes {
 			}
 			VisualInvoke(() => {
 				lock (virtualChildren) {
-					/*if (IsLoaded) {
-						if (!showFreeSpace)
-							vi.children.Remove(root.FreeSpace);
-						else
-							SortInsert(root, root.FreeSpace);
-					}*/
 					foreach (FileNode node in VirtualChildren) {
 						node.RaisePropertyChanged(nameof(Percent));
 					}
 					RaisePropertiesChanged(nameof(Size), nameof(Percent));
 				}
 			});
-		}
-
-		private void LoadChildren(RootNode root) {
-			lock (virtualChildren) {
-				if (!populated && virtualChildren != null) {
-					EnsureVisualChildren();
-					
-					foreach (FileNode child in virtualChildren) {
-						if (child.Icon == null && IsExpanded)
-							child.LoadIcon(root);
-						if (child.IsExpanded)
-							((FolderNode) child).LoadChildren(root);
-					}
-					vi.children.AddRange(virtualChildren.OrderBy(n => n, root.Document.FileComparer));
-					foreach (FileNode child in virtualChildren) {
-						if (child.Type == FileNodeType.FreeSpace)
-							child.IsHidden = !root.Document.Settings.ShowFreeSpace;
-					}
-				}
-				populated = true;
-			}
-		}
-
-		private void UnloadChildren(RootNode root) {
-			lock (virtualChildren) {
-				if (populated && virtualChildren != null) {
-					populated = false;
-
-					//Children.Clear();
-					foreach (FolderNode child in VirtualFolders) {
-						if (child.populated)
-							child.UnloadChildren(root);
-					}
-				}
-				populated = false;
-				//UnloadVisuals(false);
-			}
-		}
+		}*/
 
 
-		internal void Sort(RootNode root, bool sortSubChildren) {
-			lock (virtualChildren) {
-				if (!populated || visualInfo?.children == null || !visualInfo.children.Any())
-					return;
 
-				/*if (IsRoot && Root.FreeSpace != null) {
-					vi.children.RemoveAt(Root.FreeSpaceIndex);
-				}
+		
 
-				return;*/
-
-				/*var query = visualInfo.children
-					.Select((item, index) => (Item: item, Index: index));
-				//query = root.Document.FileComparer.SortDirection == ListSortDirection.Descending
-				//	? query.OrderByDescending(tuple => tuple.Item, root.Document.FileComparer)
-				query = query.OrderBy(tuple => tuple.Item, root.Document.FileComparer);
-
-				var map = query.Select((tuple, index) => (OldIndex: tuple.Index, NewIndex: index))
-					.Where(o => o.OldIndex != o.NewIndex);
-				using (var enumerator = map.GetEnumerator()) {
-					if (enumerator.MoveNext()) {
-						visualInfo.children.Move(enumerator.Current.NewIndex, enumerator.Current.OldIndex);
-					}
-				}
-				if (sortSubChildren) {
-					foreach (FileNode child in visualInfo.children) {
-						if (child.IsExpanded && child is FolderNode subfolder)
-							subfolder.Sort(root, true);
-					}
-				}*/
-				/*foreach (var (OldIndex, NewIndex) in map) {
-					visualInfo.children.Move(NewIndex, OldIndex);
-				}*/
-				/*using (var enumerator = map.GetEnumerator()) {
-					if (enumerator.MoveNext()) {
-						Move(enumerator.Current.OldIndex, enumerator.Current.NewIndex);
-					}
-				}*/
-
-				//visualInfo.children.CustomSort = null;
-				//visualInfo.children.CustomSort = root.Document.FileComparer;
-				//visualInfo.children.Refresh();
-				//root.Document.FileComparer.UpdateCollectionView(this, visualInfo.children.View);
-				visualInfo.children.Sort(root.Document.FileComparer.Compare);
-				//visualInfo.children.View.LiveSortingProperties.Clear();
-				//visualInfo.children.View.LiveSortingProperties.Add(root.Document.FileComparer.SortProperty);
-				if (sortSubChildren) {
-					foreach (FileNode child in visualInfo.children) {
-						if (child.IsExpanded && child is FolderNode subfolder)
-							subfolder.Sort(root, true);
-					}
-				}
-
-				/*FileNodeComparer comparer = root.Document.FileComparer;
-				FileNode first = Children[0];
-				//var sorted = new List<WinDirNode>(Children.Cast<WinDirNode>());
-				//sorted.Sort(root.SortCompare);
-				if (sortSubChildren && first.IsExpanded && first is FolderNode firstFolder)
-					firstFolder.Sort(root, sortSubChildren);
-				for (int i = 1; i < Children.Count; i++) {
-					FileNode a = Children[i];
-
-					int index;
-					for (index = i; index > 0; index--) {
-						if (!comparer.ShouldSort(a, Children[index - 1]))
-							break;
-					}
-					if (i != index) {
-						vi.children.Move(index, i);
-						//vi.children.RemoveAt(i);
-						//vi.children.Insert(index, a);
-					}
-
-					if (sortSubChildren && a.IsExpanded && a is FolderNode aFolder)
-						aFolder.Sort(root, sortSubChildren);
-				}*/
-			}
-		}
-
-		private void SortInsert(RootNode root, FileNode node) {
+		protected internal void SortInsert(RootNode root, FileNode node) {
 			int index;
 			for (index = Children.Count; index > 0; index--) {
 				if (!root.Document.FileComparer.ShouldSort(node, Children[index - 1]))
@@ -441,8 +360,8 @@ namespace WinDirStat.Net.Data.Nodes {
 				virtualChildren?.Sort(root.Document.SizeFileComparer);
 			};
 		}
-		
-		protected override void OnExpanding() {
+
+		/*protected override void OnExpanding() {
 			RootNode root = Root;
 			if (!populated)
 				LoadChildren(root);
@@ -450,55 +369,35 @@ namespace WinDirStat.Net.Data.Nodes {
 				Sort(root, false);
 			foreach (FileNode child in VirtualChildren)
 				child.LoadIcon(root);
-		}
+		}*/
 
-		protected override void OnCollapsing() {
-			UnloadChildren(Root);
-			if (vi.children != null) {
-				FileNode[] removedChildren = visualInfo.children.ToArray();
-				visualInfo.children.Clear();
-				foreach (FileNode child in removedChildren) {
-					child.UnloadVisuals();
-				}
+		//protected override void OnCollapsing() {
+		//	UnloadChildren(Root);
+		/*if (vi.children != null) {
+			FileNode[] removedChildren = visualInfo.children.ToArray();
+			visualInfo.children.Clear();
+			foreach (FileNode child in removedChildren) {
+				child.UnloadVisuals();
 			}
-		}
+		}*/
+		//}
+
+
 
 		private static DateTime Max(DateTime a, DateTime b) {
 			return (a > b ? a : b);
 		}
 		
-		public override IReadOnlyList<FileNode> VirtualChildren {
+		/*public override IReadOnlyList<FileNode> VirtualChildren {
 			get => virtualChildren ?? EmptyList;
-		}
+		}*/
 
-		public IEnumerable<FolderNode> VirtualFolders {
-			get {
-				if (type == FileNodeType.FileCollection)
-					yield break;
-				foreach (FileNode node in VirtualChildren) {
-					if (node is FolderNode folder)
-						yield return folder;
-				}
-			}
-		}
-
-		public IEnumerable<FileNode> VirtualFiles {
-			get {
-				if (type != FileNodeType.FileCollection)
-					yield break;
-				foreach (FileNode node in VirtualChildren) {
-					if (node.Type == FileNodeType.File)
-						yield return node;
-				}
-			}
-		}
-
-		public override bool HasChildren {
+		/*public override bool HasVirtualChildren {
 			get => (virtualChildren?.Count ?? 0) != 0;
-		}
+		}*/
 
 		internal bool HasDirectories {
-			get => type != FileNodeType.FileCollection && (virtualChildren?.Count ?? 0) != 0;
+			get => Type != FileNodeType.FileCollection && (virtualChildren?.Count ?? 0) != 0;
 		}
 
 		internal bool HasFileCollection {
@@ -518,16 +417,16 @@ namespace WinDirStat.Net.Data.Nodes {
 			get => validating;
 		}
 
-		public override FileNodeType Type {
+		/*public override FileNodeType Type {
 			get => type;
-		}
+		}*/
 
-		public override int FileCount {
+		/*public override int FileCount {
 			get => fileCount;
 		}
 
 		public override int SubdirCount {
 			get => subdirCount;
-		}
+		}*/
 	}
 }

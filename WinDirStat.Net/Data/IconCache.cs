@@ -144,12 +144,12 @@ namespace WinDirStat.Net.Data {
 		}
 
 		public void CacheIconAsync(string path, FileAttributes attributes, CacheIconCallback callback) {
-			if (callback == null)
+			/*if (callback == null)
 				throw new ArgumentNullException(nameof(callback));
 			Application.Current.Dispatcher.BeginInvoke(new Action(() => {
 				ImageSource icon = CacheIcon(path, attributes);
 				callback(icon);
-			}), DispatcherPriority.Background);
+			}), DispatcherPriority.Background);*/
 		}
 
 		public ImageSource CacheFileType(string extension) {
@@ -161,17 +161,17 @@ namespace WinDirStat.Net.Data {
 		}
 
 		public void CacheFileTypeAsync(string extension, CacheIconCallback callback) {
-			Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+			/*Application.Current.Dispatcher.BeginInvoke(new Action(() => {
 				ImageSource icon = CacheFileType(extension);
 				callback(icon);
-			}), DispatcherPriority.Background);
+			}), DispatcherPriority.Background);*/
 		}
 		
 		public void CacheFileTypeAsync(string extension, CacheFileTypeCallback callback) {
-			Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+			/*Application.Current.Dispatcher.BeginInvoke(new Action(() => {
 				ImageSource icon = CacheFileType(extension, out string name);
 				callback(icon, name);
-			}), DispatcherPriority.Background);
+			}), DispatcherPriority.Background);*/
 		}
 
 		public ImageSource DefaultDriveIcon {

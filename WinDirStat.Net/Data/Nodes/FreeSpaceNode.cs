@@ -9,29 +9,32 @@ using System.Threading.Tasks;
 namespace WinDirStat.Net.Data.Nodes {
 	public class FreeSpaceNode : FileNode {
 
-		private static readonly char[] FreeSpaceName = "<Free Space>".ToArray();
+		//private static readonly char[] FreeSpaceName = "<Free Space>".ToArray();
+		private const string FreeSpaceName = "<Free Space>";
 
 		private readonly string driveName;
 
 		public FreeSpaceNode(string driveName, bool showFreeSpace) {
 			this.driveName = driveName;
-			cName = FreeSpaceName;
-			attributes = FileAttributes.Normal;
+			//cName = FreeSpaceName;
+			name = FreeSpaceName;
+			Attributes = FileAttributes.Normal;
+			Type = FileNodeType.FreeSpace;
 			//creationTime = DateTime.MinValue;
 			lastChangeTime = DateTime.MinValue;
 			//lastAccessTime = DateTime.MinValue;
 
 			size = GetAvailableFreeSpace();
-			IsHidden = !showFreeSpace;
+			//IsHidden = !showFreeSpace;
 		}
 
 		public string DriveName {
 			get => driveName;
 		}
 
-		public override FileNodeType Type {
+		/*public override FileNodeType Type {
 			get => FileNodeType.FreeSpace;
-		}
+		}*/
 
 		private long GetAvailableFreeSpace() {
 			GetDiskFreeSpaceEx(driveName, out ulong freeSpace, out _, out _);

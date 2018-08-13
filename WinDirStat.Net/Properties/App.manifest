@@ -5,11 +5,11 @@
     xmlns:asmv2="urn:schemas-microsoft-com:asm.v2"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <assemblyIdentity version="1.0.0.0" name="App" />
-  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+  <!--<trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
         <requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
       </requestedPrivileges>
     </security>
-  </trustInfo>
+  </trustInfo>-->
 </asmv1:assembly>
