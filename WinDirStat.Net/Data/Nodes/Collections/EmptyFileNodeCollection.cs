@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 namespace WinDirStat.Net.Data.Nodes {
 	public class EmptyFileNodeCollection : IFileNodeCollection {
 
-		public void Add(FileNode item) {
+		public void Add(FileNodeBase item) {
 			throw new NotSupportedException();
 		}
 
-		public void AddRange(IEnumerable<FileNode> nodes) {
+		public void AddRange(IEnumerable<FileNodeBase> nodes) {
 			throw new NotImplementedException();
 		}
 
@@ -21,15 +21,15 @@ namespace WinDirStat.Net.Data.Nodes {
 			throw new NotSupportedException();
 		}
 
-		public bool Contains(FileNode item) {
+		public bool Contains(FileNodeBase item) {
 			return false;
 		}
 
-		public void CopyTo(FileNode[] array, int arrayIndex) {
+		public void CopyTo(FileNodeBase[] array, int arrayIndex) {
 			throw new NotSupportedException();
 		}
 
-		public bool Remove(FileNode item) {
+		public bool Remove(FileNodeBase item) {
 			throw new NotSupportedException();
 		}
 
@@ -41,7 +41,7 @@ namespace WinDirStat.Net.Data.Nodes {
 			get => true;
 		}
 
-		public IEnumerator<FileNode> GetEnumerator() {
+		public IEnumerator<FileNodeBase> GetEnumerator() {
 			yield break;
 		}
 
@@ -49,15 +49,15 @@ namespace WinDirStat.Net.Data.Nodes {
 			return GetEnumerator();
 		}
 
-		public int IndexOf(FileNode item) {
+		public int IndexOf(FileNodeBase item) {
 			return -1;
 		}
 
-		public void Insert(int index, FileNode item) {
+		public void Insert(int index, FileNodeBase item) {
 			throw new NotSupportedException();
 		}
 
-		public void InsertRange(int index, IEnumerable<FileNode> nodes) {
+		public void InsertRange(int index, IEnumerable<FileNodeBase> nodes) {
 			throw new NotImplementedException();
 		}
 
@@ -65,7 +65,7 @@ namespace WinDirStat.Net.Data.Nodes {
 			throw new NotImplementedException();
 		}
 
-		public void RemoveAll(Predicate<FileNode> match) {
+		public void RemoveAll(Predicate<FileNodeBase> match) {
 			throw new NotImplementedException();
 		}
 
@@ -73,11 +73,11 @@ namespace WinDirStat.Net.Data.Nodes {
 			throw new NotSupportedException();
 		}
 
-		public FileNode[] ToArray() {
-			return new FileNode[0];
+		public FileNodeBase[] ToArray() {
+			return new FileNodeBase[0];
 		}
 
-		public FileNode this[int index] {
+		public FileNodeBase this[int index] {
 			get => throw new ArgumentOutOfRangeException();
 			set => throw new NotSupportedException();
 		}

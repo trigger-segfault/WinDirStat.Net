@@ -70,8 +70,14 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Controls\FlashyProgressBar.cs" />
-    <Compile Include="Data\Nodes\DriveSpaceNode.cs" />
-    <Compile Include="Data\Nodes\RootDriveNode.cs" />
+    <Compile Include="Controls\PercentageBar.cs" />
+    <Compile Include="Converters\DirectoryExistsToBoolean.cs" />
+    <Compile Include="Converters\RadioButtonConverter.cs" />
+    <Compile Include="Data\IconCache.Queue.cs" />
+    <Compile Include="Data\Nodes\FileNode.cs" />
+    <Compile Include="Data\Nodes\FileNodeBase.Flags.cs" />
+    <Compile Include="Data\Nodes\FileNodeFlags.cs" />
+    <Compile Include="Data\Nodes\FolderNode.Flags.cs" />
     <Compile Include="Data\Nodes\UnknownNode.cs" />
     <Compile Include="Drawing\ColorSpace.cs" />
     <Compile Include="Controls\ImageMenuItem.cs" />
@@ -82,12 +88,21 @@
     <Compile Include="Settings\Geometry\Rgb24Color.cs" />
     <Compile Include="Settings\WinDirSettings.Defaults.cs" />
     <Compile Include="Settings\WinDirSettings.IO.cs" />
+    <Compile Include="Utils\BitField16.cs" />
     <Compile Include="Utils\BitField32.cs" />
     <Compile Include="Utils\MathUtils.cs" />
     <Compile Include="Settings\IconCacheMode.cs" />
     <Compile Include="Settings\Geometry\Rectangle2S.cs" />
     <Compile Include="Settings\TreemapOptions.cs" />
+    <Compile Include="Utils\Native\Win32.FindFile.cs" />
+    <Compile Include="Utils\Native\Win32.ImageList.cs" />
+    <Compile Include="Utils\Native\Win32.Shell.cs" />
+    <Compile Include="Utils\Native\Win32.SHGetStockIconInfo.cs" />
+    <Compile Include="Utils\Native\Win32.Windows.cs" />
     <Compile Include="Utils\SpeedTester.cs" />
+    <Compile Include="Utils\Native\Win32.cs" />
+    <Compile Include="Utils\Native\Win32.SHGetFileInfo.cs" />
+    <Compile Include="Utils\Native\Win32Extensions.cs" />
     <Compile Include="Windows\FolderBrowserDialog.cs" />
     <Compile Include="Drawing\ITreemapItem.cs" />
     <Compile Include="Drawing\PreviewTreemapItem.cs" />
@@ -105,7 +120,7 @@
     <Compile Include="Converters\ScanTimeFormatter.cs" />
     <Compile Include="Converters\TextToHorizontalAlignment.cs" />
     <Compile Include="Data\FileEnumerator.Native.cs" />
-    <Compile Include="Data\Nodes\FileNode.VisualInfo.cs" />
+    <Compile Include="Data\Nodes\FileNodeBase.VisualInfo.cs" />
     <Compile Include="Settings\WinDirSettings.cs" />
     <Compile Include="Utils\ListExtensions.cs" />
     <Compile Include="Utils\CompactList.cs" />
@@ -116,7 +131,6 @@
     <Compile Include="Data\SortMethods.cs" />
     <Compile Include="Data\Nodes\Collections\FileNodeCollection.cs" />
     <Compile Include="Data\Nodes\FileNodeComparer.cs" />
-    <Compile Include="Data\Nodes\FileNodeType.cs" />
     <Compile Include="Data\Nodes\FreeSpaceNode.cs" />
     <Compile Include="Settings\Geometry\Rgba32Color.cs" />
     <Compile Include="TreeView\EditTextBox.cs" />
@@ -136,7 +150,7 @@
     <Compile Include="Data\Nodes\Collections\EmptyFileNodeCollection.cs" />
     <Compile Include="Data\Nodes\FolderNode.cs" />
     <Compile Include="Data\Nodes\FileNode.TreeNode.cs" />
-    <Compile Include="Data\Nodes\FileNode.cs" />
+    <Compile Include="Data\Nodes\FileNodeBase.cs" />
     <Compile Include="Data\Nodes\RootNode.cs" />
     <Compile Include="Utils\BitmapUtils.cs" />
     <Compile Include="Converters\EmptyWhenNegative.cs" />
@@ -145,6 +159,13 @@
     <Compile Include="Converters\ByteFormatter.cs" />
     <Compile Include="Utils\ByteFormatter.cs" />
     <Compile Include="Utils\PathUtils.cs" />
+    <Compile Include="Windows\SelectDriveComparer.cs" />
+    <Compile Include="Windows\SelectDrivesDialog.xaml.cs">
+      <DependentUpon>SelectDrivesDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Utils\WindowExtensions.cs" />
+    <Compile Include="Windows\SelectDrivesDocument.cs" />
+    <Compile Include="Windows\SelectDrivesList.cs" />
     <Page Include="Controls\GraphView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -167,6 +188,10 @@
       <ContainsDesignTimeResources>true</ContainsDesignTimeResources>
     </Page>
     <Page Include="Themes\SortView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\SelectDrivesDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -200,7 +225,7 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\FileIcons\FileCollection.png" />
-    <Resource Include="Resources\FileIcons\UnknownFile.png" />
+    <Resource Include="Resources\FileIcons\UnknownSpace.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\DimmedGraph.png" />
@@ -211,7 +236,7 @@
   <ItemGroup>
     <Resource Include="Resources\FileIcons\FreeSpace.png" />
     <Resource Include="Resources\FileIcons\Shortcut.png" />
-    <Resource Include="Resources\FileIcons\UnknownSpace.png" />
+    <Resource Include="Resources\FileIcons\UnknownSpace2.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons\Delete.png" />

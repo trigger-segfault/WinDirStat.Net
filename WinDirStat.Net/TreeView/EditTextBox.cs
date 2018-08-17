@@ -39,7 +39,7 @@ namespace WinDirStat.Net.TreeView {
 
 		public FileTreeViewItem Item { get; set; }
 
-		public FileNode Node {
+		public FileNodeBase Node {
 			get { return Item.Node; }
 		}
 

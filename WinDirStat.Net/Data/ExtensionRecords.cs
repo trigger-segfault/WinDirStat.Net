@@ -17,17 +17,25 @@ using WinDirStat.Net.Settings.Geometry;
 namespace WinDirStat.Net.Data {
 	[Serializable]
 	public class ExtensionRecord : INotifyPropertyChanged {
+		public static readonly ExtensionRecord Empty = new ExtensionRecord();
+
+		private readonly ExtensionRecords records;
+		internal readonly List<FolderNode> containers = new List<FolderNode>();
 		private readonly string extension;
 		private string name;
 		private Rgb24Color color;
 		private ImageSource icon;
+		private ImageSource preview;
 		private long size;
 		private int fileCount;
-		internal readonly List<FolderNode> containers;
 
-		public ExtensionRecord(string extension) {
+		private ExtensionRecord() {
+			extension = "";
+		}
+
+		public ExtensionRecord(ExtensionRecords records, string extension) {
+			this.records = records;
 			this.extension = extension.ToLower();
-			containers = new List<FolderNode>();
 			color = new Rgb24Color(150, 150, 150);
 			if (IsEmptyExtension)
 				name = "File";
@@ -63,6 +71,16 @@ namespace WinDirStat.Net.Data {
 			}
 		}
 
+		public ImageSource Preview {
+			get => preview;
+			set {
+				if (preview != value) {
+					preview = value;
+					AutoRaisePropertyChanged();
+				}
+			}
+		}
+
 		public Rgb24Color Color {
 			get => color;
 			set {
@@ -78,8 +96,13 @@ namespace WinDirStat.Net.Data {
 				if (size != value) {
 					size = value;
 					AutoRaisePropertyChanged();
+					RaisePropertyChanged(nameof(Percent));
 				}
 			}
+		}
+
+		public double Percent {
+			get => (double) size / records.TotalSize;
 		}
 
 		public int FileCount {
@@ -98,7 +121,7 @@ namespace WinDirStat.Net.Data {
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
-		private void RaisePropertyChanged(string name) {
+		internal void RaisePropertyChanged(string name) {
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 		}
 
@@ -116,6 +139,7 @@ namespace WinDirStat.Net.Data {
 		private readonly Dictionary<string, ExtensionRecord> records;
 		private readonly IReadOnlyDictionary<string, ExtensionRecord> readonlyRecords;
 		private bool isRaisingEvent;
+		private long totalSize;
 
 		public ExtensionRecords(WinDirDocument document) {
 			this.document = document;
@@ -136,39 +160,40 @@ namespace WinDirStat.Net.Data {
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 		}
 
-		public bool Include(string extension, long size) {
+		public ExtensionRecord Include(string extension, long size) {
 			return IncludeMany(extension, size, 1, out _);
 		}
 
-		public bool Include(string extension, long size, out ImageSource icon) {
+		public ExtensionRecord Include(string extension, long size, out ImageSource icon) {
 			return IncludeMany(extension, size, 1, out icon);
 		}
 
-		public bool IncludeMany(string extension, long totalSize, int fileCount) {
-			return IncludeMany(extension, totalSize, fileCount, out _);
+		public ExtensionRecord IncludeMany(string extension, long size, int fileCount) {
+			return IncludeMany(extension, size, fileCount, out _);
 		}
 
-		public bool IncludeMany(string extension, long totalSize, int fileCount, out ImageSource icon) {
+		public ExtensionRecord IncludeMany(string extension, long size, int fileCount, out ImageSource icon) {
 			extension = FixExtension(extension);
-			if (totalSize < 0)
-				throw new ArgumentOutOfRangeException(nameof(totalSize));
+			if (size < 0)
+				throw new ArgumentOutOfRangeException(nameof(size));
 			if (fileCount < 0)
 				throw new ArgumentOutOfRangeException(nameof(fileCount));
 			if (fileCount == 0) {
 				// Nodbody must be asking for an icon
 				icon = null;
-				return false;
+				return null;
 			}
 
 			ExtensionRecord record = GetOrCreate(extension, out bool created);
-			record.Size += totalSize;
+			totalSize += size;
+			record.Size += size;
 			record.FileCount += fileCount;
 			if (created) {
 				// record.Extension already has ToLower() applied
 				records.Add(record.Extension, record);
 				sortedRecords.Add(record);
 				// Use the default icon until we have something more fitting
-				record.Icon = Icons.DefaultFileIcon;
+				record.Icon = IconCache.FileIcon;
 				if (!record.IsEmptyExtension) {
 					Icons.CacheFileTypeAsync(extension, (ic, na) => {
 						if (ic != null)
@@ -179,16 +204,16 @@ namespace WinDirStat.Net.Data {
 				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, record));
 			}
 			icon = record.Icon;
-			return created;
+			return record;
 		}
 
 		public bool Remove(string extension, long size) {
 			return RemoveMany(extension, size, 1);
 		}
 
-		public bool RemoveMany(string extension, long totalSize, int fileCount) {
-			if (totalSize < 0)
-				throw new ArgumentOutOfRangeException(nameof(totalSize));
+		public bool RemoveMany(string extension, long size, int fileCount) {
+			if (size < 0)
+				throw new ArgumentOutOfRangeException(nameof(size));
 			if (fileCount < 0)
 				throw new ArgumentOutOfRangeException(nameof(fileCount));
 			if (fileCount == 0)
@@ -196,7 +221,8 @@ namespace WinDirStat.Net.Data {
 			extension = FixExtension(extension);
 
 			ExtensionRecord record = records[extension];
-			record.Size -= totalSize;
+			totalSize -= size;
+			record.Size -= size;
 			record.FileCount -= fileCount;
 			bool removed = (record.FileCount == 0);
 			if (removed) {
@@ -215,10 +241,18 @@ namespace WinDirStat.Net.Data {
 
 		public void FinalValidation() {
 			sortedRecords.Sort(document.ExtensionComparer.Compare);
+			RefreshPalette();
+		}
+
+		public void RefreshPalette() {
 			var colors = document.Settings.FilePalette;
+			var previews = document.Settings.FilePalettePreviews;
 			int index = 0;
-			foreach (ExtensionRecord record in sortedRecords.OrderBy(e => -e.Size)) {
-				record.Color = colors[Math.Min(index++, colors.Count - 1)];
+			foreach (ExtensionRecord record in sortedRecords) {
+				record.Color = colors[index];
+				record.Preview = previews[index];
+				if (index < colors.Count - 1)
+					index++;
 			}
 		}
 
@@ -242,6 +276,10 @@ namespace WinDirStat.Net.Data {
 		
 		public int Count {
 			get => records.Count;
+		}
+
+		public long TotalSize {
+			get => totalSize;
 		}
 
 		public event NotifyCollectionChangedEventHandler CollectionChanged;
@@ -286,7 +324,7 @@ namespace WinDirStat.Net.Data {
 		private ExtensionRecord GetOrCreate(string extension, out bool created) {
 			created = !records.TryGetValue(extension, out ExtensionRecord record);
 			if (created) {
-				record = new ExtensionRecord(extension);
+				record = new ExtensionRecord(this, extension);
 			}
 			return record;
 		}

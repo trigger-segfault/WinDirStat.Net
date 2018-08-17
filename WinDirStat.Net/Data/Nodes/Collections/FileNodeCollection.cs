@@ -12,7 +12,7 @@ using System.Windows.Data;
 namespace WinDirStat.Net.Data.Nodes {
 	public class FileNodeCollection : IFileNodeCollection {
 		private readonly FolderNode parent;
-		private List<FileNode> list = new List<FileNode>();
+		private List<FileNodeBase> list = new List<FileNodeBase>();
 		private bool isRaisingEvent;
 
 		public FileNodeCollection(FolderNode parent) {
@@ -27,7 +27,7 @@ namespace WinDirStat.Net.Data.Nodes {
 		[field: NonSerialized]
 		public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-		void OnCollectionReset(List<FileNode> newList, List<FileNode> oldList) {
+		void OnCollectionReset(List<FileNodeBase> newList, List<FileNodeBase> oldList) {
 			Debug.Assert(!isRaisingEvent);
 			isRaisingEvent = true;
 			try {
@@ -56,14 +56,14 @@ namespace WinDirStat.Net.Data.Nodes {
 				throw new InvalidOperationException();
 		}
 
-		void ThrowIfValueIsNullOrHasParent(FileNode node) {
+		void ThrowIfValueIsNullOrHasParent(FileNodeBase node) {
 			if (node == null)
 				throw new ArgumentNullException("node");
 			if (node.vi.parent != null)
 				throw new ArgumentException("The node already has a parent", "node");
 		}
 
-		public FileNode this[int index] {
+		public FileNodeBase this[int index] {
 			get => list[index];
 			set {
 				ThrowOnReentrancy();
@@ -80,11 +80,11 @@ namespace WinDirStat.Net.Data.Nodes {
 			get => list.Count;
 		}
 
-		bool ICollection<FileNode>.IsReadOnly {
+		bool ICollection<FileNodeBase>.IsReadOnly {
 			get => false;
 		}
 
-		public void Sort(Comparison<FileNode> comparison) {
+		public void Sort(Comparison<FileNodeBase> comparison) {
 			var oldList = list.ToList();
 			//list = new List<FileNode>(oldList.Capacity);
 			//OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldList, 0));
@@ -98,28 +98,28 @@ namespace WinDirStat.Net.Data.Nodes {
 			get => CollectionChanged != null;
 		}
 
-		public int IndexOf(FileNode node) {
+		public int IndexOf(FileNodeBase node) {
 			if (node == null || node.vi.parent != parent)
 				return -1;
 			else
 				return list.IndexOf(node);
 		}
 
-		public void Insert(int index, FileNode node) {
+		public void Insert(int index, FileNodeBase node) {
 			ThrowOnReentrancy();
 			ThrowIfValueIsNullOrHasParent(node);
 			list.Insert(index, node);
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, node, index));
 		}
 
-		public void InsertRange(int index, IEnumerable<FileNode> nodes) {
+		public void InsertRange(int index, IEnumerable<FileNodeBase> nodes) {
 			if (nodes == null)
 				throw new ArgumentNullException("nodes");
 			ThrowOnReentrancy();
-			List<FileNode> newNodes = nodes.ToList();
+			List<FileNodeBase> newNodes = nodes.ToList();
 			if (newNodes.Count == 0)
 				return;
-			foreach (FileNode node in newNodes) {
+			foreach (FileNodeBase node in newNodes) {
 				ThrowIfValueIsNullOrHasParent(node);
 			}
 			list.InsertRange(index, newNodes);
@@ -128,7 +128,7 @@ namespace WinDirStat.Net.Data.Nodes {
 
 		public void Move(int index, int oldIndex) {
 			ThrowOnReentrancy();
-			FileNode node = list[oldIndex];
+			FileNodeBase node = list[oldIndex];
 			list.RemoveAt(oldIndex);
 			list.Insert(index, node);
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, node, index, oldIndex));
@@ -150,18 +150,18 @@ namespace WinDirStat.Net.Data.Nodes {
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldItems, index));
 		}
 
-		public void Add(FileNode node) {
+		public void Add(FileNodeBase node) {
 			ThrowOnReentrancy();
 			ThrowIfValueIsNullOrHasParent(node);
 			list.Add(node);
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, node, list.Count - 1));
 		}
 
-		public FileNode[] ToArray() {
+		public FileNodeBase[] ToArray() {
 			return list.ToArray();
 		}
 
-		public void AddRange(IEnumerable<FileNode> nodes) {
+		public void AddRange(IEnumerable<FileNodeBase> nodes) {
 			InsertRange(this.Count, nodes);
 		}
 
@@ -170,19 +170,19 @@ namespace WinDirStat.Net.Data.Nodes {
 			//var oldList = new List<FileNode>(list);
 			//list.Clear();
 			var oldList = list;
-			list = new List<FileNode>();
+			list = new List<FileNodeBase>();
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldList, 0));
 		}
 
-		public bool Contains(FileNode node) {
+		public bool Contains(FileNodeBase node) {
 			return IndexOf(node) >= 0;
 		}
 
-		public void CopyTo(FileNode[] array, int arrayIndex) {
+		public void CopyTo(FileNodeBase[] array, int arrayIndex) {
 			list.CopyTo(array, arrayIndex);
 		}
 
-		public bool Remove(FileNode item) {
+		public bool Remove(FileNodeBase item) {
 			int pos = IndexOf(item);
 			if (pos >= 0) {
 				RemoveAt(pos);
@@ -193,7 +193,7 @@ namespace WinDirStat.Net.Data.Nodes {
 			}
 		}
 
-		public IEnumerator<FileNode> GetEnumerator() {
+		public IEnumerator<FileNodeBase> GetEnumerator() {
 			return list.GetEnumerator();
 		}
 
@@ -201,7 +201,7 @@ namespace WinDirStat.Net.Data.Nodes {
 			return list.GetEnumerator();
 		}
 
-		public void RemoveAll(Predicate<FileNode> match) {
+		public void RemoveAll(Predicate<FileNodeBase> match) {
 			if (match == null)
 				throw new ArgumentNullException("match");
 			ThrowOnReentrancy();

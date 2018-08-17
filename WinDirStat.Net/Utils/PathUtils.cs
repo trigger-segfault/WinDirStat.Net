@@ -216,9 +216,10 @@ namespace WinDirStat.Net.Utils {
 
 		/// <summary>Returns a path that can be compared with another normalized path.</summary>
 		public static string NormalizePath(string path) {
-			return Path.GetFullPath(path)
-					   .TrimEnd(DirectorySeparators)
-					   .ToUpperInvariant();
+			return TrimSeparatorDotEnd(
+				Path.GetFullPath(path)
+					.TrimEnd(DirectorySeparators)
+					.ToUpperInvariant());
 		}
 
 		/// <summary>Returns true if the two paths lead to the same location.</summary>

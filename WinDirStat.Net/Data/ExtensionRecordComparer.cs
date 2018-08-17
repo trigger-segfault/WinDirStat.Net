@@ -36,8 +36,9 @@ namespace WinDirStat.Net.Data {
 
 		public int Compare(ExtensionRecord a, ExtensionRecord b) {
 			int diff = sortComparer(a, b);
+			// Always sort alphabetically after initial sort
 			if (diff == 0)
-				diff = SortByExtension(a, b);
+				return SortByExtension(a, b);
 			if (SortDirection == ListSortDirection.Ascending)
 				return diff;
 			else
@@ -46,10 +47,11 @@ namespace WinDirStat.Net.Data {
 
 		public bool ShouldSort(ExtensionRecord a, ExtensionRecord b) {
 			int diff = sortComparer(a, b);
+			// Always sort alphabetically after initial sort
 			if (diff == 0)
-				diff = SortByExtension(a, b);
+				return SortByExtension(a, b) < 0;
 			if (SortDirection == ListSortDirection.Ascending)
-				return diff <= 0;
+				return diff < 0;
 			else
 				return diff > 0;
 		}

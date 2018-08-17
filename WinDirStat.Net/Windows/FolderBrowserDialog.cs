@@ -55,8 +55,7 @@ namespace WinDirStat.Net.Windows {
 		/// <param name="owner">The window that owns the dialog</param>
 		/// <returns>The result of the dialog.</returns>
 		public bool? ShowDialog(Window owner) {
-			/*using (*/
-			FormsFolderBrowserDialog dialog = new FormsFolderBrowserDialog();/*) {*/
+			using (FormsFolderBrowserDialog dialog = new FormsFolderBrowserDialog()) {
 				dialog.ShowNewFolderButton = ShowNewFolderButton;
 				dialog.SelectedPath = SelectedPath;
 				dialog.RootFolder = RootFolder;
@@ -66,7 +65,7 @@ namespace WinDirStat.Net.Windows {
 				if (result ?? false)
 					SelectedPath = dialog.SelectedPath;
 				return result;
-			//}
+			}
 		}
 
 		/// <summary>

@@ -11,8 +11,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using WinDirStat.Net.Data.Nodes;
+using WinDirStat.Net.Drawing;
 using WinDirStat.Net.Utils;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
+using static WinDirStat.Net.Utils.Native.Win32;
 
 namespace WinDirStat.Net.Data {
 	public interface IFileFindData {
@@ -28,54 +30,76 @@ namespace WinDirStat.Net.Data {
 
 	internal partial class FileEnumerator {
 
+		private struct FolderState {
+			public FolderNode Folder;
+			public ScanState State;
+
+			public FolderState(ScanState state) {
+				Folder = state.Root;
+				State = state;
+			}
+
+			public FolderState(FolderNode folder, ScanState state) {
+				State = state;
+				Folder = folder;
+			}
+		}
+
 		static readonly IntPtr InvalidHandle = new IntPtr(-1);
 
 
 		private void ScanNative(Action<RootNode> rootSetup, CancellationToken token) {
-			root = new RootNode(document, new DirectoryInfo(rootPath));
-			SetupRoot(rootSetup);
-			Queue<FolderNode> subdirs = new Queue<FolderNode>();
-			subdirs.Enqueue(root);
+			//root = new RootNode(document, new DirectoryInfo(rootPath), true);
+			//SetupRoot(rootSetup);
+			Queue<FolderState> subdirs = new Queue<FolderState>();
+			foreach (ScanState state in states)
+				subdirs.Enqueue(new FolderState(state));
 			do {
 				SuspendCheck();
 				ReadNative(subdirs, token);
 			} while (subdirs.Any() && !token.IsCancellationRequested);
 		}
 
-		private void ReadNative(Queue<FolderNode> subdirs, CancellationToken token) {
+		private void ReadNative(Queue<FolderState> subdirs, CancellationToken token) {
 			Win32FindData fData = new Win32FindData();
-			FolderNode parent = subdirs.Dequeue();
+			FolderState folderState = subdirs.Dequeue();
+			ScanState state = folderState.State;
+			FolderNode parent = folderState.Folder;
 			bool findResult;
 			string parentPath = parent.Path;
 			string searchPattern = PathUtils.CombineNoChecks(parentPath, "*");
 			if (!searchPattern.StartsWith(@"\\?\"))
 				searchPattern = @"\\?\" + searchPattern;
-			IntPtr hFind = FindFirstFileEx(searchPattern, FindExInfoLevels.Basic, out fData, FindExSearchOps.NameMatch, IntPtr.Zero, FindExFlags.None);
+			IntPtr hFind = FindFirstFileEx(searchPattern, FindExInfoLevels.Basic, out fData, FindExSearchOps.NameMatch, IntPtr.Zero, FindExFlags.LargeFetch);
 			if (hFind == InvalidHandle)
 				return;
 
+			FolderNode fileCollection = null;
 			try {
 				do {
 					string filePath = PathUtils.CombineNoChecks(parentPath, fData.cFileName);
-					if (fData.IsRelativeDirectory || SkipFile(fData.cFileName, filePath)) {
+					if (fData.IsRelativeDirectory || SkipFile(state, fData.cFileName, filePath)) {
 						// Skip these types of entries
 						findResult = FindNextFile(hFind, out fData);
 						continue;
 					}
 					FileFindData data = new FileFindData(fData, filePath);
-					FileNode child;
+					FileNodeBase child;
 					if (data.IsDirectory) {
 						FolderNode folder = new FolderNode(data);
 						child = folder;
-						subdirs.Enqueue(folder);
+						subdirs.Enqueue(new FolderState(folder, state));
 					}
 					else {
-						child = new FileNode(data);
-						if (!fData.IsSymbolicLink)
-							scannedSize += child.Size;
-						document.Extensions.Include(child.Extension, child.Size);
+						FileNode file = new FileNode(data);
+						child = file;
+						if (!fData.IsSymbolicLink) {
+							state.ScannedSize += child.Size;
+							totalScannedSize += child.Size;
+						}
+						file.extRecord = document.Extensions.Include(GetExtension(file.Name), child.Size);
 					}
-					parent.AddChild(root, child, filePath, true);
+					parent.AddChild(state.Root, child, ref fileCollection);
 
 					SuspendCheck();
 					if (token.IsCancellationRequested)
@@ -86,7 +110,7 @@ namespace WinDirStat.Net.Data {
 
 				if (parent.IsExpanded) {
 					Application.Current.Dispatcher.Invoke(() => {
-						parent.Validate(root, false);
+						parent.Validate(state.Root, false);
 					});
 				}
 			}
@@ -124,7 +148,7 @@ namespace WinDirStat.Net.Data {
 			}
 		}
 
-		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+		/*[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
 		private struct Win32FindData {
 			[MarshalAs(UnmanagedType.U4)]
 			public FileAttributes dwFileAttributes;
@@ -137,14 +161,9 @@ namespace WinDirStat.Net.Data {
 			public uint dwReserved1;
 			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
 			public string cFileName;
-			//private fixed char cFileName[260];
 			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 14)]
 			private string cAlternateFileName;
-			//private fixed char cAlternateFileName[14];
-
-			/*public string Name {
-				get { fixed (char* c = cFileName) return new string(c); }
-			}*/
+			
 			public bool IsSymbolicLink {
 				get => dwFileAttributes.HasFlag(FileAttributes.ReparsePoint);
 			}
@@ -232,6 +251,6 @@ namespace WinDirStat.Net.Data {
 			/// file virtualization filter is present. 
 			/// </summary>
 			OnDiskEntriesOnly = 4,
-		}
+		}*/
 	}
 }

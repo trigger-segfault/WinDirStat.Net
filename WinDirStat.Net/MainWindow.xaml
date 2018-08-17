@@ -7,158 +7,11 @@
         xmlns:local="clr-namespace:WinDirStat.Net.Controls"
         xmlns:conv="clr-namespace:WinDirStat.Net.Converters"
         xmlns:sort="clr-namespace:WinDirStat.Net.SortingView"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity;assembly=System.Windows.Interactivity"
-        xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="WinDirStat.Net" Height="450" Width="800" SnapsToDevicePixels="True" UseLayoutRounding="True" Closing="OnClosing">
-    <!--
-        xmlns:tv="http://icsharpcode.net/sharpdevelop/treeview"-->
     <Window.Resources>
         <SolidColorBrush x:Key="ListBorder" Color="#828790"/>
-        <!--<Style x:Key="LeftAlignHeader" TargetType="{x:Type GridViewColumnHeader}" BasedOn="{StaticResource {x:Type GridViewColumnHeader}}">
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="ContentTemplate">
-                <Setter.Value>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" Padding="9,0,8,0"/>
-                    </DataTemplate>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="Height" Value="24"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type GridViewColumnHeader}">
-                        <Grid SnapsToDevicePixels="True">
-                            <Border x:Name="HeaderBorder" BorderBrush="#FFE5E5E5" BorderThickness="0,0,0,1" Background="White">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition MaxHeight="7"/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <Border Padding="{TemplateBinding Padding}" Grid.RowSpan="2">
-                                        <ContentPresenter x:Name="HeaderContent" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="0,0,0,1" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                                    </Border>
-                                </Grid>
-                            </Border>
-                            <Border x:Name="HeaderHoverBorder" BorderThickness="1,0,1,1" Margin="1,1,0,0"/>
-                            <Border x:Name="HeaderPressBorder" BorderThickness="1,1,1,0" Margin="1,0,0,1"/>
-                            <Canvas>
-                                <Thumb x:Name="PART_HeaderGripper">
-                                    <Thumb.Style>
-                                        <Style TargetType="{x:Type Thumb}">
-                                            <Setter Property="Canvas.Right" Value="-9"/>
-                                            <Setter Property="Width" Value="18"/>
-                                            <Setter Property="Height" Value="{Binding ActualHeight, RelativeSource={RelativeSource TemplatedParent}}"/>
-                                            <Setter Property="Padding" Value="0"/>
-                                            <Setter Property="Background" Value="#FFE5E5E5"/>
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="{x:Type Thumb}">
-                                                        <Border Background="Transparent" Padding="{TemplateBinding Padding}">
-                                                            <Rectangle Fill="{TemplateBinding Background}" HorizontalAlignment="Center" Width="1"/>
-                                                        </Border>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </Thumb.Style>
-                                </Thumb>
-                            </Canvas>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" TargetName="HeaderBorder" Value="#D9EBF9"/>
-                                <Setter Property="Background" TargetName="PART_HeaderGripper" Value="Transparent"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" TargetName="HeaderBorder" Value="#BCDCF4"/>
-                                <Setter Property="Visibility" TargetName="PART_HeaderGripper" Value="Hidden"/>
-                                <Setter Property="Margin" TargetName="HeaderContent" Value="1,1,0,0"/>
-                            </Trigger>
-                            <Trigger Property="Height" Value="Auto">
-                                <Setter Property="MinHeight" Value="20"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <Style x:Key="RightAlignHeader" TargetType="{x:Type GridViewColumnHeader}" BasedOn="{StaticResource LeftAlignHeader}">
-            <Setter Property="HorizontalContentAlignment" Value="Right" />
-        </Style>
-
-        <Style x:Key="ScrollViewerStyle1" TargetType="{x:Type ScrollViewer}">
-            <Setter Property="Focusable" Value="False"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ScrollViewer}">
-                        <Grid Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <DockPanel Margin="{TemplateBinding Padding}">
-                                <ScrollViewer DockPanel.Dock="Top" Focusable="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
-                                    <GridViewHeaderRowPresenter AllowsColumnReorder="{Binding TemplatedParent.View.AllowsColumnReorder, RelativeSource={RelativeSource TemplatedParent}}" ColumnHeaderContainerStyle="{Binding TemplatedParent.View.ColumnHeaderContainerStyle, RelativeSource={RelativeSource TemplatedParent}}" ColumnHeaderToolTip="{Binding TemplatedParent.View.ColumnHeaderToolTip, RelativeSource={RelativeSource TemplatedParent}}" ColumnHeaderContextMenu="{Binding TemplatedParent.View.ColumnHeaderContextMenu, RelativeSource={RelativeSource TemplatedParent}}" ColumnHeaderTemplate="{Binding TemplatedParent.View.ColumnHeaderTemplate, RelativeSource={RelativeSource TemplatedParent}}" Columns="{Binding TemplatedParent.View.Columns, RelativeSource={RelativeSource TemplatedParent}}" Margin="0" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                                </ScrollViewer>
-                                <ScrollContentPresenter x:Name="PART_ScrollContentPresenter" CanContentScroll="{TemplateBinding CanContentScroll}" CanHorizontallyScroll="False" CanVerticallyScroll="False" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" KeyboardNavigation.DirectionalNavigation="Local" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                            </DockPanel>
-                            <ScrollBar x:Name="PART_HorizontalScrollBar" Cursor="Arrow" Maximum="{TemplateBinding ScrollableWidth}" Minimum="0" Orientation="Horizontal" Grid.Row="1" Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}" Value="{Binding HorizontalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportWidth}"/>
-                            <ScrollBar x:Name="PART_VerticalScrollBar" Cursor="Arrow" Grid.Column="1" Maximum="{TemplateBinding ScrollableHeight}" Minimum="0" Orientation="Vertical" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" Value="{Binding VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportHeight}"/>
-                            <DockPanel Background="{Binding Background, ElementName=PART_VerticalScrollBar}" Grid.Column="1" LastChildFill="False" Grid.Row="1">
-                                <Rectangle DockPanel.Dock="Left" Fill="White" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" Width="1"/>
-                                <Rectangle DockPanel.Dock="Top" Fill="White" Height="1" Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
-                            </DockPanel>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <Style x:Key="ListViewStyle1" TargetType="{x:Type ListView}">
-            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource ListBorder}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Foreground" Value="#FF042271"/>
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
-            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
-            <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
-            <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
-            <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ListView}">
-                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="0">
-                            <Themes:ListBoxChrome x:Name="Bd" BorderBrush="{x:Null}" BorderThickness="0" Background="{TemplateBinding Background}" RenderMouseOver="{TemplateBinding IsMouseOver}" RenderFocused="{TemplateBinding IsKeyboardFocusWithin}" SnapsToDevicePixels="true">
-                                <ScrollViewer Padding="{TemplateBinding Padding}" Style="{StaticResource ScrollViewerStyle1}">
-                                    <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                                </ScrollViewer>
-                            </Themes:ListBoxChrome>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsEnabled" Value="false">
-                                <Setter Property="Background" TargetName="Bd" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
-                            </Trigger>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="IsGrouping" Value="true"/>
-                                    <Condition Property="VirtualizingPanel.IsVirtualizingWhenGrouping" Value="false"/>
-                                </MultiTrigger.Conditions>
-                                <Setter Property="ScrollViewer.CanContentScroll" Value="false"/>
-                            </MultiTrigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>-->
-
         <DataTemplate x:Key="FilePercentTemplate">
             <TextBlock TextAlignment="Right">
                 <TextBlock.Style>
@@ -252,7 +105,7 @@
                         </Style>
                     </RowDefinition.Style>
                 </RowDefinition>
-                    <RowDefinition x:Name="rowTreegraph">
+                <RowDefinition x:Name="rowTreegraph">
                     <RowDefinition.Style>
                         <Style TargetType="RowDefinition">
                             <Setter Property="Height" Value="0"/>
@@ -297,8 +150,7 @@
                         </ColumnDefinition.Style>
                     </ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <!-- Root="{Binding RootNode}"-->
-                <tv:FileTreeView x:Name="tree" Grid.Column="0"
+                <tv:FileTreeView x:Name="tree" Grid.Column="0" Root="{Binding RootNode}"
                                  SortMode="Size" SortDirection="Descending" Sort="OnFileSort" SelectionChanged="OnFileSelectionChanged" GotFocus="OnFileTreeGotFocus">
                     <tv:FileTreeView.View>
                         <sort:SortView>
@@ -342,51 +194,7 @@
                         </sort:SortView>
                     </tv:FileTreeView.View>
                 </tv:FileTreeView>
-                <tv:FileTreeView Grid.Column="0" Root="{Binding FileRoot, ElementName=graphView}"
-                                 SortMode="Size" SortDirection="Descending">
-                    <tv:FileTreeView.View>
-                        <sort:SortView>
-                            <sort:SortViewColumn Width="250" Header="Name"
-                                                 SortMode="Name">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <tv:FileNodeView />
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </sort:SortViewColumn>
-                            <sort:SortViewColumn Width="120" Header="Subtree Percentage"
-                                                 SortMode="Subtree" DefaultSortDirection="Descending">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <local:SubtreePercentage Percentage="{Binding Percent}"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </sort:SortViewColumn>
-                            <sort:SortViewColumn Width="62" Header="Percent" TextAlignment="Right"
-                                                 SortMode="Percent" DefaultSortDirection="Descending"
-                                                 CellDataTemplate="{StaticResource FilePercentTemplate}"/>
-                            <sort:SortViewColumn Width="70" Header="Size" TextAlignment="Right"
-                                                 SortMode="Size" DefaultSortDirection="Descending"
-                                                 CellBinding="{Binding Size, Converter={conv:ByteFormatter}}"/>
-                            <sort:SortViewColumn Width="80" Header="Items" TextAlignment="Right"
-                                                 SortMode="Items" DefaultSortDirection="Descending"
-                                                 CellBinding="{Binding ItemCount, Converter={conv:EmptyWhenNegative}}"/>
-                            <sort:SortViewColumn Width="80" Header="Files" TextAlignment="Right"
-                                                 SortMode="Files" DefaultSortDirection="Descending"
-                                                 CellBinding="{Binding FileCount, Converter={conv:EmptyWhenNegative}}"/>
-                            <sort:SortViewColumn Width="75" Header="Subdirs" TextAlignment="Right"
-                                                 SortMode="Subdirs" DefaultSortDirection="Descending"
-                                                 CellBinding="{Binding SubdirCount, Converter={conv:EmptyWhenNegative}}"/>
-                            <sort:SortViewColumn Width="130" Header="Last Change"
-                                                 SortMode="LastChange" DefaultSortDirection="Descending"
-                                                 CellBinding="{Binding LastChangeTime}"/>
-                            <sort:SortViewColumn Width="50" Header="Attributes"
-                                                 SortMode="Attributes"
-                                                 CellBinding="{Binding Attributes, Converter={conv:AttributesFormatter}}"/>
-                        </sort:SortView>
-                    </tv:FileTreeView.View>
-                </tv:FileTreeView>
-                <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" ResizeDirection="Columns"/>
+                <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" ResizeDirection="Columns" Focusable="False"/>
                 <sort:SortListView x:Name="extensionList" Grid.Column="2"
                                    SortMode="Bytes" SortDirection="Descending" Sort="OnExtensionSort"
                                    ItemsSource="{Binding FinishedExtensions}" SelectionChanged="OnExtensionSelectionChanged" SelectionMode="Single" GotFocus="OnExtensionListGotFocus">
@@ -405,7 +213,7 @@
                             <sort:SortViewColumn Width="50" Header="Color" SortMode="Color">
                                 <sort:SortViewColumn.CellDataTemplate>
                                     <DataTemplate>
-                                        <!--<Image Source="{Binding Preview}" Stretch="Fill" VerticalAlignment="Center" Height="16"/>-->
+                                        <Image Source="{Binding Preview}" Stretch="Fill" VerticalAlignment="Center" Height="13"/>
                                     </DataTemplate>
                                 </sort:SortViewColumn.CellDataTemplate>
                             </sort:SortViewColumn>
@@ -417,8 +225,7 @@
                                                   CellBinding="{Binding Size, Converter={conv:ByteFormatter}}"/>
                             <sort:SortViewColumn Width="60" Header="% Bytes" TextAlignment="Right"
                                                   SortMode="Percent" DefaultSortDirection="Descending"
-                                                  />
-                            <!--CellBinding="{Binding Percent, StringFormat=P1}"-->
+                                                  CellBinding="{Binding Percent, StringFormat=P1}"/>
                             <sort:SortViewColumn Width="50" Header="Files" TextAlignment="Right"
                                                   SortMode="Files" DefaultSortDirection="Descending"
                                                   CellBinding="{Binding FileCount, Converter={conv:EmptyWhenNegative}}"/>
@@ -426,12 +233,10 @@
                     </sort:SortListView.View>
                 </sort:SortListView>
             </Grid>
-            <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" ResizeDirection="Rows"/>
+            <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" ResizeDirection="Rows" Focusable="False"/>
             <Border Grid.Row="2" BorderThickness="1" BorderBrush="{StaticResource ListBorder}">
-                <!--Root="{Binding FinishedRootNode}"-->
                 <local:GraphView x:Name="graphView" ForceDimmed="{Binding IsRefreshing}"
-                                 
-                                 Options="{Binding Settings.TreemapOptions}"
+                                 Root="{Binding FinishedRootNode}"
                                  RenderPriority="{Binding Settings.RenderPriority}"
                                  MouseDown="OnGraphFileSelected"/>
             </Border>

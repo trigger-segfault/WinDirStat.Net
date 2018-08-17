@@ -14,206 +14,220 @@ using WinDirStat.Net.Utils;
 using System.Threading;
 
 namespace WinDirStat.Net.Data.Nodes {
-	public class FolderNode : FileNode {
+	public partial class FolderNode : FileNodeBase {
 
 		//private static readonly char[] FileCollectionName = "<Files>".ToArray();
 		private const string FileCollectionName = "<Files>";
-
-#if COMPRESSED_DATA
-		/*private const byte InvalidatedFlag = 0x01;
-		private const byte ValidatingFlag = 0x02;
-		private const byte PopulatedFlag = 0x04;
-		private const byte DoneFlag = 0x08;
-
-		private volatile byte flags = InvalidatedFlag;
-
-		/// <summary>Gets one of the <see cref="heightAndFlags"/> flags.</summary>
-		private bool GetFlag(byte flag) {
-			return (flags & flag) != 0;
-		}
-
-		/// <summary>Sets one of the <see cref="heightAndFlags"/> flags.</summary>
-		private void SetFlag(byte flag, bool enabled) {
-			if (enabled)
-				flags |= flag;
-			else
-				flags &= unchecked((byte) ~flag);
-		}*/
-#endif
-
-		//private readonly FileNodeType type;
-		//viprivate FileNodeCollection visualChildren;
+		
+		protected volatile List<FileNodeBase> virtualChildren = EmptyVirtualChildren;
 		internal int fileCount;
 		internal int subdirCount;
 
-#if !COMPRESSED_DATA
-		private bool populated;
-		private volatile bool invalidated = true;
-		private volatile bool validating;
-		private volatile bool done;
-#else
-		/*private bool invalidated {
-			get => GetFlag(InvalidatedFlag);
-			set => SetFlag(InvalidatedFlag, value);
+		private FolderNode()
+			: base(FileCollectionName, FileNodeType.FileCollection, FileNodeFlags.None)
+		{
+			// File Collections are only ever created when a file
+			// needs to be added. Let's setup the list now.
+			virtualChildren = new List<FileNodeBase>(4);
 		}
-		private bool validating {
-			get => GetFlag(ValidatingFlag);
-			set => SetFlag(ValidatingFlag, value);
-		}
-		private bool populated {
-			get => GetFlag(PopulatedFlag);
-			set => SetFlag(PopulatedFlag, value);
-		}
-		private bool done {
-			get => GetFlag(DoneFlag);
-			set => SetFlag(DoneFlag, value);
-		}*/
-		protected bool invalidated {
-			get => bitfield.GetBit(13);
-			set => bitfield.SetBit(13, value);
-		}
-		protected bool validating {
-			get => bitfield.GetBit(14);
-			set => bitfield.SetBit(14, value);
-		}
-		protected bool done {
-			get => bitfield.GetBit(16);
-			set => bitfield.SetBit(16, value);
+		
+		protected FolderNode(string name, FileNodeType type, FileNodeFlags rootType)
+			: base(name, type, rootType)
+		{
 		}
 
-#endif
-
-
-
-
-		//private volatile ushort typeAndFlags = 0x0100;
-
-		/*private FileNodeType type {
-			get => (FileNodeType) (typeAndFlags & 0xFF);
-			set => typeAndFlags = unchecked((ushort) ((typeAndFlags & 0xFF00) | (int) value));
+		protected FolderNode(INtfsNode node, FileNodeType type, FileNodeFlags rootType)
+			: base(node, type, rootType)
+		{
 		}
 
-
-		private bool invalidated {
-
-		}*/
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// 
-		/// <remarks>
-		/// Unlike <see cref="Children"/>, this is always filled with all known children.
-		/// <para/>
-		/// This list is also sorted by size during the final validation.
-		/// </remarks>
-		//protected internal CompactList<FileNode> virtualChildren = new CompactList<FileNode>(0);
-		/// <summary>
-		/// This is only non-null during the loading process. Afterwords this list is no longer used.
-		/// </summary>
-		//private List<FileNode> childrenToLoad;
-		private FolderNode fileCollection;
-
-		//private readonly object childrenLock = new object();
-
-		private FolderNode() {
-			virtualChildren = new List<FileNode>(0);
-			Type = FileNodeType.FileCollection;
-			//cName = FileCollectionName;
-			name = FileCollectionName;
+		protected FolderNode(FileSystemInfo info, FileNodeType type, FileNodeFlags rootType)
+			: base(info, type, rootType)
+		{
 		}
 
-		protected FolderNode(INtfsNode node, FileNodeType type) : base(node) {
-			this.Type = type;
-			virtualChildren = new List<FileNode>(0);
-		}
-
-		protected FolderNode(FileSystemInfo info, FileNodeType type) : base(info) {
-			this.Type = type;
-			virtualChildren = new List<FileNode>(0);
-		}
-
-		protected FolderNode(IFileFindData data, FileNodeType type) : base(data) {
-			this.Type = type;
-			virtualChildren = new List<FileNode>(0);
+		protected FolderNode(IFileFindData data, FileNodeType type, FileNodeFlags rootType)
+			: base(data, type, rootType)
+		{
 		}
 
 		public FolderNode(FolderNode node, FolderNode parent) : base(node, parent) {
 			fileCount = node.fileCount;
 			subdirCount = node.subdirCount;
-			virtualChildren = new List<FileNode>(node.virtualChildren.Count);
-			foreach (FileNode child in node.virtualChildren) {
-				FileNode newChild;
-				if (child is FolderNode folder)
-					newChild = new FolderNode(folder, this);
-				else
-					newChild = new FileNode(child, this);
-				virtualChildren.Add(newChild);
-			}
-			if (Type != FileNodeType.Root) {
-				//populated = node.populated;
-				invalidated = node.invalidated;
-				done = node.done;
-				validating = node.validating;
-				if (node.populated) {
-					vi.isExpanded = node.IsExpanded;
-					LoadChildren(Root);
+
+			List<FileNodeBase> oldVirtualChildren = node.virtualChildren;
+			int count = oldVirtualChildren.Count;
+			if (count > 0) {
+				virtualChildren = new List<FileNodeBase>(oldVirtualChildren.Count);
+				for (int i = 0; i < count; i++) {
+					FileNodeBase child = oldVirtualChildren[i];
+					FileNodeBase newChild = null;
+					if (child is FolderNode folder)
+						newChild = new FolderNode(folder, this);
+					else if (child is FileNode file)
+						newChild = new FileNode(file, this);
+					if (newChild != null)
+						Add(newChild);
 				}
 			}
 		}
 
-		public FolderNode(INtfsNode node) : this(node, FileNodeType.Directory) {
+		public FolderNode(INtfsNode node)
+			: this(node, FileNodeType.Directory, FileNodeFlags.None)
+		{
 		}
 
-		public FolderNode(FileSystemInfo info) : this(info, FileNodeType.Directory) {
+		public FolderNode(FileSystemInfo info)
+			: this(info, FileNodeType.Directory, FileNodeFlags.None)
+		{
 		}
 
-		public FolderNode(IFileFindData data) : this(data, FileNodeType.Directory) {
+		public FolderNode(IFileFindData find)
+			: this(find, FileNodeType.Directory, FileNodeFlags.None)
+		{
 		}
-		
-		internal void AddChild(RootNode root, FileNode node, string path, bool asyncLoad) {
-			if (node.Type == FileNodeType.File && Type != FileNodeType.FileCollection) {
+
+		internal override sealed List<FileNodeBase> VirtualChildren {
+			get => virtualChildren;
+		}
+		public override sealed int ItemCount {
+			get => fileCount + subdirCount;
+		}
+		public override sealed int FileCount {
+			get => fileCount;
+		}
+		public override sealed int SubdirCount {
+			get => subdirCount;
+		}
+		public bool IsStoringFiles {
+			get => virtualChildren.Count > 0 && virtualChildren[0].Type == FileNodeType.File;
+		}
+		public bool IsEmpty {
+			get => virtualChildren == EmptyVirtualChildren;
+		}
+
+		internal void AddChild(RootNode root, FileNodeBase node, ref FolderNode fileCollection) {
+			bool fileCollectionCreated = false;
+			if (node.Type == FileNodeType.File && Type != FileNodeType.FileCollection &&
+				virtualChildren.Count > 0 && virtualChildren[0].Type != FileNodeType.File)
+			{
+				// Setup file collection if the folder is storing non-files.
 				if (fileCollection == null) {
 					fileCollection = new FolderNode();
-					AddChild(root, fileCollection, null, asyncLoad);
+					fileCollectionCreated = true;
 				}
-				fileCollection.AddChild(root, node, null, asyncLoad);
 			}
-			else {
-				if (node.Type == FileNodeType.FreeSpace && !root.Document.Settings.ShowFreeSpace)
-					return;
-				lock (virtualChildren) {
-					if (virtualChildren == null) {
-						virtualChildren = new List<FileNode>();
-					}
-					Debug.Assert(node.virtualParent == null);
-					node.virtualParent = this;
-					virtualChildren.Add(node);
-					if (populated)
+			else if (IsStoringFiles && node.Type != FileNodeType.File) {
+				// Setup file collection if the folder needs to store a non-file.
+				if (fileCollection == null) {
+					fileCollection = new FolderNode();
+					fileCollectionCreated = true;
+				}
+			}
+			FolderNode nonRefFileCollection = fileCollection;
+
+			VisualInvokeIf(IsLoaded, () => VisualAddChild(root, node, nonRefFileCollection, fileCollectionCreated));
+		}
+
+		private void VisualAddChild(RootNode root, FileNodeBase node, FolderNode fileCollection, bool fileCollectionCreated) {
+			bool newList = false;
+
+			// We know we're adding a node to virtualChildren, make sure it's setup
+			if (IsEmpty) {
+				virtualChildren = new List<FileNodeBase>(4);
+				newList = true;
+			}
+			
+			lock (virtualChildren) {
+				// Setup file collection if the folder is storing non-files.
+				if (node.Type == FileNodeType.File && Type != FileNodeType.FileCollection &&
+					virtualChildren.Count > 0 && virtualChildren[0].Type != FileNodeType.File)
+				{
+					if (fileCollectionCreated)
+						Add(fileCollection);
+					fileCollection.VisualAddChild(root, node, null, false);
+					//if (newList)
+					//	RaisePropertyChanged(nameof(ShowExpander));
+					if (fileCollectionCreated && IsPopulated) {
 						EnsureVisualChildren();
-					Invalidate();
+						fileCollection.LoadIcon(root);
+						vi.children.Add(fileCollection);
+					}
+					return;
 				}
-				if (populated) {
+
+				// Setup file collection if the folder needs to store a non-file.
+				if (IsStoringFiles && node.Type != FileNodeType.File) {
+					lock (fileCollection.virtualChildren) {
+						// File collection was just created, so no UI validation required
+						fileCollection.AddRange(virtualChildren);
+						virtualChildren.Clear();
+						if (fileCollectionCreated)
+							Add(fileCollection);
+						fileCollection.Invalidate();
+						if (IsPopulated) {
+							// No need to transfer the visual children
+							vi.children.Clear();
+						}
+					}
+				}
+				Add(node);
+				Invalidate();
+
+				if (newList)
+					RaisePropertyChanged(nameof(ShowExpander));
+
+				if (IsPopulated) {
+					EnsureVisualChildren();
 					node.LoadIcon(root);
-					VisualInvoke(() => {
-						if (virtualChildren.Count == 1)
-							RaisePropertyChanged(nameof(ShowExpander));
-						lock (virtualChildren)
-							//SortInsert(root, node);
-							vi.children.Add(node);
-							//node.IsHidden = !root.Document.Settings.ShowFreeSpace;
-					});
-				}
-				else if (virtualChildren.Count == 1) {
-					VisualPropertyChanged(nameof(ShowExpander));
+					if (fileCollectionCreated) {
+						fileCollection.LoadIcon(root);
+						vi.children.Add(fileCollection);
+					}
+					vi.children.Add(node);
 				}
 			}
 		}
 
+		protected void Add(FileNodeBase node) {
+			//if (IsEmpty)
+			//	virtualChildren = new List<FileNodeBase>(4);
+			virtualChildren.Add(node);
+			node.virtualParent = this;
+		}
+
+		/*protected void SetList(List<FileNodeBase> items) {
+			virtualChildren = items;
+			int count = virtualChildren.Count;
+			for (int i = 0; i < count; i++)
+				virtualChildren[i].virtualParent = this;
+		}*/
+
+		protected void AddRange(IEnumerable<FileNodeBase> items) {
+			//if (IsEmpty)
+			//	virtualChildren = new List<FileNodeBase>();
+			virtualChildren.AddRange(items);
+			int count = virtualChildren.Count;
+			for (int i = 0; i < count; i++)
+				virtualChildren[i].virtualParent = this;
+		}
+
+		/*protected List<FileNodeBase> Clear() {
+			int count = virtualChildren.Count;
+			if (count > 0) {
+				for (int i = 0; i < count; i++)
+					virtualChildren[i].virtualParent = null;
+				List<FileNodeBase> oldChildren = virtualChildren;
+				virtualChildren = EmptyVirtualChildren;
+				return oldChildren;
+			}
+			return EmptyVirtualChildren;
+		}*/
+
 		private void Invalidate() {
-			if (!invalidated) {
-				invalidated = true;
-				VirtualParent?.Invalidate();
+			if (!IsInvalidated) {
+				IsInvalidated = true;
+				virtualParent?.Invalidate();
 			}
 		}
 
@@ -222,12 +236,18 @@ namespace WinDirStat.Net.Data.Nodes {
 		}
 
 		internal bool Validate(RootNode root, bool force) {
-			if (!invalidated || (validating && !force))
+			if (!IsInvalidated || (IsValidating && !force))
 				return false;
-			while (validating)
+			while (IsValidating)
 				Thread.Sleep(1);
-			validating = true;
-			invalidated = false;
+
+			IsInvalidated = false;
+
+			// Nothing to validate
+			if (IsEmpty)
+				return true;
+
+			IsValidating = true;
 
 			bool percentagesChanged = false;
 			long oldSize = size;
@@ -235,20 +255,31 @@ namespace WinDirStat.Net.Data.Nodes {
 			//WinDirNode[] children;
 			bool addedChildren = false;
 			lock (virtualChildren) {
+				UnknownNode unknown = null;
+				FileNodeBase freeSpace = null;
 				fileCount = 0;
 				subdirCount = 0;
 				size = 0;
-				foreach (FileNode child in VirtualChildren) {
-					/*if (child.Type == FileNodeType.FreeSpace) {
-						if (root.Document.Settings.ShowFreeSpace)
-							size += child.Size;
+				int count = virtualChildren.Count;
+				for (int i = 0; i < count; i++) {
+					FileNodeBase child = virtualChildren[i];
+					if (child.Type == FileNodeType.Unknown) {
+						// Don't count the size for this because it will 
+						// be updated based on the remaining size.
+						unknown = (UnknownNode) child;
 						continue;
-					}*/
+					}
+					else if (child.Type == FileNodeType.FreeSpace) {
+						// Don't count the size for this because it will 
+						// be excluded when updating unknown's size.
+						freeSpace = child;
+						continue;
+					}
 					if (child is FolderNode childDir)
 						percentagesChanged |= childDir.Validate(root, force);
 					size += child.Size;
 					//lastAccessTime = Max(lastAccessTime, child.LastAccessTime);
-					lastChangeTime = Max(lastChangeTime, child.LastChangeTime);
+					lastChangeTime = MaxDateTime(lastChangeTime, child.LastChangeTime);
 					if (child.Type == FileNodeType.File || child.Type == FileNodeType.FreeSpace) {
 						fileCount++;
 					}
@@ -260,80 +291,45 @@ namespace WinDirStat.Net.Data.Nodes {
 						}
 					}
 				}
+				if (unknown != null) {
+					unknown.UpdateSize(size);
+					size += unknown.Size;
+				}
+				if (freeSpace != null) {
+					size += freeSpace.Size;
+				}
 				percentagesChanged |= (oldSize != size) || addedChildren;
 				/*if (percentagesChanged) {
 					foreach (FileNode child in VirtualChildren) {
 						child.RaisePropertyChanged(nameof(Percent));
 					}
 				}*/
-			}
 
-			if ((IsVirtualRoot || VirtualParent.populated) && IsVisible) {
-				VisualPropertiesChanged(nameof(Size),
-					//nameof(LastAccessTime),
-					nameof(LastChangeTime),
-					nameof(ItemCount),
-					nameof(FileCount),
-					nameof(SubdirCount),
-					nameof(Percent));
-			}
+				if ((virtualParent?.IsPopulated ?? true) && IsVisible) {
+					RaisePropertiesChanged(nameof(Size),
+						//nameof(LastAccessTime),
+						nameof(LastChangeTime),
+						nameof(ItemCount),
+						nameof(FileCount),
+						nameof(SubdirCount),
+						nameof(Percent));
+				}
 
-			if (percentagesChanged) {
-				VisualInvoke(() => {
-
-					lock (virtualChildren) {
-						foreach (FileNode child in VirtualChildren) {
-							child.RaisePropertyChanged(nameof(Percent));
-						}
+				if (percentagesChanged) {
+					count = virtualChildren.Count;
+					for (int i = 0; i < count; i++) {
+						virtualChildren[i].RaisePropertyChanged(nameof(Percent));
 					}
 					if (IsExpanded)
 						Sort(root, false);
-				});
+				}
 			}
 
-			validating = false;
+			IsValidating = false;
 			return percentagesChanged;
 		}
-
-		/*internal void UpdateShowFreeSpace(bool showFreeSpace) {
-			// This must only be called when the value has actually switched
-			Debug.Assert(Type == FileNodeType.Root);
-			RootNode root = (RootNode) this;
-			if (root.FreeSpace == null) {
-				foreach (FileNode node in VirtualChildren) {
-					if (node is RootNode subroot)
-						UpdateShowFreeSpace(showFreeSpace);
-				}
-				return;
-			}
-
-			lock (virtualChildren) {
-				foreach (FileNode node in VirtualChildren) {
-					if (node.Type == FileNodeType.FreeSpace) {
-						node.IsHidden = !showFreeSpace;
-						if (showFreeSpace)
-							size += node.Size;
-						else
-							size -= node.Size;
-						break;
-					}
-				}
-			}
-			VisualInvoke(() => {
-				lock (virtualChildren) {
-					foreach (FileNode node in VirtualChildren) {
-						node.RaisePropertyChanged(nameof(Percent));
-					}
-					RaisePropertiesChanged(nameof(Size), nameof(Percent));
-				}
-			});
-		}*/
-
-
-
 		
-
-		protected internal void SortInsert(RootNode root, FileNode node) {
+		protected internal void SortInsert(RootNode root, FileNodeBase node) {
 			int index;
 			for (index = Children.Count; index > 0; index--) {
 				if (!root.Document.FileComparer.ShouldSort(node, Children[index - 1]))
@@ -341,92 +337,126 @@ namespace WinDirStat.Net.Data.Nodes {
 			}
 			vi.children.Insert(index, node);
 		}
-
-		/*internal void Sort(RootNode root) {
-			modelChildren.Sort(root.Document.FileComparer);
-		}*/
 		
 		internal void FinalValidate(RootNode root) {
+			// Nothing to validate
+			if (IsEmpty)
+				return;
+
+			Validate(root, true);
 			lock (virtualChildren) {
-				if (IsExpanded)
-					LoadChildren(root);
-				Validate(root, true);
-				foreach (FolderNode subfolder in VirtualFolders) {
-					subfolder.FinalValidate(root);
+				if (!IsStoringFiles) {
+					int count = virtualChildren.Count;
+					for (int i = 0; i < count; i++) {
+						FileNodeBase child = virtualChildren[i];
+						if (child is FolderNode folder)
+							folder.FinalValidate(root);
+					}
 				}
-
-				// Sort after the sizes have been fully determined
 				virtualChildren.Minimize();
-				virtualChildren?.Sort(root.Document.SizeFileComparer);
-			};
-		}
-
-		/*protected override void OnExpanding() {
-			RootNode root = Root;
-			if (!populated)
-				LoadChildren(root);
-			else
-				Sort(root, false);
-			foreach (FileNode child in VirtualChildren)
-				child.LoadIcon(root);
-		}*/
-
-		//protected override void OnCollapsing() {
-		//	UnloadChildren(Root);
-		/*if (vi.children != null) {
-			FileNode[] removedChildren = visualInfo.children.ToArray();
-			visualInfo.children.Clear();
-			foreach (FileNode child in removedChildren) {
-				child.UnloadVisuals();
+				virtualChildren.Sort(root.Document.SizeFileComparer.Compare);
 			}
-		}*/
-		//}
-
-
-
-		private static DateTime Max(DateTime a, DateTime b) {
+		}
+		private static DateTime MaxDateTime(DateTime a, DateTime b) {
 			return (a > b ? a : b);
 		}
 		
-		/*public override IReadOnlyList<FileNode> VirtualChildren {
-			get => virtualChildren ?? EmptyList;
-		}*/
-
-		/*public override bool HasVirtualChildren {
-			get => (virtualChildren?.Count ?? 0) != 0;
-		}*/
-
-		internal bool HasDirectories {
-			get => Type != FileNodeType.FileCollection && (virtualChildren?.Count ?? 0) != 0;
+		public FolderNode GetFileCollection() {
+			int count = virtualChildren.Count;
+			for (int i = 0; i < count; i++) {
+				FileNodeBase child = virtualChildren[i];
+				if (child.Type == FileNodeType.FileCollection)
+					return (FolderNode) child;
+			}
+			return null;
 		}
 
-		internal bool HasFileCollection {
-			get => fileCollection != null;
+		protected void LoadChildren(RootNode root) {
+
+			lock (virtualChildren) {
+				if (!IsPopulated) {
+					IsPopulated = true;
+					// Nothing to load
+					if (IsEmpty)
+						return;
+
+					EnsureVisualChildren();
+
+					int count = virtualChildren.Count;
+					for (int i = 0; i < count; i++) {
+						FileNodeBase child = virtualChildren[i];
+						if (child.Icon == null && IsExpanded)
+							child.LoadIcon(root, virtualChildren.Count > 5000);
+						if (child.IsExpanded && child is FolderNode folder)
+							folder.LoadChildren(root);
+					}
+					vi.children.AddRange(virtualChildren.OrderBy(n => n, root.Document.FileComparer));
+				}
+			}
 		}
 
-		public bool IsDone {
-			get => done;
-			set => done = value;
+		protected void UnloadChildren(RootNode root) {
+			lock (virtualChildren) {
+				if (IsPopulated) {
+					IsPopulated = false;
+					// Nothing to unload
+					if (IsEmpty)
+						return;
+					
+					vi.children.Clear();
+					if (!IsStoringFiles) {
+						int count = virtualChildren.Count;
+						for (int i = 0; i < count; i++) {
+							FileNodeBase child = virtualChildren[i];
+							if (child.visualInfo != null) {
+								if (child is FolderNode folder) {
+									if (folder.IsPopulated)
+										folder.UnloadChildren(root);
+								}
+								child.UnloadVisuals();
+							}
+						}
+					}
+				}
+				IsPopulated = false;
+			}
 		}
 
-		public bool Invalidated {
-			get => invalidated;
+		protected override sealed void OnExpanding() {
+			RootNode root = Root;
+			lock (virtualChildren) {
+				if (!IsPopulated)
+					LoadChildren(root);
+				else
+					Sort(root, false);
+			}
 		}
 
-		public bool Validating {
-			get => validating;
+		protected override sealed void OnCollapsing() {
+			UnloadChildren(Root);
+		}
+		protected void EnsureVisualChildren() {
+			if (vi.children == null)
+				vi.children = new FileNodeCollection(this);
 		}
 
-		/*public override FileNodeType Type {
-			get => type;
-		}*/
+		internal void Sort(RootNode root, bool sortSubChildren) {
+			// Nothing to sort
+			if (IsEmpty)
+				return;
 
-		/*public override int FileCount {
-			get => fileCount;
+			lock (virtualChildren) {
+				if (!IsPopulated || visualInfo?.children == null || !visualInfo.children.Any())
+					return;
+				
+				visualInfo.children.Sort(root.Document.FileComparer.Compare);
+				if (sortSubChildren) {
+					foreach (FileNodeBase child in visualInfo.children) {
+						if (child.IsExpanded && child is FolderNode subfolder)
+							subfolder.Sort(root, true);
+					}
+				}
+			}
 		}
-
-		public override int SubdirCount {
-			get => subdirCount;
-		}*/
 	}
 }

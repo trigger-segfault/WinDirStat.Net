@@ -32,11 +32,11 @@ namespace WinDirStat.Net.TreeView {
 		/// The root node of the flat list tree.
 		/// Tjis is not necessarily the root of the model!
 		/// </summary>
-		internal FileNode root;
+		internal FileNodeBase root;
 		readonly bool includeRoot;
 		readonly object syncRoot = new object();
 
-		public TreeFlattener(FileNode modelRoot, bool includeRoot) {
+		public TreeFlattener(FileNodeBase modelRoot, bool includeRoot) {
 			this.root = modelRoot;
 			while (root.vi.listParent != null)
 				root = root.vi.listParent;
@@ -54,9 +54,9 @@ namespace WinDirStat.Net.TreeView {
 			CollectionChanged?.Invoke(this, e);
 		}
 
-		public void NodesInserted(int index, IEnumerable<FileNode> nodes) {
+		public void NodesInserted(int index, IEnumerable<FileNodeBase> nodes) {
 			if (!includeRoot) index--;
-			foreach (FileNode node in nodes) {
+			foreach (FileNodeBase node in nodes) {
 				RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, node, index++));
 			}
 		}
@@ -66,9 +66,9 @@ namespace WinDirStat.Net.TreeView {
 			RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, nodes, index));
 		}*/
 
-		public void NodesRemoved(int index, IEnumerable<FileNode> nodes) {
+		public void NodesRemoved(int index, IEnumerable<FileNodeBase> nodes) {
 			if (!includeRoot) index--;
-			foreach (FileNode node in nodes) {
+			foreach (FileNodeBase node in nodes) {
 				RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, node, index));
 			}
 		}
@@ -78,9 +78,9 @@ namespace WinDirStat.Net.TreeView {
 			RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, nodes, index));
 		}*/
 
-		public void NodesMoved(int index, int oldIndex, IEnumerable<FileNode> nodes) {
+		public void NodesMoved(int index, int oldIndex, IEnumerable<FileNodeBase> nodes) {
 			if (!includeRoot) index--;
-			foreach (FileNode node in nodes) {
+			foreach (FileNodeBase node in nodes) {
 				//RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, node, oldIndex++));
 				//RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, node, index++));
 				RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, node, index++, oldIndex++));
@@ -101,7 +101,7 @@ namespace WinDirStat.Net.TreeView {
 			get {
 				if (index < 0 || index >= this.Count)
 					throw new ArgumentOutOfRangeException();
-				return FileNode.GetNodeByVisibleIndex(root, includeRoot ? index : index + 1);
+				return FileNodeBase.GetNodeByVisibleIndex(root, includeRoot ? index : index + 1);
 			}
 			set => throw new NotSupportedException();
 		}
@@ -113,12 +113,12 @@ namespace WinDirStat.Net.TreeView {
 		}
 
 		public int IndexOf(object item) {
-			FileNode node = item as FileNode;
+			FileNodeBase node = item as FileNodeBase;
 			if (node != null && node.IsVisible && node.GetListRoot() == root) {
 				if (includeRoot)
-					return FileNode.GetVisibleIndexForNode(node);
+					return FileNodeBase.GetVisibleIndexForNode(node);
 				else
-					return FileNode.GetVisibleIndexForNode(node) - 1;
+					return FileNodeBase.GetVisibleIndexForNode(node) - 1;
 			}
 			else {
 				return -1;

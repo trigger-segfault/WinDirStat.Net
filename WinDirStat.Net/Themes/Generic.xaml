@@ -4,6 +4,8 @@
                     xmlns:conv="clr-namespace:WinDirStat.Net.Converters"
                     xmlns:tree="clr-namespace:WinDirStat.Net.TreeView"
                     xmlns:sort="clr-namespace:WinDirStat.Net.SortingView"
+                    xmlns:data="clr-namespace:WinDirStat.Net.Data"
+                    xmlns:System="clr-namespace:System;assembly=mscorlib"
                     xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2">
 
     <BitmapImage x:Key="ShortcutIcon" UriSource="pack://application:,,,/WinDirStat.Net;component/Resources/FileIcons/Shortcut.png"/>
@@ -20,10 +22,10 @@
                 <ControlTemplate TargetType="{x:Type local:SubtreePercentage}">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition x:Name="PART_SpacerColumn" Width="0*"/>
+                            <ColumnDefinition x:Name="PART_BarColumn" Width="1*"/>
                         </Grid.ColumnDefinitions>
-                        <FrameworkElement Name="spacer" Grid.Column="0" />
+                        <!--<FrameworkElement Name="spacer" Grid.Column="0" />-->
                         <Border Name="border" Grid.Column="1" BorderThickness="1" Height="10"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 Background="{TemplateBinding Background}">
@@ -41,7 +43,39 @@
         </Setter>
     </Style>
 
+    <Style TargetType="{x:Type local:PercentageBar}">
+        <Setter Property="Focusable"
+                Value="False" />
+        <Setter Property="Margin" Value="2"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Background" Value="#FFE1E1E1"/>
+        <Setter Property="BorderBrush" Value="#FFC6C6C6"/>
+        <Setter Property="Fill" Value="#FF408C40"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:PercentageBar}">
+                    <!--<FrameworkElement Name="spacer" Grid.Column="0" />-->
+                    <Border Name="border" BorderThickness="1" Height="10"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                Background="{TemplateBinding Background}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0*" Name="PART_FillColoumn"/>
+                                <ColumnDefinition Width="1*" Name="PART_EmptyColoumn"/>
+                            </Grid.ColumnDefinitions>
+                            <Rectangle Fill="{TemplateBinding Fill}" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="ScrollViewerStyle1" TargetType="{x:Type ScrollViewer}">
+        <!--<Style.Resources>
+            <System:Double x:Key="{x:Static SystemParameters.VerticalScrollBarThumbHeightKey}">48</System:Double>
+            <System:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarThumbWidthKey}">48</System:Double>
+        </Style.Resources>-->
         <Setter Property="Focusable" Value="False"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -373,7 +407,7 @@
                                            VerticalAlignment="Center"
                                            Focusable="False"/>
                                     <Image Name="shortcut"
-                                           Source="{StaticResource ShortcutIcon}"
+                                           Source="{x:Static data:IconCache.ShortcutIcon}"
                                            Width="16"
                                            Height="16"
                                            Margin="0 0 5 1"
@@ -383,7 +417,7 @@
                                 </Grid>
                                 <Border Name="textContainer"
                                     Background="{TemplateBinding TextBackground}">
-                                    <TextBlock Text="{Binding Name}"
+                                    <TextBlock Text="{Binding Header}"
                                                Margin="2 0 0 0"
                                                VerticalAlignment="Center"
                                                Focusable="False" 

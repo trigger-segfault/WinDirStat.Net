@@ -14,116 +14,100 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using WinDirStat.Net.Utils;
+using static WinDirStat.Net.Utils.Native.Win32;
 
 namespace WinDirStat.Net.Data {
 	public delegate void CacheIconCallback(ImageSource icon);
-	public delegate void CacheFileTypeCallback(ImageSource icon, string name);
+	public delegate void CacheIconAndNameCallback(ImageSource icon, string name);
 
-	public class IconCache : IReadOnlyList<ImageSource>, INotifyCollectionChanged {
-
-		private interface ICacheTask {
-			void Run(IconCache icons);
-		}
-
-		private class IconCacheTask : ICacheTask {
-			public string Path { get; }
-			public string FileName {
-				get => System.IO.Path.GetFileName(Path);
-			}
-			public FileAttributes Attributes { get; }
-			public CacheIconCallback Callback { get; }
-
-			public IconCacheTask(string path, FileAttributes attributes, CacheIconCallback callback) {
-				Path = path;
-				Attributes = attributes;
-				Callback = callback;
-			}
-
-			public void Run(IconCache icons) {
-				ImageSource icon = icons.CacheIcon(Path, Attributes);
-				Callback(icon);
-			}
-
-			public override string ToString() {
-				return $"Icon: {FileName}";
-			}
-		}
-
-		private class FileTypeCacheTask : ICacheTask {
-			public string Extension { get; }
-			public CacheFileTypeCallback Callback { get; }
-
-			public FileTypeCacheTask(string extension, CacheFileTypeCallback callback) {
-				Extension = extension;
-				Callback = callback;
-			}
-
-			public void Run(IconCache icons) {
-				ImageSource icon = icons.CacheFileType(Extension, out string name);
-				Callback(icon, name);
-			}
-
-			public override string ToString() {
-				return $"File Type: {Extension}";
-			}
-		}
+	public partial class IconCache : IReadOnlyList<ImageSource>, INotifyCollectionChanged, INotifyPropertyChanged {
 
 		private const SHFileInfoFlags FlagDefaults =
 			SHFileInfoFlags.SysIconIndex | SHFileInfoFlags.SmallIcon;// | SHFileInfoFlags.Icon | SHFileInfoFlags.SmallIcon;
 
 		private const SHFileInfoFlags FileTypeFlags = SHFileInfoFlags.UseFileAttributes;
 
-		private static ImageSource unknownFileIcon;
+		//private static ImageSource unknownFileIcon;
 		private static ImageSource fileCollectionIcon;
 		private static ImageSource freeSpaceIcon;
 		private static ImageSource unknownSpaceIcon;
+		private static ImageSource fileIcon;
+		private static ImageSource folderIcon;
+		private static ImageSource volumeIcon;
+		private static ImageSource shortcutIcon;
 
-		public static ImageSource UnknownFileIcon {
-			get {
-				if (unknownFileIcon == null)
-					unknownFileIcon = BitmapUtils.FromResource("Resources/FileIcons/UnknownFile.png");
-				return unknownFileIcon;
-			}
+		private static ImageSource LoadResource(string name) {
+			return BitmapUtils.FromResource($"Resources/FileIcons/{name}.png");
 		}
 
 		public static ImageSource FileCollectionIcon {
-			get {
-				if (fileCollectionIcon == null)
-					fileCollectionIcon = BitmapUtils.FromResource("Resources/FileIcons/FileCollection.png");
-				return fileCollectionIcon;
-			}
+			get => fileCollectionIcon ?? (fileCollectionIcon = LoadResource("FileCollection"));
 		}
-
 		public static ImageSource FreeSpaceIcon {
-			get {
-				if (freeSpaceIcon == null)
-					freeSpaceIcon = BitmapUtils.FromResource("Resources/FileIcons/FreeSpace.png");
-				return freeSpaceIcon;
-			}
+			get => freeSpaceIcon ?? (freeSpaceIcon = LoadResource("FreeSpace"));
+		}
+		public static ImageSource UnknownSpaceIcon {
+			get => unknownSpaceIcon ?? (unknownSpaceIcon = LoadResource("UnknownSpace"));
 		}
 
-		public static ImageSource UnknownSpaceIcon {
-			get {
-				if (unknownSpaceIcon == null)
-					unknownSpaceIcon = BitmapUtils.FromResource("Resources/FileIcons/UnknownSpace.png");
-				return unknownSpaceIcon;
-			}
+		public static ImageSource FileIcon {
+			get => fileIcon ?? (fileIcon = LoadStockIcon(SHStockIconID.DocNoAssoc));
+		}
+		public static ImageSource FolderIcon {
+			get => folderIcon ?? (folderIcon = LoadStockIcon(SHStockIconID.Folder));
+		}
+		public static ImageSource VolumeIcon {
+			get => volumeIcon ?? (volumeIcon = LoadStockIcon(SHStockIconID.DriveFixed));
+		}
+		public static ImageSource ShortcutIcon {
+			get => shortcutIcon ?? (shortcutIcon = LoadStockIcon(SHStockIconID.Link));
 		}
 
 		private readonly WinDirDocument document;
 		private readonly Dictionary<int, ImageSource> cachedIcons;
 		private readonly ObservableCollection<ImageSource> cachedIconList;
 		private readonly Queue<ICacheTask> cacheTasks;
+		private readonly DispatcherTimer queueTimer;
 		//private ImageSource defaultDriveIcon;
-		private ImageSource defaultFolderIcon;
-		private ImageSource defaultFileIcon;
+		//private ImageSource defaultFolderIcon;
+		//private ImageSource defaultFileIcon;
 		
+		public static ResourceKey ShortcutIconKey { get; } =
+			new ComponentResourceKey(typeof(IconCache), "ShortcutIconKey");
+
+		static IconCache() {
+			Application.Current.Resources.Add(ShortcutIconKey, ShortcutIcon);
+		}
 
 		public IconCache(WinDirDocument document) {
 			this.document = document;
 			cachedIcons = new Dictionary<int, ImageSource>();
 			cachedIconList = new ObservableCollection<ImageSource>();
 			cacheTasks = new Queue<ICacheTask>();
+			queueTimer = new DispatcherTimer(
+				TimeSpan.FromSeconds(0.1),
+				DispatcherPriority.Normal,
+				OnQueueTick,
+				Application.Current.Dispatcher);
+			queueTimer.Stop();
+		}
+
+		private void OnQueueTick(object sender, EventArgs e) {
+			//Stopwatch sw = Stopwatch.StartNew();
+			ICacheTask task;
+			for (int i = 0; i < 5; i++) {
+				lock (cacheTasks) {
+					if (cacheTasks.Count == 0)
+						break;
+					task = cacheTasks.Dequeue();
+				}
+				task.Run(this);
+			}
+			lock (cacheTasks) {
+				if (cacheTasks.Count == 0)
+					queueTimer.Stop();
+			}
+			//Console.WriteLine($"OnQueueTick took: {sw.ElapsedMilliseconds}ms");
 		}
 
 		public WinDirDocument Document {
@@ -139,116 +123,207 @@ namespace WinDirStat.Net.Data {
 			cachedIconList.Clear();
 		}
 
+		private void ClearQueue() {
+			cacheTasks.Clear();
+		}
+
+		private void QueueCacheTask(ICacheTask task) {
+			lock (cacheTasks) {
+				cacheTasks.Enqueue(task);
+				if (cacheTasks.Count == 1)
+					queueTimer.Start();
+			}
+		}
+
+		public ImageSource CacheSpecialFolder(Environment.SpecialFolder folder) {
+			return CacheSpecialFolder(folder, SHFileInfoFlags.None, out _);
+		}
+
+		public ImageSource CacheSpecialFolder(Environment.SpecialFolder folder, out string name) {
+			return CacheSpecialFolder(folder, SHFileInfoFlags.DisplayName, out name);
+		}
+
+		public void CacheSpecialFolderAsync(Environment.SpecialFolder folder, CacheIconCallback callback) {
+			if (callback == null)
+				throw new ArgumentNullException(nameof(callback));
+			Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+				ImageSource icon = CacheSpecialFolder(folder);
+				callback(icon);
+			}), DispatcherPriority.Background);
+		}
+
+		public void CacheSpecialFolderAsync(Environment.SpecialFolder folder,
+			CacheIconAndNameCallback callback)
+		{
+			if (callback == null)
+				throw new ArgumentNullException(nameof(callback));
+			//QueueCacheTask(new SpecialFolderCacheTask(folder, callback));
+			Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+				ImageSource icon = CacheSpecialFolder(folder, out string name);
+				callback(icon, name);
+			}), DispatcherPriority.Background);
+		}
+
+		public ImageSource CacheIcon(string path, FileAttributes attributes, out string name) {
+			return CacheIcon(path, attributes, SHFileInfoFlags.DisplayName, out name, out _);
+		}
+
 		public ImageSource CacheIcon(string path, FileAttributes attributes) {
-			return CacheIcon(path, attributes, SHFileInfoFlags.None, false, out _);
+			return CacheIcon(path, attributes, SHFileInfoFlags.None, out _, out _);
 		}
 
 		public void CacheIconAsync(string path, FileAttributes attributes, CacheIconCallback callback) {
-			/*if (callback == null)
+			if (callback == null)
 				throw new ArgumentNullException(nameof(callback));
+			//QueueCacheTask(new IconCacheTask(path, attributes, callback));
 			Application.Current.Dispatcher.BeginInvoke(new Action(() => {
 				ImageSource icon = CacheIcon(path, attributes);
 				callback(icon);
-			}), DispatcherPriority.Background);*/
+			}), DispatcherPriority.Background);
+		}
+
+		public void CacheIconAsync(string path, FileAttributes attributes, CacheIconAndNameCallback callback) {
+			if (callback == null)
+				throw new ArgumentNullException(nameof(callback));
+			//QueueCacheTask(new IconAndDisplayNameCacheTask(path, attributes, callback));
+			Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+				ImageSource icon = CacheIcon(path, attributes, out string name);
+				callback(icon, name);
+			}), DispatcherPriority.Background);
 		}
 
 		public ImageSource CacheFileType(string extension) {
-			return CacheIcon(extension, FileTypeFlags, false, out _);
+			return CacheIcon(extension, FileTypeFlags, out _, out _);
 		}
 
 		public ImageSource CacheFileType(string extension, out string name) {
-			return CacheIcon(extension, FileTypeFlags, true, out name);
+			return CacheIcon(extension, FileTypeFlags | SHFileInfoFlags.TypeName, out _, out name);
 		}
 
 		public void CacheFileTypeAsync(string extension, CacheIconCallback callback) {
-			/*Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+			if (callback == null)
+				throw new ArgumentNullException(nameof(callback));
+			Application.Current.Dispatcher.BeginInvoke(new Action(() => {
 				ImageSource icon = CacheFileType(extension);
 				callback(icon);
-			}), DispatcherPriority.Background);*/
+			}), DispatcherPriority.Background);
 		}
 		
-		public void CacheFileTypeAsync(string extension, CacheFileTypeCallback callback) {
-			/*Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+		public void CacheFileTypeAsync(string extension, CacheIconAndNameCallback callback) {
+			if (callback == null)
+				throw new ArgumentNullException(nameof(callback));
+			//QueueCacheTask(new FileTypeCacheTask(extension, callback));
+			Application.Current.Dispatcher.BeginInvoke(new Action(() => {
 				ImageSource icon = CacheFileType(extension, out string name);
 				callback(icon, name);
-			}), DispatcherPriority.Background);*/
+			}), DispatcherPriority.Background);
 		}
 
-		public ImageSource DefaultDriveIcon {
-			get {
-				if (defaultFolderIcon == null) {
-					string tmpDir = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString())).FullName;
-					Application.Current.Dispatcher.Invoke(() => {
-						defaultFolderIcon = GetRegisteredIcon(tmpDir);
-					});
+		private static ImageSource LoadStockIcon(SHStockIconID id, SHStockIconFlags flags = 0) {
+			flags |= SHStockIconFlags.Icon | SHStockIconFlags.SmallIcon;
+			SHStockIconInfo stockInfo = new SHStockIconInfo() {
+				cbSize = SHStockIconInfo.CBSize,
+			};
+			if (SHGetStockIconInfo(id, flags, ref stockInfo))
+				return null;
+			try {
+				return ExtractIcon(stockInfo.hIcon);
+			}
+			finally {
+				DestroyIcon(stockInfo.hIcon);
+			}
+		}
+
+		private ImageSource CacheStockIcon(SHStockIconID id, SHStockIconFlags flags = 0) {
+			flags |= SHStockIconFlags.SysIconIndex | SHStockIconFlags.Icon | SHStockIconFlags.SmallIcon;
+			ImageSource icon = null;
+			SHStockIconInfo stockInfo = new SHStockIconInfo();
+			stockInfo.cbSize = SHStockIconInfo.CBSize;
+			if (SHGetStockIconInfo(id, flags, ref stockInfo))
+				return null;
+			try {
+				if (!cachedIcons.TryGetValue(stockInfo.iSysIconIndex, out icon)) {
 					try {
-						Directory.Delete(tmpDir);
+						Debug.WriteLine($"Cache[{Count}]: " + id);
+						icon = ExtractIcon(stockInfo.hIcon);
 					}
-					catch { }
-				}
-				return defaultFolderIcon;
-			}
-		}
-
-		public ImageSource DefaultFolderIcon {
-			get {
-				if (defaultFolderIcon == null) {
-					string tmpDir = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString())).FullName;
-					Application.Current.Dispatcher.Invoke(() => {
-						defaultFolderIcon = GetRegisteredIcon(tmpDir);
-					});
-					try {
-						Directory.Delete(tmpDir);
+					catch {
+						Debug.WriteLine($"Failed to load icon for \"{id}\"!");
 					}
-					catch { }
+					RaisePropertyChanged("Count");
+					cachedIcons.Add(stockInfo.iSysIconIndex, icon);
+					cachedIconList.Add(icon);
 				}
-				return defaultFolderIcon;
 			}
+			finally {
+				DestroyIcon(stockInfo.hIcon);
+			}
+			return icon;
 		}
 
-		public ImageSource DefaultFileIcon {
-			get {
-				if (defaultFileIcon == null) {
-					string tmpFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-					using (File.Create(tmpFile)) { }
-					Application.Current.Dispatcher.Invoke(() => {
-						defaultFileIcon = GetRegisteredIcon(tmpFile);
-					});
-					try {
-						File.Delete(tmpFile);
-					}
-					catch { }
-				}
-				return defaultFileIcon;
-			}
-		}
+		private ImageSource CacheSpecialFolder(Environment.SpecialFolder folder, SHFileInfoFlags flags,
+			out string displayName)
+		{
+			displayName = null;
+			flags |= FlagDefaults | SHFileInfoFlags.PIDL;
 
-		private ImageSource CacheIcon(string path, SHFileInfoFlags flags, bool setTypeName, out string typeName) {
-			return CacheIcon(path, 0, flags, setTypeName, out typeName);
-		}
-
-		private ImageSource CacheIcon(string path, FileAttributes attributes, SHFileInfoFlags flags, bool setTypeName, out string typeName) {
-			typeName = null;
-			flags |= FlagDefaults;
-			/*if (!attributes.HasFlag(FileAttributes.Directory) && Path.GetExtension(path).ToLower() == ".lnk") {
-				flags |= SHFileInfoFlags.LinkOverlay;
-			}*/
-			if (setTypeName) {
-				flags |= SHFileInfoFlags.TypeName;
-			}
-			//if (attributes != 0)
-			//	flags |= SHFileInfoFlags.UseFileAttributes;
+			IntPtr pidl = IntPtr.Zero;
 			ImageSource icon = null;
 			SHFileInfo fileInfo = new SHFileInfo();
-			IntPtr hImageList = hImageList = SHGetFileInfo(path, 0, ref fileInfo, SHFileInfo.CBSize, flags);
+			if (SHGetSpecialFolderLocation(IntPtr.Zero, folder, ref pidl))
+				return null;
+			IntPtr hImageList = SHGetFileInfo(pidl, 0, ref fileInfo, SHFileInfo.CBSize, flags);
 			try {
-				if (hImageList == IntPtr.Zero) {
+				if (hImageList == IntPtr.Zero)
 					return null;
-				}
 
-				if (setTypeName) {
-					typeName = fileInfo.szTypeName;
+				if (flags.HasFlag(SHFileInfoFlags.DisplayName))
+					displayName = fileInfo.szDisplayName;
+
+				if (!cachedIcons.TryGetValue(fileInfo.iIcon, out icon)) {
+					try {
+						Debug.WriteLine($"Cache[{Count}]: " + pidl);
+						icon = ExtractIcon(hImageList, fileInfo.iIcon);
+					}
+					catch {
+						Debug.WriteLine($"Failed to load icon for \"{pidl}\"!");
+					}
+					RaisePropertyChanged("Count");
+					cachedIcons.Add(fileInfo.iIcon, icon);
+					cachedIconList.Add(icon);
 				}
+			}
+			finally {
+				ImageList_Destroy(hImageList);
+				Marshal.FreeCoTaskMem(pidl);
+			}
+			return icon;
+		}
+
+		private ImageSource CacheIcon(string path, SHFileInfoFlags flags, out string displayName,
+			out string typeName)
+		{
+			return CacheIcon(path, 0, flags, out displayName, out typeName);
+		}
+
+		private ImageSource CacheIcon(string path, FileAttributes attributes, SHFileInfoFlags flags,
+			out string displayName, out string typeName)
+		{
+			displayName = null;
+			typeName = null;
+			flags |= FlagDefaults;
+
+			ImageSource icon = null;
+			SHFileInfo fileInfo = new SHFileInfo();
+			IntPtr hImageList = SHGetFileInfo(path, 0, ref fileInfo, SHFileInfo.CBSize, flags);
+			try {
+				if (hImageList == IntPtr.Zero)
+					return null;
+
+				if (flags.HasFlag(SHFileInfoFlags.DisplayName))
+					displayName = fileInfo.szDisplayName;
+				if (flags.HasFlag(SHFileInfoFlags.TypeName))
+					typeName = fileInfo.szTypeName;
 
 				if (!cachedIcons.TryGetValue(fileInfo.iIcon, out icon)) {
 					try {
@@ -258,31 +333,34 @@ namespace WinDirStat.Net.Data {
 					catch {
 						Debug.WriteLine($"Failed to load icon for \"{path}\"!");
 					}
+					RaisePropertyChanged("Count");
 					cachedIcons.Add(fileInfo.iIcon, icon);
 					cachedIconList.Add(icon);
 				}
 			}
 			finally {
 				ImageList_Destroy(hImageList);
-				//DestroyIcon(fileInfo.hIcon);
 			}
 			return icon;
 		}
 
-		private ImageSource ExtractIcon(IntPtr hImageList, int index) {
-			IntPtr hIcon = IntPtr.Zero;
+		private static ImageSource ExtractIcon(IntPtr hIcon) {
+			using (Icon icon = Icon.FromHandle(hIcon))
+			using (Bitmap bitmap = icon.ToBitmap())
+				return BitmapUtils.FromGdiBitmap(bitmap);
+		}
+
+		private static ImageSource ExtractIcon(IntPtr hImageList, int index) {
+			IntPtr hIcon = ImageList_GetIcon(hImageList, index, ImageListDrawFlags.Normal);
 			try {
-				hIcon = ImageList_GetIcon(hImageList, index, ImageListDrawFlags.Normal);
-				using (Icon icon = Icon.FromHandle(hIcon))
-				using (Bitmap bitmap = icon.ToBitmap())
-					return BitmapUtils.FromGdiBitmap(bitmap);
+				return ExtractIcon(hIcon);
 			}
 			finally {
 				if (hIcon != IntPtr.Zero)
 					DestroyIcon(hIcon);
 			}
 		}
-		private ImageSource GetRegisteredIcon(string filePath) {
+		/*private static ImageSource GetRegisteredIcon(string filePath) {
 			IntPtr hIcon = IntPtr.Zero;
 			try {
 				hIcon = GetRegisteredHIcon(filePath);
@@ -294,7 +372,7 @@ namespace WinDirStat.Net.Data {
 				if (hIcon != IntPtr.Zero)
 					DestroyIcon(hIcon);
 			}
-		}
+		}*/
 
 		private static IntPtr GetRegisteredHIcon(string filePath) {
 			const SHFileInfoFlags Flags = SHFileInfoFlags.Icon | SHFileInfoFlags.SmallIcon;
@@ -302,112 +380,7 @@ namespace WinDirStat.Net.Data {
 			SHGetFileInfo(filePath, 0, ref shinfo, SHFileInfo.CBSize, Flags);
 			return shinfo.hIcon;
 		}
-
-		[DllImport("user32.dll", SetLastError = true)]
-		private static extern bool DestroyIcon(IntPtr hIcon);
-
-		[DllImport("gdi32.dll", SetLastError = true)]
-		private static extern bool DeleteObject(IntPtr hObject);
-
-		[DllImport("kernel32.dll", SetLastError = true)]
-		private static extern uint GetSystemDirectory(out string buffer, int size);
-
-		[StructLayout(LayoutKind.Sequential)]
-		private struct SHFileInfo {
-			/// <summary>The marshaled size of the struct.</summary>
-			public static readonly int CBSize = Marshal.SizeOf<SHFileInfo>();
-
-			/// <summary>
-			/// A handle to the icon that represents the file. You are responsible for destroying this handle
-			/// with DestroyIcon when you no longer need it.
-			/// </summary>
-			public IntPtr hIcon;
-			/// <summary>The index of the icon image within the system image list.</summary>
-			public int iIcon;
-			/// <summary>
-			/// An array of values that indicates the attributes of the file object. For information about
-			/// these values, see the IShellFolder::GetAttributesOf method.
-			/// </summary>
-			public uint dwAttributes;
-			/// <summary>
-			/// A string that contains the name of the file as it appears in the Windows Shell, or the path
-			/// and file name of the file that contains the icon representing the file.
-			/// </summary>
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-			public string szDisplayName;
-			/// <summary>A string that describes the type of file.</summary>
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 80)]
-			public string szTypeName;
-		}
-
-		[Flags]
-		private enum SHFileInfoFlags : uint {
-			None = 0,
-			LargeIcon = 0x000000000,
-
-			SmallIcon = 0x000000001,
-			OpenIcon = 0x000000002,
-			ShellIconSize = 0x000000004,
-			PIDL = 0x000000008,
-
-			UseFileAttributes = 0x000000010,
-			AddOverlays = 0x000000020,
-			OverlayIndex = 0x000000040,
-
-			Icon = 0x000000100,
-			DisplayName = 0x000000200,
-			TypeName = 0x000000400,
-			Attributes = 0x000000800,
-
-			IconLocation = 0x000001000,
-			ExeType = 0x000002000,
-			SysIconIndex = 0x000004000,
-			LinkOverlay = 0x000008000,
-
-			Selected = 0x000010000,
-			AttrSpecified = 0x000020000,
-		}
-
-		[DllImport("shell32.dll")]
-		private static extern IntPtr SHGetFileInfo(string path, [MarshalAs(UnmanagedType.U4)] FileAttributes fileAttributes, ref SHFileInfo fileInfo, int sizeofFileInfo, [MarshalAs(UnmanagedType.U4)] SHFileInfoFlags flags);
-
-		[DllImport("comctl32.dll", SetLastError = true)]
-		private static extern int ImageList_GetImageCount(IntPtr hImageList);
-
-		[DllImport("comctl32.dll", SetLastError = true)]
-		private static extern IntPtr ImageList_Duplicate(IntPtr hImageList);
-
-		[DllImport("comctl32.dll", SetLastError = true)]
-		private static extern IntPtr ImageList_Destroy(IntPtr hImageList);
-
-		[DllImport("comctl32.dll", SetLastError = true)]
-		private static extern int ImageList_Add(IntPtr hImageList, IntPtr image, IntPtr mask);
-
-		[DllImport("comctl32.dll", SetLastError = true)]
-		private static extern IntPtr ImageList_ExtractIcon(IntPtr hInstance, IntPtr hImageList, int i);
-
-		[DllImport("comctl32.dll", SetLastError = true)]
-		private static extern IntPtr ImageList_GetIcon(IntPtr hImageList, int i, [MarshalAs(UnmanagedType.U4)] ImageListDrawFlags flags);
 		
-		[Flags]
-		private enum ImageListDrawFlags : uint {
-			Normal = 0x00000000,
-			Transparent = 0x00000001,
-			Blend25 = 0x00000002,
-			Focus = 0x00000002,
-			Blend50 = 0x00000004,
-			Selected = 0x00000004,
-			Blend = 0x00000004,
-			Mask = 0x00000010,
-			Image = 0x00000020,
-			Rop = 0x00000040,
-			OverlayMask = 0x00000F00,
-			PreserveAlpha = 0x00001000,
-			Scale = 0x00002000,
-			DpiScale = 0x00004000,
-			Async = 0x00008000,
-		}
-
 		public ImageSource this[int index] {
 			get => cachedIconList[index];
 		}
@@ -423,6 +396,12 @@ namespace WinDirStat.Net.Data {
 		public event NotifyCollectionChangedEventHandler CollectionChanged {
 			add => cachedIconList.CollectionChanged += value;
 			remove => cachedIconList.CollectionChanged -= value;
+		}
+
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		private void RaisePropertyChanged(string name) {
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 		}
 	}
 }

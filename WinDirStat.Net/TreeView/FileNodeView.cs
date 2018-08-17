@@ -45,8 +45,8 @@ namespace WinDirStat.Net.TreeView {
 			set => SetValue(TextBackgroundProperty, value);
 		}
 
-		public FileNode Node {
-			get { return DataContext as FileNode; }
+		public FileNodeBase Node {
+			get { return DataContext as FileNodeBase; }
 		}
 
 		public FileTreeViewItem ParentItem { get; private set; }
@@ -81,11 +81,11 @@ namespace WinDirStat.Net.TreeView {
 		protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e) {
 			base.OnPropertyChanged(e);
 			if (e.Property == DataContextProperty) {
-				UpdateDataContext(e.OldValue as FileNode, e.NewValue as FileNode);
+				UpdateDataContext(e.OldValue as FileNodeBase, e.NewValue as FileNodeBase);
 			}
 		}
 
-		void UpdateDataContext(FileNode oldNode, FileNode newNode) {
+		void UpdateDataContext(FileNodeBase oldNode, FileNodeBase newNode) {
 			if (newNode != null) {
 				newNode.PropertyChanged += Node_PropertyChanged;
 				if (Template != null) {

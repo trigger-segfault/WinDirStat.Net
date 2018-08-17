@@ -13,7 +13,7 @@ using System.Windows.Media;
 using WinDirStat.Net.TreeView;
 
 namespace WinDirStat.Net.Data.Nodes {
-	public partial class FileNode : INotifyPropertyChanged {
+	public partial class FileNodeBase : INotifyPropertyChanged {
 
 		//protected FileNodeCollection modelChildren;
 		//protected internal FolderNode visualParent;
@@ -34,13 +34,13 @@ namespace WinDirStat.Net.Data.Nodes {
 				vi.isVisible = newIsVisible;
 
 				// invalidate the augmented data
-				FileNode node = this;
+				FileNodeBase node = this;
 				while (node != null && node.vi.totalListLength >= 0) {
 					node.vi.totalListLength = -1;
 					node = node.vi.listParent;
 				}
 				// Remember the removed nodes:
-				List<FileNode> removedNodes = null;
+				List<FileNodeBase> removedNodes = null;
 				if (updateFlattener && !newIsVisible) {
 					removedNodes = VisibleDescendantsAndSelf().ToList();
 				}
@@ -77,7 +77,7 @@ namespace WinDirStat.Net.Data.Nodes {
 		private void UpdateChildIsVisible(bool updateFlattener) {
 			if (vi.children != null && vi.children.Count > 0) {
 				bool showChildren = vi.isVisible && vi.isExpanded;
-				foreach (FileNode child in vi.children) {
+				foreach (FileNodeBase child in vi.children) {
 					child.UpdateIsVisible(showChildren, updateFlattener);
 				}
 			}
@@ -150,8 +150,8 @@ namespace WinDirStat.Net.Data.Nodes {
 		#endregion
 		
 		#region OnChildrenChanged
-		internal protected void OnCollectionReset(List<FileNode> newList, List<FileNode> oldList) {
-			foreach (FileNode node in oldList) {
+		internal protected void OnCollectionReset(List<FileNodeBase> newList, List<FileNodeBase> oldList) {
+			foreach (FileNodeBase node in oldList) {
 				if (node.vi.parent == this)
 					Debug.Assert(node.vi.parent == this);
 
@@ -160,11 +160,11 @@ namespace WinDirStat.Net.Data.Nodes {
 
 				node.vi.parent = null;
 				Debug.WriteLine("Removing {0} from {1}", node, this);
-				FileNode removeEnd = node;
+				FileNodeBase removeEnd = node;
 				while (removeEnd.vi.children != null && removeEnd.vi.children.Count > 0)
 					removeEnd = removeEnd.vi.children.Last();
 
-				List<FileNode> removedNodes = null;
+				List<FileNodeBase> removedNodes = null;
 				int visibleIndexOfRemoval = 0;
 				if (node.vi.isVisible) {
 					visibleIndexOfRemoval = GetVisibleIndexForNode(node);
@@ -174,9 +174,9 @@ namespace WinDirStat.Net.Data.Nodes {
 				RemoveNodes(node, removeEnd);
 			}
 
-			FileNode insertionPos = null;
+			FileNodeBase insertionPos = null;
 
-			foreach (FileNode node in newList) {
+			foreach (FileNodeBase node in newList) {
 				if (node.vi.parent == this)
 					Debug.Assert(node.vi.parent == this);
 				node.vi.parent = (FolderNode) this;
@@ -261,7 +261,7 @@ namespace WinDirStat.Net.Data.Nodes {
 				return;
 			}*/
 			if (e.OldItems != null) {
-				foreach (FileNode node in e.OldItems) {
+				foreach (FileNodeBase node in e.OldItems) {
 					if (node.vi.parent == this)
 						Debug.Assert(node.vi.parent == this);
 
@@ -270,11 +270,11 @@ namespace WinDirStat.Net.Data.Nodes {
 
 					node.vi.parent = null;
 					Debug.WriteLine("Removing {0} from {1}", node, this);
-					FileNode removeEnd = node;
+					FileNodeBase removeEnd = node;
 					while (removeEnd.vi.children != null && removeEnd.vi.children.Count > 0)
 						removeEnd = removeEnd.vi.children.Last();
 
-					List<FileNode> removedNodes = null;
+					List<FileNodeBase> removedNodes = null;
 					int visibleIndexOfRemoval = 0;
 					if (node.vi.isVisible) {
 						visibleIndexOfRemoval = GetVisibleIndexForNode(node);
@@ -292,13 +292,13 @@ namespace WinDirStat.Net.Data.Nodes {
 				}
 			}
 			if (e.NewItems != null) {
-				FileNode insertionPos;
+				FileNodeBase insertionPos;
 				if (e.NewStartingIndex == 0)
 					insertionPos = null;
 				else
 					insertionPos = vi.children[e.NewStartingIndex - 1];
 
-				foreach (FileNode node in e.NewItems) {
+				foreach (FileNodeBase node in e.NewItems) {
 					if (node.vi.parent == this)
 						Debug.Assert(node.vi.parent == this);
 					node.vi.parent = (FolderNode) this;
@@ -328,7 +328,7 @@ namespace WinDirStat.Net.Data.Nodes {
 		#region Expanding / LazyLoading
 		
 		public bool ShowExpander {
-			get => HasVirtualChildren;
+			get => VirtualChildren.Count > 0;
 		}
 
 		public bool IsExpanded {
@@ -348,8 +348,8 @@ namespace WinDirStat.Net.Data.Nodes {
 			}
 		}
 
-		//protected virtual void OnExpanding() { }
-		//protected virtual void OnCollapsing() { }
+		protected virtual void OnExpanding() { }
+		protected virtual void OnCollapsing() { }
 
 		/*public bool LazyLoading {
 			get => lazyLoading;
@@ -397,47 +397,47 @@ namespace WinDirStat.Net.Data.Nodes {
 
 		#region Ancestors / Descendants
 
-		public IEnumerable<FileNode> Descendants() {
+		public IEnumerable<FileNodeBase> Descendants() {
 			return TreeTraversal.PreOrder(this.Children, n => n.Children);
 		}
 
-		public IEnumerable<FileNode> VirtualDescendants() {
+		public IEnumerable<FileNodeBase> VirtualDescendants() {
 			return TreeTraversal.PreOrder(this.Children, n => n.Children);
 		}
 
-		public IEnumerable<FileNode> DescendantsAndSelf() {
+		public IEnumerable<FileNodeBase> DescendantsAndSelf() {
 			return TreeTraversal.PreOrder(this, n => n.VirtualChildren);
 		}
 
-		public IEnumerable<FileNode> VirtualDescendantsAndSelf() {
+		public IEnumerable<FileNodeBase> VirtualDescendantsAndSelf() {
 			return TreeTraversal.PreOrder(this, n => n.VirtualChildren);
 		}
 
-		internal IEnumerable<FileNode> VisibleDescendants() {
+		internal IEnumerable<FileNodeBase> VisibleDescendants() {
 			return TreeTraversal.PreOrder(this.Children.Where(c => c.vi.isVisible), n => n.Children.Where(c => c.vi.isVisible));
 		}
 
-		internal IEnumerable<FileNode> VisibleDescendantsAndSelf() {
+		internal IEnumerable<FileNodeBase> VisibleDescendantsAndSelf() {
 			return TreeTraversal.PreOrder(this, n => n.Children.Where(c => c.vi.isVisible));
 		}
 
-		public IEnumerable<FileNode> Ancestors() {
-			for (FileNode n = this.Parent; n != null; n = n.Parent)
+		public IEnumerable<FileNodeBase> Ancestors() {
+			for (FileNodeBase n = this.Parent; n != null; n = n.Parent)
 				yield return n;
 		}
 
-		public IEnumerable<FileNode> VirtualAncestors() {
-			for (FileNode n = this.VirtualParent; n != null; n = n.VirtualParent)
+		public IEnumerable<FileNodeBase> VirtualAncestors() {
+			for (FileNodeBase n = this.VirtualParent; n != null; n = n.VirtualParent)
 				yield return n;
 		}
 
-		public IEnumerable<FileNode> AncestorsAndSelf() {
-			for (FileNode n = this; n != null; n = n.Parent)
+		public IEnumerable<FileNodeBase> AncestorsAndSelf() {
+			for (FileNodeBase n = this; n != null; n = n.Parent)
 				yield return n;
 		}
 
-		public IEnumerable<FileNode> VirtualAncestorsAndSelf() {
-			for (FileNode n = this; n != null; n = n.VirtualParent)
+		public IEnumerable<FileNodeBase> VirtualAncestorsAndSelf() {
+			for (FileNodeBase n = this; n != null; n = n.VirtualParent)
 				yield return n;
 		}
 
@@ -753,22 +753,27 @@ namespace WinDirStat.Net.Data.Nodes {
 
 		#region INotifyPropertyChanged Members
 
-		public event PropertyChangedEventHandler PropertyChanged {
+		/*public event PropertyChangedEventHandler PropertyChanged {
 			add { }
 			remove { }
 			//add => vi.PropertyChanged += value;
 			//remove => vi.PropertyChanged -= value;
-		}
-		//public event PropertyChangedEventHandler PropertyChanged;
+		}*/
+		public event PropertyChangedEventHandler PropertyChanged;
 
-		internal void RaisePropertyChanged(string name) {
+		protected internal void RaisePropertyChanged(string name) {
 			//visualInfo?.RaisePropertyChanged(this, new PropertyChangedEventArgs(name));
-			//PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 		}
 
-		internal void AutoRaisePropertyChanged([CallerMemberName] string name = null) {
+		protected internal void RaisePropertiesChanged(params string[] names) {
+			for (int i = 0; i < names.Length; i++)
+				RaisePropertyChanged(names[i]);
+		}
+
+		protected internal void AutoRaisePropertyChanged([CallerMemberName] string name = null) {
 			//visualInfo?.RaisePropertyChanged(this, new PropertyChangedEventArgs(name));
-			//PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 		}
 
 		#endregion

@@ -56,6 +56,7 @@ namespace WinDirStat.Net.Controls {
 			PART_FillColoumn = GetTemplateChild("PART_FillColoumn") as ColumnDefinition;
 			PART_EmptyColoumn = GetTemplateChild("PART_EmptyColoumn") as ColumnDefinition;
 			UpdatePercentage();
+			UpdateTemplate();
 		}
 
 		private void UpdatePercentage() {
@@ -65,8 +66,8 @@ namespace WinDirStat.Net.Controls {
 			}
 		}
 
-		public FileNode Node {
-			get { return DataContext as FileNode; }
+		public FileNodeBase Node {
+			get => ((FileNodeBase) DataContext);
 		}
 
 		public FileTreeViewItem ParentItem { get; private set; }
@@ -83,38 +84,32 @@ namespace WinDirStat.Net.Controls {
 		protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e) {
 			base.OnPropertyChanged(e);
 			if (e.Property == DataContextProperty) {
-				UpdateDataContext(e.OldValue as FileNode, e.NewValue as FileNode);
+				UpdateDataContext(e.OldValue as FileNodeBase, e.NewValue as FileNodeBase);
 			}
 		}
 
-		void UpdateDataContext(FileNode oldNode, FileNode newNode) {
+		void UpdateDataContext(FileNodeBase oldNode, FileNodeBase newNode) {
 			if (newNode != null && Template != null) {
 				UpdateTemplate();
 			}
 		}
 
 		void UpdateTemplate() {
-			var spacer = Template.FindName("spacer", this) as FrameworkElement;
-			//spacer.Width = CalculateIndent();
+			var spacer = GetTemplateChild("PART_SpacerColumn") as ColumnDefinition;
+			var filler = GetTemplateChild("PART_BarColumn") as ColumnDefinition;
+			int level = Node.Level;
+			double intent = CalculateIndent(level);
+			spacer.Width = new GridLength(1d - intent, GridUnitType.Star);
+			filler.Width = new GridLength(intent, GridUnitType.Star);
+			Fill = new SolidColorBrush((Color) Node.Root.Document.Settings.GetSubtreePaletteColor(level));
 		}
 
-		internal double CalculateIndent() {
-			int result = 19 * Node.Level;
-			if (ParentTreeView.ShowRoot) {
-				if (!ParentTreeView.ShowRootExpander) {
-					if (ParentTreeView.Root != Node) {
-						result -= 15;
-					}
-				}
-			}
-			else {
-				result -= 19;
-			}
-			if (result < 0) {
-				Debug.WriteLine("Negative indent level detected for node " + Node);
-				result = 0;
-			}
-			return result;
+		private const double IndentRatio = 9d / 10d;
+
+		internal double CalculateIndent(int level) {
+			if (Node == null || level == 0)
+				return 1d;
+			return Math.Max(0d, Math.Min(1d, Math.Pow(IndentRatio, level)));
 		}
 	}
 }

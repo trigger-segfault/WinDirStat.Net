@@ -55,6 +55,7 @@ namespace WinDirStat.Net.Settings {
 		public void Reset() {
 			IconCacheMode = IconCacheMode.Individual;
 			TreemapOptions = TreemapOptions.Default;
+			HighlightColor = Rgba32Color.White;
 			SetFilePalette(DefaultFilePalette);
 			SetSubtreePalette(DefaultSubtreePalette);
 			ShowFreeSpace = false;

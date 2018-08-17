@@ -63,11 +63,12 @@ namespace WinDirStat.Net {
 		}
 
 		public MainWindow() {
-			FileInfo fileInfo = new FileInfo(@"C:\fragmentation.txt");
+			Trace.WriteLine("");
+			/*FileInfo fileInfo = new FileInfo(@"C:\fragmentation.txt");
 			DirectoryInfo dirInfo = new DirectoryInfo(@"C:\fragmentation.txt");
 			InstanceOverheadTest<object>();
 			InstanceOverheadTest<FileNode>(() => new FileNode(fileInfo));
-			InstanceOverheadTest<FolderNode>(() => new FolderNode(dirInfo));
+			InstanceOverheadTest<FolderNode>(() => new FolderNode(dirInfo));*/
 			/*FileInfo fileInfo = new FileInfo(@"C:\fragmentation.txt");
 			DirectoryInfo dirInfo = new DirectoryInfo(@"C:\Program Files");
 			InstanceOverheadTest<char[]>(() => "Hello World".ToLower().ToLower().ToCharArray());
@@ -130,13 +131,14 @@ namespace WinDirStat.Net {
 			tree.ShowRootExpander = false;
 			tree.ShowRoot = true;
 			
-			StartScan(@"F:\");
+			StartScan(@"C:\");
 		}
 
 		private void OnScanEnded(object sender, ScanEventArgs e) {
 			switch (e.ScanState) {
 			case ScanState.Finished:
-				graphView.Root = document.RootNode;
+				//graphView.itemRoot = document.itemRootNode;
+				//graphView.Root = document.RootNode;
 				//extensionList.ItemsSource = document.Extensions;
 				break;
 			case ScanState.Failed:
@@ -151,6 +153,11 @@ namespace WinDirStat.Net {
 			//graphView.Root = null;
 			//extensionList.ItemsSource = null;
 			document.ScanAsync(rootPath);
+		}
+		private void StartScan(IEnumerable<string> rootPaths) {
+			//graphView.Root = null;
+			//extensionList.ItemsSource = null;
+			document.ScanAsync(rootPaths.ToArray());
 		}
 
 		/*[DllImport("psapi.dll")]
@@ -176,7 +183,8 @@ namespace WinDirStat.Net {
 			if (graphView.HasHover) {
 				tree.FocusNode(graphView.Hover);
 				tree.SelectedItem = graphView.Hover;
-				tree.Focus();
+				//tree.Focus();
+				//Keyboard.Focus(tree);
 			}
 		}
 
@@ -188,7 +196,26 @@ namespace WinDirStat.Net {
 			bool suspended = false;
 			if (document.IsScanningOrRefreshing && !document.IsSuspended)
 				document.IsSuspended = suspended = true;
-			FolderBrowserDialog dialog = new FolderBrowserDialog() {
+			SelectDrivesDialog dialog2 = new SelectDrivesDialog(document.SelectDrives);
+			bool? result = dialog2.ShowDialog(this);
+			if ((result ?? false)) {
+				SelectDrivesDocument drivesDoc = document.SelectDrives;
+				switch (drivesDoc.SelectMode) {
+				case SelectDriveMode.All:
+					document.CancelAsync(() => StartScan(drivesDoc.Drives.Select(d => d.Name)), true);
+					break;
+				case SelectDriveMode.Individual:
+					document.CancelAsync(() => StartScan(drivesDoc.SelectedDrives.Select(d => d.Name)), true);
+					break;
+				case SelectDriveMode.Folder:
+					document.CancelAsync(() => StartScan(drivesDoc.FolderPath), true);
+					break;
+				}
+			}
+			else if (suspended) {
+				document.IsSuspended = false;
+			}
+			/*FolderBrowserDialog dialog = new FolderBrowserDialog() {
 				ShowNewFolderButton = false,
 				Description = "Select a folder to scan",
 			};
@@ -198,7 +225,7 @@ namespace WinDirStat.Net {
 			}
 			else if (suspended) {
 				document.IsSuspended = false;
-			}
+			}*/
 		}
 
 		private void OnExit(object sender, RoutedEventArgs e) {
@@ -215,7 +242,7 @@ namespace WinDirStat.Net {
 
 		private void OnFileTreeGotFocus(object sender, RoutedEventArgs e) {
 			if (tree.SelectedItems != null && tree.SelectedItems.Count > 0 && document.IsFinished) {
-				graphView.HighlightSelection(tree.SelectedItems.Cast<FileNode>());
+				graphView.HighlightSelection(tree.SelectedItems.Cast<FileNodeBase>());
 			}
 		}
 

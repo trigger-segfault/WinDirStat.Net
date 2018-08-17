@@ -10,7 +10,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using WinDirStat.Net.Data.Nodes;
+using WinDirStat.Net.Drawing;
 using WinDirStat.Net.Settings;
+using WinDirStat.Net.Windows;
 
 namespace WinDirStat.Net.Data {
 	public enum ScanState {
@@ -75,13 +77,14 @@ namespace WinDirStat.Net.Data {
 		private Action cancelCallback;
 		private WinDirSettings settings;
 		private bool disposed;
-
+		private readonly SelectDrivesDocument selectDrives;
 
 		public event PropertyChangedEventHandler PropertyChanged;
 		public event ScanEventHander ScanRootSetup;
 		public event ScanEventHander ScanEnded;
 
 		public WinDirDocument() {
+			selectDrives = new SelectDrivesDocument(this);
 			settings = new WinDirSettings(this);
 			settings.PropertyChanged += SettingsPropertyChanged;
 			extensions = new ExtensionRecords(this);
@@ -115,7 +118,7 @@ namespace WinDirStat.Net.Data {
 			if (IsScanningOrRefreshing) {
 				HasProgress = fileEnumerator.HasProgress;
 				Progress = fileEnumerator.Progress;
-				rootNode?.RaisePropertyChanged(nameof(FileNode.Percent));
+				rootNode?.RaisePropertyChanged(nameof(FileNodeBase.Percent));
 				RaisePropertyChanged(nameof(ScanTime));
 			}
 		}
@@ -134,32 +137,32 @@ namespace WinDirStat.Net.Data {
 			}
 		}
 
-		public void Scan(string rootPath) {
-			if (rootPath == null)
-				throw new ArgumentNullException(nameof(rootPath));
+		public void Scan(params string[] rootPaths) {
+			if (rootPaths == null)
+				throw new ArgumentNullException(nameof(rootPaths));
 			ThrowIfScanningOrRefreshing();
 			ScanPrepare();
-			ScanThread(rootPath, cancel.Token);
+			ScanThread(rootPaths, cancel.Token);
 		}
 
-		public void ScanAsync(string rootPath) {
-			if (rootPath == null)
-				throw new ArgumentNullException(nameof(rootPath));
+		public void ScanAsync(params string[] rootPaths) {
+			if (rootPaths == null)
+				throw new ArgumentNullException(nameof(rootPaths));
 			ThrowIfScanningOrRefreshing();
 			lock (threadLock) {
 				ScanPrepare();
-				scanThread = new Thread(() => ScanThread(rootPath, cancel.Token)) {
+				scanThread = new Thread(() => ScanThread(rootPaths, cancel.Token)) {
 					Priority = settings.ScanPriority,
 				};
 				scanThread.Start();
 			}
 		}
 
-		private void ScanThread(string rootPath, CancellationToken token) {
+		private void ScanThread(string[] rootPaths, CancellationToken token) {
 			Exception exception = null;
 			try {
 				validateTimer.Start();
-				fileEnumerator.Scan(rootPath, OnRootSetup, token);
+				fileEnumerator.Scan(rootPaths, OnRootSetup, token);
 			}
 			catch (Exception ex) {
 				exception = ex;
@@ -273,7 +276,8 @@ namespace WinDirStat.Net.Data {
 		}
 
 		internal void FinalValidate() {
-			extensions.FinalValidation();
+			Application.Current.Dispatcher.Invoke(extensions.FinalValidation);
+			//extensions.FinalValidation();
 			RootNode.FinalValidate(RootNode);
 		}
 
@@ -455,6 +459,10 @@ namespace WinDirStat.Net.Data {
 				RaisePropertyChanged(nameof(ExtensionSortDirection));
 		}
 
+		public SelectDrivesDocument SelectDrives {
+			get => selectDrives;
+		}
+
 		internal ExtensionRecordComparer ExtensionComparer {
 			get => extensionComparer;
 		}
@@ -501,11 +509,11 @@ namespace WinDirStat.Net.Data {
 			switch (e.PropertyName) {
 			case nameof(WinDirSettings.ShowFreeSpace):
 				if (rootNode != null)
-					rootNode.UpdateShowFreeSpace(settings.ShowFreeSpace);
+					rootNode.OnShowFreeSpaceChanged(settings.ShowFreeSpace);
 				break;
 			case nameof(WinDirSettings.ShowUnknown):
-				//if (rootNode != null)
-				//	rootNode.UpdateShowUnknown(settings.ShowUnknown);
+				if (rootNode != null)
+					rootNode.OnShowUnknownChanged(settings.ShowUnknown);
 				break;
 			case nameof(WinDirSettings.RAMInterval):
 				ramTimer.Interval = settings.RAMInterval;

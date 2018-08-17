@@ -7,8 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace WinDirStat.Net.Data.Nodes {
-	public interface IFileNodeCollection : IList<FileNode>, INotifyCollectionChanged {
-		void AddRange(IEnumerable<FileNode> nodes);
+	public interface IFileNodeCollection : IList<FileNodeBase>, INotifyCollectionChanged {
+		void AddRange(IEnumerable<FileNodeBase> nodes);
 		
 		//void InsertRange(int index, IEnumerable<FileNode> nodes);
 		

@@ -1,0 +1,57 @@
+﻿<Window x:Class="WinDirStat.Net.Windows.SelectDrivesDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WinDirStat.Net.Controls"
+        xmlns:conv="clr-namespace:WinDirStat.Net.Converters"
+        xmlns:sort="clr-namespace:WinDirStat.Net.SortingView"
+        mc:Ignorable="d"
+        Title="WinDirStat.Net - Select Drives" Height="313" Width="435" Icon="/WinDirStat.Net;component/App.ico" ShowInTaskbar="False" WindowStartupLocation="CenterOwner" Background="#FFF0F0F0" Loaded="OnLoaded" SnapsToDevicePixels="True" UseLayoutRounding="True" SourceInitialized="OnSourceInitialized">
+    <Grid>
+        <RadioButton x:Name="buttonAllLocalDrives" Content="_All Local Drives" GroupName="SelectDrive" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0"
+                     IsChecked="{Binding SelectMode, Converter={conv:RadioButtonConverter}, ConverterParameter=All}"/>
+        <RadioButton x:Name="buttonIndividualDrives" Content="_Individual Drives" GroupName="SelectDrive" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,49,0,0"
+                     IsChecked="{Binding SelectMode, Converter={conv:RadioButtonConverter}, ConverterParameter=Individual}"/>
+        <RadioButton x:Name="buttonAFolder" Content="A _Folder" GroupName="SelectDrive" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10,0,0,35"
+                     IsChecked="{Binding SelectMode, Converter={conv:RadioButtonConverter}, ConverterParameter=Folder}"/>
+        <TextBox x:Name="textBoxFolder" Text="{Binding FolderPath}"  VerticalAlignment="Bottom" Margin="10,0,90,10" Height="23" BorderBrush="#FF828790" VerticalContentAlignment="Center" />
+        <Button x:Name="buttonBrowseFolder" Content="..." VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,10,11" Height="21" Width="73" Click="OnBrowseFolder"/>
+        <Button x:Name="buttonOK" Content="OK" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,10,10,0" Height="21" Width="73" IsDefault="True" Click="OnOK"/>
+        <Button x:Name="buttonCancel" Content="Cancel" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,39,10,0" Height="21" Width="73" IsCancel="True"/>
+        <sort:SortListView x:Name="list" SortDirection="Ascending" SortMode="Name" Margin="10,69,10,61" SelectionChanged="OnDriveSelectionChanged" GotFocus="OnDriveListGotFocus"
+                           ItemsSource="{Binding Drives}" Sort="OnSortDrives">
+            <sort:SortListView.View>
+                <sort:SortView>
+                    <sort:SortViewColumn Header="Name" Width="127" SortMode="Name">
+                        <sort:SortViewColumn.CellDataTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,5,1" VerticalAlignment="Center" Focusable="False"/>
+                                    <TextBlock Text="{Binding DisplayName}" Margin="2,0,6,0" VerticalAlignment="Center" Focusable="False" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </sort:SortViewColumn.CellDataTemplate>
+                    </sort:SortViewColumn>
+                    <sort:SortViewColumn Header="Total" Width="65" TextAlignment="Right"
+                                         SortMode="Total" DefaultSortDirection="Descending"
+                                         CellBinding="{Binding Total, Converter={conv:ByteFormatter}}"/>
+                    <sort:SortViewColumn Header="Free" Width="65" TextAlignment="Right"
+                                         SortMode="Free" DefaultSortDirection="Descending"
+                                         CellBinding="{Binding Free, Converter={conv:ByteFormatter}}"/>
+                    <sort:SortViewColumn Header="Used/Total" Width="80"
+                                         SortMode="UsedTotalBar" DefaultSortDirection="Descending">
+                        <sort:SortViewColumn.CellDataTemplate>
+                            <DataTemplate>
+                                <local:PercentageBar Percentage="{Binding Percent}" Fill="#FF0000AA"/>
+                            </DataTemplate>
+                        </sort:SortViewColumn.CellDataTemplate>
+                    </sort:SortViewColumn>
+                    <sort:SortViewColumn Header="Used/Total" Width="62" TextAlignment="Right"
+                                         SortMode="UsedTotalPercent" DefaultSortDirection="Descending"
+                                         CellBinding="{Binding Percent, StringFormat=P1}"/>
+                </sort:SortView>
+            </sort:SortListView.View>
+        </sort:SortListView>
+    </Grid>
+</Window>

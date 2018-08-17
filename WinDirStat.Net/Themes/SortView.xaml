@@ -4,7 +4,19 @@
                     xmlns:conv="clr-namespace:WinDirStat.Net.Converters"
                     xmlns:Default="clr-namespace:WinDirStat.Net.TreeView"
                     xmlns:sort="clr-namespace:WinDirStat.Net.SortingView"
-                    xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2">
+                    xmlns:System="clr-namespace:System;assembly=mscorlib">
+    
+    <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource {x:Type ScrollBar}}">
+        <Style.Resources>
+            <Style TargetType="{x:Type Track}">
+                <Style.Resources>
+                    <System:Double x:Key="{x:Static SystemParameters.VerticalScrollBarButtonHeightKey}">48</System:Double>
+                    <System:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarButtonWidthKey}">48</System:Double>
+                </Style.Resources>
+            </Style>
+        </Style.Resources>
+    </Style>
+
     <Style x:Key="SortViewColumnHeaderStyle"
            TargetType="{x:Type GridViewColumnHeader}">
         <Setter Property="HorizontalContentAlignment" Value="Left"/>

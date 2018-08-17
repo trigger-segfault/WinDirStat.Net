@@ -12,117 +12,206 @@ using WinDirStat.Net.Utils;
 namespace WinDirStat.Net.Data.Nodes {
 	public class RootNode : FolderNode {
 
+		private const string ComputerName = "Computer";
+
 		private readonly string rootPath;
 
-		internal readonly WinDirDocument document;
+		private readonly WinDirDocument document;
 		private FreeSpaceNode freeSpace;
+		private UnknownNode unknown;
+		internal string displayName = null;
 
-		public RootNode(WinDirDocument document, INtfsNode node)
-			: base(node, FileNodeType.Root)
+		public event EventHandler Invalidated;
+		
+		public string DisplayName {
+			get => displayName ?? $"({PathUtils.TrimSeparatorEnd(Name)})";
+		}
+
+		public RootNode(WinDirDocument document)
+			: base(ComputerName, FileNodeType.Computer, FileNodeFlags.AbsoluteRootType)
 		{
+			displayName = "My Computer";
+			this.document = document;
+		}
+
+		public RootNode(WinDirDocument document, INtfsNode node, bool isAbsoluteRoot)
+			: base(node, GetFileType(node.FullName), GetRootType(isAbsoluteRoot)) {
 			this.document = document;
 			rootPath = System.IO.Path.GetFullPath(node.FullName);
-			if (PathUtils.IsPathRoot(rootPath)) {
+			if (Type == FileNodeType.Volume) {
 				if (!rootPath.EndsWith(@"\") && !rootPath.EndsWith("/"))
-					rootPath += @"\";
-				name = rootPath;
+					rootPath += '\\';
 			}
-		}
-		
-		public RootNode(WinDirDocument document, FileSystemInfo info)
-			: base(info, FileNodeType.Root)
-		{
-			this.document = document;
-			rootPath = System.IO.Path.GetFullPath(info.FullName);
-			if (PathUtils.IsPathRoot(rootPath)) {
-				if (!rootPath.EndsWith(@"\") && !rootPath.EndsWith("/"))
-					rootPath += @"\";
-				name = rootPath;
-			}
+			SetupDrive();
 		}
 
+		public RootNode(WinDirDocument document, FileSystemInfo info, bool isAbsoluteRoot)
+			: base(info, GetFileType(info.FullName), GetRootType(isAbsoluteRoot)) {
+			this.document = document;
+			rootPath = System.IO.Path.GetFullPath(info.FullName);
+			if (Type == FileNodeType.Volume) {
+				if (!rootPath.EndsWith(@"\") && !rootPath.EndsWith("/"))
+					rootPath += '\\';
+			}
+			SetupDrive();
+		}
+
+		public RootNode(WinDirDocument document, IFileFindData find, bool isAbsoluteRoot)
+			: base(find, GetFileType(find.FullName), GetRootType(isAbsoluteRoot)) {
+			this.document = document;
+			rootPath = System.IO.Path.GetFullPath(find.FullName);
+			if (Type == FileNodeType.Volume) {
+				if (!rootPath.EndsWith(@"\") && !rootPath.EndsWith("/"))
+					rootPath += '\\';
+			}
+			SetupDrive();
+		}
+
+		// Duplicate tree for faster iteration
 		public RootNode(RootNode node) : base(node, null) {
 			rootPath = node.rootPath;
 			document = node.document;
 			freeSpace = node.freeSpace;
-			//populated = node.populated;
-			invalidated = node.invalidated;
-			done = node.done;
-			validating = node.validating;
-			if (node.populated) {
-				vi.isExpanded = node.IsExpanded;
-				LoadChildren(Root);
+		}
+
+		private void SetupDrive() {
+			if (Type == FileNodeType.Volume) {
+				freeSpace = new FreeSpaceNode(rootPath);
+				freeSpace.virtualParent = this;
+				freeSpace.LoadIcon(this);
+				unknown = new UnknownNode(rootPath, 0);
+				unknown.virtualParent = this;
+				unknown.LoadIcon(this);
+				FolderNode fileCollection = null;
+				if (document.Settings.ShowFreeSpace)
+					AddChild(this, freeSpace, ref fileCollection);
+				if (document.Settings.ShowUnknown)
+					AddChild(this, unknown, ref fileCollection);
 			}
+		}
+
+		private static FileNodeType GetFileType(string path) {
+			return (PathUtils.IsPathRoot(path) ? FileNodeType.Volume : FileNodeType.Directory);
+		}
+
+		private static FileNodeFlags GetRootType(bool isAbsoluteRoot) {
+			return (isAbsoluteRoot ? FileNodeFlags.AbsoluteRootType : FileNodeFlags.None) |
+				FileNodeFlags.FileRootType;
 		}
 
 		internal void AddFreeSpace(FreeSpaceNode freeSpace, string path, bool async) {
 			Debug.Assert(this.freeSpace == null);
 			this.freeSpace = freeSpace;
-			AddChild(this, freeSpace, path, async);
+			if (document.Settings.ShowFreeSpace) {
+				FolderNode fileCollection = null;
+				AddChild(this, freeSpace, ref fileCollection);
+			}
 		}
 
 		public FreeSpaceNode FreeSpace {
 			get => freeSpace;
 			//internal set => freeSpace = value;
 		}
+		public UnknownNode Unknown {
+			get => unknown;
+		}
 
-		internal int FreeSpaceIndex {
-			get {
-				if (freeSpace != null)
-					return virtualChildren.IndexOf(freeSpace);
-				return -1;
-			}
+		public WinDirDocument Document {
+			get => document;
 		}
 
 		public string RootPath {
 			get => rootPath;
 		}
 
-		internal void UpdateShowFreeSpace(bool showFreeSpace) {
+		internal void OnShowFreeSpaceChanged(bool showFreeSpace) {
 			// This must only be called when the value has actually switched
-			Debug.Assert(Type == FileNodeType.Root);
-			if (freeSpace == null) {
-				foreach (FileNode node in VirtualChildren) {
-					if (node is RootNode subroot)
-						UpdateShowFreeSpace(showFreeSpace);
+			if (Type == FileNodeType.Computer) {
+				int count = virtualChildren.Count;
+				for (int i = 0; i < count; i++) {
+					((RootNode) virtualChildren[i]).OnShowFreeSpaceChanged(showFreeSpace);
 				}
 				return;
 			}
-
-			lock (virtualChildren) {
-				int index = virtualChildren.IndexOf(freeSpace);
-				if (index != -1 && !showFreeSpace) {
-					virtualChildren.RemoveAt(index);
-					size -= freeSpace.Size;
-				}
-				else if (index == -1 && showFreeSpace) {
-					virtualChildren.Add(freeSpace);
-					virtualChildren.Sort(document.SizeFileComparer.Compare);
-					size += freeSpace.Size;
-				}
-			}
-			VisualInvoke(() => {
-				if (populated) {
-					int index = vi.children.IndexOf(freeSpace);
+			else if (Type == FileNodeType.Volume) {
+				lock (virtualChildren) {
+					int index = virtualChildren.IndexOf(freeSpace);
 					if (index != -1 && !showFreeSpace) {
-						vi.children.RemoveAt(index);
+						virtualChildren.RemoveAt(index);
+						size -= freeSpace.Size;
 					}
 					else if (index == -1 && showFreeSpace) {
-						vi.children.Add(freeSpace);
-						Sort(Root, false);
+						Add(freeSpace);
+						virtualChildren.Sort(document.SizeFileComparer.Compare);
+						size += freeSpace.Size;
 					}
-				}
-				lock (virtualChildren) {
-					foreach (FileNode node in VirtualChildren) {
-						node.RaisePropertyChanged(nameof(Percent));
+					if (IsPopulated) {
+						index = vi.children.IndexOf(freeSpace);
+						if (index != -1 && !showFreeSpace) {
+							vi.children.RemoveAt(index);
+						}
+						else if (index == -1 && showFreeSpace) {
+							vi.children.Add(freeSpace);
+							Sort(Root, false);
+						}
+					}
+					int count = virtualChildren.Count;
+					for (int i = 0; i < count; i++) {
+						virtualChildren[i].RaisePropertyChanged(nameof(Percent));
 					}
 					RaisePropertiesChanged(nameof(Size), nameof(Percent));
 				}
-			});
+			}
+		}
+		internal long GetUsedSize() {
+			long usedSize = 0;
+			int count = virtualChildren.Count;
+			for (int i = 0; i < count; i++) {
+				FileNodeBase child = virtualChildren[i];
+				if (child.Type != FileNodeType.FreeSpace && child.Type != FileNodeType.Unknown)
+					usedSize += child.Size;
+			}
+			return usedSize;
 		}
 
-		/*public override WinDirDocument Document {
-			get => document;
-		}*/
+		internal void OnShowUnknownChanged(bool showUnknown) {
+			if (Type == FileNodeType.Computer) {
+				int count = virtualChildren.Count;
+				for (int i = 0; i < count; i++) {
+					((RootNode) virtualChildren[i]).OnShowUnknownChanged(showUnknown);
+				}
+				return;
+			}
+			else if (Type == FileNodeType.Volume) {
+				lock (virtualChildren) {
+					int index = virtualChildren.IndexOf(unknown);
+					if (index != -1 && !showUnknown) {
+						virtualChildren.RemoveAt(index);
+						size -= unknown.Size;
+					}
+					else if (index == -1 && showUnknown) {
+						Add(unknown);
+						unknown.UpdateSize(GetUsedSize());
+						size += unknown.Size;
+						virtualChildren.Sort(document.SizeFileComparer.Compare);
+					}
+					if (IsPopulated) {
+						index = vi.children.IndexOf(unknown);
+						if (index != -1 && !showUnknown) {
+							vi.children.RemoveAt(index);
+						}
+						else if (index == -1 && showUnknown) {
+							vi.children.Add(unknown);
+							Sort(Root, false);
+						}
+					}
+					int count = virtualChildren.Count;
+					for (int i = 0; i < count; i++) {
+						virtualChildren[i].RaisePropertyChanged(nameof(Percent));
+					}
+					RaisePropertiesChanged(nameof(Size), nameof(Percent));
+				}
+			}
+		}
 	}
 }

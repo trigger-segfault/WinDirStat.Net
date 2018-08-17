@@ -2,28 +2,90 @@
 using System.Collections.Generic;
 using WinDirStat.Net.Data.Nodes;
 using WinDirStat.Net.Settings.Geometry;
+using WinDirStat.Net.Data;
 
 namespace WinDirStat.Net.Drawing {
 	public class TreemapItem : ITreemapItem {
 		private List<TreemapItem> children;
-		private readonly long size;
+		private long size;
 		private Rectangle2S rectangle;
-		private readonly string extension;
-		private readonly TreemapItem parent;
+		private string extension;
+		private string name;
+		private TreemapItem parent;
 		private Rgb24Color color;
+		private FileNodeType type;
 
-		public TreemapItem(FileNode file) : this(file, null) {
+		public TreemapItem(FileNodeBase file) : this(file, null) {
 		}
 
-		private TreemapItem(FileNode file, TreemapItem parent) {
+		private TreemapItem(FileNodeBase file, TreemapItem parent) {
 			this.parent = parent;
 			int count = file.ChildCount;
-			children = new List<TreemapItem>();
+			children = new List<TreemapItem>(count);
 			for (int i = 0; i < count; i++)
-				children.Add(new TreemapItem(file[i]));
+			children.Add(new TreemapItem(file[i], this));
+			children.Sort(CompareReverse);
+			children.Sort(Compare);
 			size = file.Size;
 			extension = file.Extension + "";
+			name = file.Name + "";
+			type = file.Type;
+			//color = file.Color;
+		}
+
+		public TreemapItem(TreemapItem file) : this(file, null) {
+		}
+
+		private TreemapItem(TreemapItem file, TreemapItem parent) {
+			this.parent = parent;
+			int count = file.ChildCount;
+			children = new List<TreemapItem>(count);
+			for (int i = 0; i < count; i++)
+				children.Add(new TreemapItem(file[i], this));
+			children.Sort(CompareReverse);
+			children.Sort(Compare);
+			size = file.Size;
+			extension = file.Extension + "";
+			name = file.name + "";
+			type = file.type;
 			color = file.Color;
+		}
+
+		public void AddChild(FileNodeBase file) {
+			children.Add(new TreemapItem(file, this));
+		}
+
+		public void AddChild(TreemapItem item) {
+			children.Add(item);
+			item.parent = this;
+		}
+
+		public void Validate(WinDirDocument document) {
+			size = 0;
+			color = document.Extensions[extension].Color;
+			for (int i = 0; i < children.Count; i++) {
+				TreemapItem child = children[i];
+				if (child.children.Count > 0)
+					child.Validate(document);
+				//else
+				//	child.color = document.Extensions[extension].Color;
+				size += child.size;
+			}
+			children.Sort(Compare);
+		}
+
+		private int Compare(TreemapItem a, TreemapItem b) {
+			int diff = b.Size.CompareTo(a.Size);
+			if (diff == 0)
+				diff = string.Compare(b.name, a.name, true);
+			return diff;
+		}
+
+		private int CompareReverse(TreemapItem b, TreemapItem a) {
+			int diff = b.Size.CompareTo(a.Size);
+			if (diff == 0)
+				diff = string.Compare(b.name, a.name, true);
+			return diff;
 		}
 
 		public string Extension => extension;

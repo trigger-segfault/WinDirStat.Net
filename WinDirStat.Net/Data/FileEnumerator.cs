@@ -15,37 +15,57 @@ using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.Win32.SafeHandles;
 using WinDirStat.Net.Data.Nodes;
+using WinDirStat.Net.Drawing;
 using WinDirStat.Net.Utils;
+using WinDirStat.Net.Utils.Native;
 
 namespace WinDirStat.Net.Data {
 	internal partial class FileEnumerator : IDisposable {
+		private class ScanState {
+			public long TotalSize;
+			public long FreeSpace;
+			public long ScannedSize;
+			public string RootPath;
+			public bool IsDrive;
+			public string RecycleBinPath;
+			public RootNode Root;
+		}
 		private readonly WinDirDocument document;
 
-		private RootNode root;
+		private List<ScanState> states;
+		private long totalScannedSize;
+		private bool allDrives;
+		private long totalTotalSize;
+		private long totalFreeSpace;
 
+		private RootNode absoluteRoot;
+		/*private TreemapItem itemRoot;
 		private long totalSize;
 		private long freeSpace;
 		private long scannedSize;
 		private string rootPath;
-		private bool isRoot;
-		private string recycleBinPath;
+		private bool isDrive;
+		private string recycleBinPath;*/
 		private AutoResetEvent resumeEvent = new AutoResetEvent(false);
 		private volatile bool isSuspended;
 
 		public RootNode Root {
-			get => root;
+			get => absoluteRoot;
+		}
+		private bool IsSingle {
+			get => states.Count == 1;
 		}
 		/*public bool IsDone {
 			get => root?.IsDone ?? false;
 		}*/
 		public bool HasProgress {
-			get => isRoot;
+			get => allDrives;
 		}
 
 		public double Progress {
 			get {
-				if (isRoot)
-					return (double) scannedSize / (totalSize - freeSpace);
+				if (allDrives)
+					return (double) totalScannedSize / (totalTotalSize - totalFreeSpace);
 				return 0d;
 			}
 		}
@@ -74,20 +94,103 @@ namespace WinDirStat.Net.Data {
 			get => document;
 		}
 
+		private void FinishScan(CancellationToken token) {
+			if (!token.IsCancellationRequested) {
+				Stopwatch watch = Stopwatch.StartNew();
+				Application.Current.Dispatcher.Invoke(() => {
+					document.FinalValidate();
+				});
+				absoluteRoot.IsDone = true;
+				Debug.WriteLine($"Took {watch.ElapsedMilliseconds}ms to call FinalValidate()");
+			}
+			GC.Collect();
+		}
+
 		internal void Scan(string rootPath, Action<RootNode> rootSetup, CancellationToken token) {
+			allDrives = false;
+			ScanState state = CreateState(rootPath, true);
+			states = new List<ScanState>() { state };
+			allDrives = states[0].IsDrive;
+
+			totalTotalSize = state.TotalSize;
+			totalFreeSpace = state.FreeSpace;
+
+			SetupRoot(state.Root, rootSetup);
+
+			try {
+				ScanMtf(state, rootSetup, token);
+			}
+			catch (Exception) {
+				ScanNative(rootSetup, token);
+			}
+			FinishScan(token);
+		}
+		internal void Scan(IEnumerable<string> rootPaths, Action<RootNode> rootSetup, CancellationToken token) {
+			allDrives = false;
+			if (rootPaths.Count() == 1) {
+				Scan(rootPaths.First(), rootSetup, token);
+				return;
+			}
+
+			states = rootPaths.Select(p => CreateState(p, false)).ToList();
+			allDrives = !states.Any(s => !s.IsDrive);
+
+			totalTotalSize = states.Sum(s => s.TotalSize);
+			totalFreeSpace = states.Sum(s => s.FreeSpace);
+
+			// Computer Root
+			RootNode computerRoot = new RootNode(document);
+			SetupRoot(computerRoot, rootSetup);
+			FolderNode unusedFileCollection = null;
+			foreach (ScanState state in states) {
+				computerRoot.AddChild(computerRoot, state.Root, ref unusedFileCollection);
+			}
+
+			// Master file tables cannot be scanned inline, so scan them all first
+			for (int i = 0; i < states.Count; i++) {
+				ScanState state = states[i];
+				try {
+					ScanMtf(state, rootSetup, token);
+					states.RemoveAt(i--);
+				}
+				catch (Exception ex) {
+					Console.WriteLine(ex);
+				}
+			}
+
+			// Are there any leftover states to work on?
+			if (states.Any())
+				ScanNative(rootSetup, token);
+			
+			FinishScan(token);
+		}
+
+		private ScanState CreateState(string rootPath, bool single) {
+			ScanState state = new ScanState();
+			state.RootPath = Path.GetFullPath(rootPath);
+			state.IsDrive = PathUtils.IsSamePath(Path.GetPathRoot(state.RootPath), state.RootPath);
+			state.RecycleBinPath = Path.Combine(Path.GetPathRoot(rootPath), "$Recycle.Bin");
+			if (state.IsDrive) {
+				Win32.GetDiskFreeSpaceEx(rootPath, out _, out ulong totalSize, out ulong freeSpace);
+				state.TotalSize = (long) totalSize;
+				state.FreeSpace = (long) freeSpace;
+			}
+			state.Root = new RootNode(document, new DirectoryInfo(state.RootPath), single);
+			state.RootPath = state.RootPath.ToUpperInvariant();
+			return state;
+		}
+
+		/*internal void Scan(string rootPath, Action<RootNode> rootSetup, CancellationToken token) {
 			//if (root != null)
 			//	throw new InvalidOperationException("File Enumerator has already been loaded!");
 			isSuspended = false;
 			rootPath = Path.GetFullPath(rootPath);
 			string testPath = rootPath.ToUpperInvariant();
-			isRoot = PathUtils.IsSamePath(Path.GetPathRoot(testPath), testPath);
+			isDrive = PathUtils.IsSamePath(Path.GetPathRoot(testPath), testPath);
 			recycleBinPath = Path.Combine(Path.GetPathRoot(rootPath), "$Recycle.Bin");
 			this.rootPath = rootPath;
-			if (isRoot) {
-				freeSpace = GetAvailableFreeSpace();
-				totalSize = GetTotalSize();
-				scannedSize = 0L;
-			}
+			scannedSize = 0L;
+			SetupDriveSizes();
 
 			if (!Directory.Exists(rootPath))
 				throw new DirectoryNotFoundException(rootPath);
@@ -108,100 +211,57 @@ namespace WinDirStat.Net.Data {
 				Debug.WriteLine($"Took {watch.ElapsedMilliseconds}ms to call FinalValidate()");
 			}
 			GC.Collect();
-		}
+		}*/
 
 		private void SuspendCheck() {
 			if (isSuspended)
 				resumeEvent.WaitOne();
 		}
 
-		private bool SkipFile(string name, string path) {
+		private bool SkipFile(ScanState state, string name, string path) {
+			if (name.Length == 0)
+				Console.WriteLine("WHAT");
 			// We still want to see all those delicious files that were thrown away
-			if (name.StartsWith("$") && !path.StartsWith(recycleBinPath))
+			if (name[0] == '$' && !path.StartsWith(state.RecycleBinPath))
 				return true;
 
 			// Certified spam
-			if (string.Compare(name, "desktop.ini", true) == 0)
-				return true;
+			//if (string.Compare(name, "desktop.ini", true) == 0)
+			//	return true;
 
 			return false;
 		}
 
-		private void SetupRoot(Action<RootNode> rootSetup) {
+		private void SetupRoot(RootNode root, Action<RootNode> rootSetup) {
+			if (!root.IsAbsoluteRootType)
+				return;
+			this.absoluteRoot = root;
 			Application.Current.Dispatcher.Invoke(() => {
 				root.LoadIcon(root);
 				root.IsExpanded = true;
 				rootSetup?.Invoke(root);
 			});
-			if (isRoot)
-				root.AddFreeSpace(new FreeSpaceNode(rootPath, document.Settings.ShowFreeSpace), rootPath, true);
+			//if (isDrive)
+			//	root.AddFreeSpace(new FreeSpaceNode(rootPath), rootPath, true);
 		}
-
-		private void ReadSlow(Action<RootNode> rootSetup, CancellationToken token) {
-			root = new RootNode(document, new DirectoryInfo(rootPath));
-			SetupRoot(rootSetup);
-			Queue<FolderNode> subdirs = new Queue<FolderNode>();
-			subdirs.Enqueue(root);
-			do {
-				SuspendCheck();
-				ReadSlow(subdirs, token);
-			} while (subdirs.Any() && !token.IsCancellationRequested);
-		}
-
-		private void ReadSlow(Queue<FolderNode> subdirs, CancellationToken token) {
-			FolderNode parent = subdirs.Dequeue();
-			try {
-				foreach (string path in Directory.EnumerateFileSystemEntries(parent.Path).AsParallel()) {
-					if (SkipFile(Path.GetFileName(path), path))
-						continue;
-					try {
-						// FileInfo works for directories with the exception
-						// of not supporting the Length property.
-						FileInfo info = new FileInfo(path);
-						FileNode child;
-						if (info.Attributes.HasFlag(FileAttributes.Directory)) {
-							FolderNode subdir = new FolderNode(info);
-							child = subdir;
-							subdirs.Enqueue(subdir);
-						}
-						else {
-							child = new FileNode(info);
-							scannedSize += child.Size;
-							document.Extensions.Include(child.Extension, child.Size);
-						}
-						parent.AddChild(root, child, path, true);
-					}
-					catch { }
-					SuspendCheck();
-					if (token.IsCancellationRequested)
-						return;
-				}
-			}
-			catch { }
-			if (parent.IsExpanded) {
-				Application.Current.Dispatcher.Invoke(() => {
-					parent.Validate(root, false);
-				});
-			}
-		}
-
-		private void ScanMtf(Action<RootNode> rootSetup, CancellationToken token) {
+		
+		private void ScanMtf(ScanState state, Action<RootNode> rootSetup, CancellationToken token) {
 			Dictionary<uint, FileNodeIndexes> fileNodes = new Dictionary<uint, FileNodeIndexes>();
 
-			DriveInfo driveInfo = new DriveInfo(Path.GetPathRoot(rootPath));
+			DriveInfo driveInfo = new DriveInfo(Path.GetPathRoot(state.RootPath));
 			using (NtfsReader ntfs = new NtfsReader(driveInfo, RetrieveMode.StandardInformations)) {
-				ReadMft(ntfs, fileNodes, rootSetup, token);
+				ReadMft(state, ntfs, fileNodes, rootSetup, token);
 			}
 
 			foreach (FileNodeIndexes indexes in fileNodes.Values) {
-				FileNode node = indexes.FileNode;
+				FileNodeBase node = indexes.FileNode;
 				//if (node.Type == FileNodeType.File)
 				//	document.Extensions.Include(node.Extension, node.Size);
 				if (indexes.NodeIndex == indexes.ParentNodeIndex) {
 					// This must be a root
 				}
 				else if (fileNodes.TryGetValue(indexes.ParentNodeIndex, out var parentIndexes)) {
-					((FolderNode) parentIndexes.FileNode).AddChild(root, node, indexes.Path, true);
+					((FolderNode) parentIndexes.FileNode).AddChild(state.Root, node, ref parentIndexes.FileCollection);
 				}
 				SuspendCheck();
 				if (token.IsCancellationRequested)
@@ -209,39 +269,42 @@ namespace WinDirStat.Net.Data {
 			}
 		}
 		
-		private void ReadMft(NtfsReader ntfs, Dictionary<uint, FileNodeIndexes> fileNodes,
+		private void ReadMft(ScanState state, NtfsReader ntfs, Dictionary<uint, FileNodeIndexes> fileNodes,
 			Action<RootNode> rootSetup, CancellationToken token)
 		{
-			foreach (INtfsNode node in ntfs.EnumerateNodes(rootPath)) {
-				string fullPath = node.FullName;
-				if (fullPath.EndsWith(@"\."))
-					fullPath = fullPath.Substring(0, fullPath.Length - 1);
-				string name = Path.GetFileName(fullPath);
-				if (SkipFile(name, fullPath))
+			foreach (INtfsNode node in ntfs.EnumerateNodes(state.RootPath)) {
+				string fullPath = PathUtils.TrimSeparatorDotEnd(node.FullName);
+				bool isRoot = (node.NodeIndex == node.ParentNodeIndex);
+				if (!isRoot && SkipFile(state, Path.GetFileName(fullPath), fullPath))
 					continue;
-				FileNode child;
-				if (node.NodeIndex == node.ParentNodeIndex) {
-					root = new RootNode(document, node);
-					child = root;
+				FileNodeBase child;
+				if (isRoot) {
+					child = state.Root;
+					/*state.Root = new RootNode(document, node, IsSingle);
+					child = state.Root;
 					// Let the user know that the root was found
-					SetupRoot(rootSetup);
+					SetupRoot(state.Root, rootSetup);*/
 				}
 				else if (node.Attributes.HasFlag(FileAttributes.Directory)) {
-					if (!isRoot && rootPath == node.FullName.ToUpperInvariant()) {
-						root = new RootNode(document, node);
-						child = root;
+					if (!state.IsDrive && state.RootPath == node.FullName.ToUpperInvariant()) {
+						child = state.Root;
+						/*state.Root = new RootNode(document, node, IsSingle);
+						child = state.Root;
 						// Let the user know that the root was found
-						SetupRoot(rootSetup);
+						SetupRoot(state.Root, rootSetup);*/
 					}
 					else {
 						child = new FolderNode(node);
 					}
 				}
 				else {
-					child = new FileNode(node);
-					if (!node.Attributes.HasFlag(FileAttributes.ReparsePoint))
-						scannedSize += child.Size;
-					document.Extensions.Include(child.Extension, child.Size);
+					FileNode file = new FileNode(node);
+					child = file;
+					if (!node.Attributes.HasFlag(FileAttributes.ReparsePoint)) {
+						state.ScannedSize += child.Size;
+						totalScannedSize += child.Size;
+					}
+					file.extRecord = document.Extensions.Include(GetExtension(file.Name), child.Size);
 				}
 				fileNodes[node.NodeIndex] = new FileNodeIndexes(child, node);
 				SuspendCheck();
@@ -249,28 +312,43 @@ namespace WinDirStat.Net.Data {
 					return;
 			}
 		}
-
-		private long GetAvailableFreeSpace() {
-			GetDiskFreeSpaceEx(rootPath, out _, out _, out ulong freeSpace);
-			return (long) freeSpace;
-		}
-		private long GetTotalSize() {
-			GetDiskFreeSpaceEx(rootPath, out _, out ulong totalSize, out _);
-			return (long) totalSize;
-		}
-
-		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-		[return: MarshalAs(UnmanagedType.Bool)]
-		private static extern bool GetDiskFreeSpaceEx(string lpDirectoryName, out ulong lpFreeBytesAvailable, out ulong lpTotalNumberOfBytes, out ulong lpTotalNumberOfFreeBytes);
 		
-		private struct FileNodeIndexes {
-			public FileNode FileNode { get; }
-			public uint NodeIndex { get; }
-			public uint ParentNodeIndex { get; }
-			public string Path { get; }
+		/*private void SetupDriveSizes() {
+			if (isDrive) {
+				Win32.GetDiskFreeSpaceEx(rootPath, out _, out ulong totalSize, out ulong freeSpace);
+				this.totalSize = (long) totalSize;
+				this.freeSpace = (long) freeSpace;
+			}
+		}*/
 
-			public FileNodeIndexes(FileNode fileNode, INtfsNode ntfsNode) {
+		private const string Dot = ".";
+
+		private static string GetExtension(string path) {
+			int length = path.Length;
+			for (int i = length; --i >= 0;) {
+				char ch = path[i];
+				if (ch == '.') {
+					if (i != length - 1)
+						return path.Substring(i, length - i).ToLower();
+					else
+						return Dot;
+				}
+				if (ch == Path.DirectorySeparatorChar || ch == Path.AltDirectorySeparatorChar || ch == Path.VolumeSeparatorChar)
+					break;
+			}
+			return Dot;
+		}
+
+		private class FileNodeIndexes {
+			public FileNodeBase FileNode;
+			public FolderNode FileCollection;
+			public uint NodeIndex;
+			public uint ParentNodeIndex;
+			public string Path;
+
+			public FileNodeIndexes(FileNodeBase fileNode, INtfsNode ntfsNode) {
 				FileNode = fileNode;
+				FileCollection = null;
 				NodeIndex = ntfsNode.NodeIndex;
 				ParentNodeIndex = ntfsNode.ParentNodeIndex;
 				Path = ntfsNode.FullName;

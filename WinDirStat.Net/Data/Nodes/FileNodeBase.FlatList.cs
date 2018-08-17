@@ -24,7 +24,7 @@ using WinDirStat.Net.TreeView;
 namespace WinDirStat.Net.Data.Nodes {
 	// This part of SharpTreeNode controls the 'flat list' data structure, which emulates
 	// a big flat list containing the whole tree; allowing access by visible index.
-	public partial class FileNode {
+	public partial class FileNodeBase {
 		/// <summary>The parent in the flat list</summary>
 		//internal FileNode listParent;
 		/// <summary>Left/right nodes in the flat list</summary>
@@ -42,12 +42,12 @@ namespace WinDirStat.Net.Data.Nodes {
 			get { return Height(vi.right) - Height(vi.left); }
 		}
 
-		static int Height(FileNode node) {
+		static int Height(FileNodeBase node) {
 			return node != null ? node.vi.height : 0;
 		}
 
-		internal FileNode GetListRoot() {
-			FileNode node = this;
+		internal FileNodeBase GetListRoot() {
+			FileNodeBase node = this;
 			while (node.vi.listParent != null)
 				node = node.vi.listParent;
 			return node;
@@ -71,7 +71,7 @@ namespace WinDirStat.Net.Data.Nodes {
 		}
 
 		[Conditional("DEBUG")]
-		static void DumpTree(FileNode node) {
+		static void DumpTree(FileNodeBase node) {
 			node.GetListRoot().DumpTree();
 		}
 
@@ -90,11 +90,11 @@ namespace WinDirStat.Net.Data.Nodes {
 		#endregion
 
 		#region GetNodeByVisibleIndex / GetVisibleIndexForNode
-		internal static FileNode GetNodeByVisibleIndex(FileNode root, int index) {
+		internal static FileNodeBase GetNodeByVisibleIndex(FileNodeBase root, int index) {
 			root.GetTotalListLength(); // ensure all list lengths are calculated
 			Debug.Assert(index >= 0);
 			Debug.Assert(index < root.vi.totalListLength);
-			FileNode node = root;
+			FileNodeBase node = root;
 			while (true) {
 				if (node.vi.left != null && index < node.vi.left.vi.totalListLength) {
 					node = node.vi.left;
@@ -113,7 +113,7 @@ namespace WinDirStat.Net.Data.Nodes {
 			}
 		}
 
-		internal static int GetVisibleIndexForNode(FileNode node) {
+		internal static int GetVisibleIndexForNode(FileNodeBase node) {
 			int index = node.vi.left != null ? node.vi.left.GetTotalListLength() : 0;
 			while (node.vi.listParent != null) {
 				if (node == node.vi.listParent.vi.right) {
@@ -134,7 +134,7 @@ namespace WinDirStat.Net.Data.Nodes {
 		/// This method assumes that the children of this node are already balanced and have an up-to-date 'height' value.
 		/// </summary>
 		/// <returns>The new root node</returns>
-		static FileNode Rebalance(FileNode node) {
+		static FileNodeBase Rebalance(FileNodeBase node) {
 			Debug.Assert(node.vi.left == null || Math.Abs(node.vi.left.Balance) <= 1);
 			Debug.Assert(node.vi.right == null || Math.Abs(node.vi.right.Balance) <= 1);
 			// Keep looping until it's balanced. Not sure if this is stricly required; this is based on
@@ -180,7 +180,7 @@ namespace WinDirStat.Net.Data.Nodes {
 			return vi.totalListLength = length;
 		}
 
-		FileNode RotateLeft() {
+		FileNodeBase RotateLeft() {
 			/* Rotate tree to the left
 			 * 
 			 *       this               right
@@ -189,8 +189,8 @@ namespace WinDirStat.Net.Data.Nodes {
 			 *           / \          / \
 			 *          B   C        A   B
 			 */
-			FileNode b = vi.right.vi.left;
-			FileNode newTop = vi.right;
+			FileNodeBase b = vi.right.vi.left;
+			FileNodeBase newTop = vi.right;
 
 			if (b != null) b.vi.listParent = this;
 			this.vi.right = b;
@@ -202,7 +202,7 @@ namespace WinDirStat.Net.Data.Nodes {
 			return newTop;
 		}
 
-		FileNode RotateRight() {
+		FileNodeBase RotateRight() {
 			/* Rotate tree to the right
 			 * 
 			 *       this             left
@@ -211,8 +211,8 @@ namespace WinDirStat.Net.Data.Nodes {
 			 *     / \                   /  \
 			 *    A   B                 B    C
 			 */
-			FileNode b = vi.left.vi.right;
-			FileNode newTop = vi.left;
+			FileNodeBase b = vi.left.vi.right;
+			FileNodeBase newTop = vi.left;
 
 			if (b != null) b.vi.listParent = this;
 			this.vi.left = b;
@@ -223,7 +223,7 @@ namespace WinDirStat.Net.Data.Nodes {
 			return newTop;
 		}
 
-		static void RebalanceUntilRoot(FileNode pos) {
+		static void RebalanceUntilRoot(FileNodeBase pos) {
 			while (pos.vi.listParent != null) {
 				if (pos == pos.vi.listParent.vi.left) {
 					pos = pos.vi.listParent.vi.left = Rebalance(pos);
@@ -234,7 +234,7 @@ namespace WinDirStat.Net.Data.Nodes {
 				}
 				pos = pos.vi.listParent;
 			}
-			FileNode newRoot = Rebalance(pos);
+			FileNodeBase newRoot = Rebalance(pos);
 			if (newRoot != pos && pos.vi.treeFlattener != null) {
 				Debug.Assert(newRoot.vi.treeFlattener == null);
 				newRoot.vi.treeFlattener = pos.vi.treeFlattener;
@@ -247,7 +247,7 @@ namespace WinDirStat.Net.Data.Nodes {
 		#endregion
 
 		#region Insertion
-		static void InsertNodeAfter(FileNode pos, FileNode newNode) {
+		static void InsertNodeAfter(FileNodeBase pos, FileNodeBase newNode) {
 			// newNode might be the model root of a whole subtree, so go to the list root of that subtree:
 			newNode = newNode.GetListRoot();
 			if (pos.vi.right == null) {
@@ -268,18 +268,18 @@ namespace WinDirStat.Net.Data.Nodes {
 		#endregion
 
 		#region Removal
-		void RemoveNodes(FileNode start, FileNode end) {
+		void RemoveNodes(FileNodeBase start, FileNodeBase end) {
 			// Removes all nodes from start to end (inclusive)
 			// All removed nodes will be reorganized in a separate tree, do not delete
 			// regions that don't belong together in the tree model!
 
-			List<FileNode> removedSubtrees = new List<FileNode>();
-			FileNode oldPos;
-			FileNode pos = start;
+			List<FileNodeBase> removedSubtrees = new List<FileNodeBase>();
+			FileNodeBase oldPos;
+			FileNodeBase pos = start;
 			do {
 				// recalculate the endAncestors every time, because the tree might have been rebalanced
-				HashSet<FileNode> endAncestors = new HashSet<FileNode>();
-				for (FileNode tmp = end; tmp != null; tmp = tmp.vi.listParent)
+				HashSet<FileNodeBase> endAncestors = new HashSet<FileNodeBase>();
+				for (FileNodeBase tmp = end; tmp != null; tmp = tmp.vi.listParent)
 					endAncestors.Add(tmp);
 
 				removedSubtrees.Add(pos);
@@ -291,7 +291,7 @@ namespace WinDirStat.Net.Data.Nodes {
 						pos.vi.right = null;
 					}
 				}
-				FileNode succ = pos.Successor();
+				FileNodeBase succ = pos.Successor();
 				DeleteNode(pos); // this will also rebalance out the deletion of the right subtree
 
 				oldPos = pos;
@@ -299,30 +299,30 @@ namespace WinDirStat.Net.Data.Nodes {
 			} while (oldPos != end);
 
 			// merge back together the removed subtrees:
-			FileNode removed = removedSubtrees[0];
+			FileNodeBase removed = removedSubtrees[0];
 			for (int i = 1; i < removedSubtrees.Count; i++) {
 				removed = ConcatTrees(removed, removedSubtrees[i]);
 			}
 		}
 
-		static FileNode ConcatTrees(FileNode first, FileNode second) {
-			FileNode tmp = first;
+		static FileNodeBase ConcatTrees(FileNodeBase first, FileNodeBase second) {
+			FileNodeBase tmp = first;
 			while (tmp.vi.right != null)
 				tmp = tmp.vi.right;
 			InsertNodeAfter(tmp, second);
 			return tmp.GetListRoot();
 		}
 
-		FileNode Successor() {
+		FileNodeBase Successor() {
 			if (vi.right != null) {
-				FileNode node = vi.right;
+				FileNodeBase node = vi.right;
 				while (node.vi.left != null)
 					node = node.vi.left;
 				return node;
 			}
 			else {
-				FileNode node = this;
-				FileNode oldNode;
+				FileNodeBase node = this;
+				FileNodeBase oldNode;
 				do {
 					oldNode = node;
 					node = node.vi.listParent;
@@ -332,8 +332,8 @@ namespace WinDirStat.Net.Data.Nodes {
 			}
 		}
 
-		static void DeleteNode(FileNode node) {
-			FileNode balancingNode;
+		static void DeleteNode(FileNodeBase node) {
+			FileNodeBase balancingNode;
 			if (node.vi.left == null) {
 				balancingNode = node.vi.listParent;
 				node.ReplaceWith(node.vi.right);
@@ -345,7 +345,7 @@ namespace WinDirStat.Net.Data.Nodes {
 				node.vi.left = null;
 			}
 			else {
-				FileNode tmp = node.vi.right;
+				FileNodeBase tmp = node.vi.right;
 				while (tmp.vi.left != null)
 					tmp = tmp.vi.left;
 				// First replace tmp with tmp.right
@@ -373,7 +373,7 @@ namespace WinDirStat.Net.Data.Nodes {
 				RebalanceUntilRoot(balancingNode);
 		}
 
-		void ReplaceWith(FileNode node) {
+		void ReplaceWith(FileNodeBase node) {
 			if (vi.listParent != null) {
 				if (vi.listParent.vi.left == this) {
 					vi.listParent.vi.left = node;

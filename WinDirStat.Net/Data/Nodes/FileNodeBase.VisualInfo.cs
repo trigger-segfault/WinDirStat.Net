@@ -9,7 +9,7 @@ using System.Windows.Media;
 using WinDirStat.Net.TreeView;
 
 namespace WinDirStat.Net.Data.Nodes {
-	public partial class FileNode : INotifyPropertyChanged {
+	public partial class FileNodeBase : INotifyPropertyChanged {
 #pragma warning disable 0649, IDE1006
 		/// <summary>
 		/// A storage class for all visual information to reduce memory usage. This class will only be
@@ -44,9 +44,9 @@ namespace WinDirStat.Net.Data.Nodes {
 			// ======= FileNode.FlatList.cs ========
 			
 			/// <summary>The parent in the flat list</summary>
-			internal FileNode listParent;
+			internal FileNodeBase listParent;
 			/// <summary>Left/right nodes in the flat list</summary>
-			internal FileNode left, right;
+			internal FileNodeBase left, right;
 
 			/// <summary>The helper class for flattening the recursive tree into a flat list.</summary>
 			internal TreeFlattener treeFlattener;

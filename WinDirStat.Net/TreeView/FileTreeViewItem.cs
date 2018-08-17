@@ -34,8 +34,8 @@ namespace WinDirStat.Net.TreeView {
 													 new FrameworkPropertyMetadata(typeof(FileTreeViewItem)));
 		}
 
-		public FileNode Node {
-			get { return DataContext as FileNode; }
+		public FileNodeBase Node {
+			get { return DataContext as FileNodeBase; }
 		}
 
 		public FileNodeView NodeView { get; internal set; }

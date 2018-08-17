@@ -14,8 +14,8 @@ namespace WinDirStat.Net.SortingView {
 	public class SortView : GridView {
 
 		static SortView() {
-			//ColumnHeaderContainerStyleProperty.OverrideMetadata(typeof(SortViewColumn),
-			//	new FrameworkPropertyMetadata(null));
+			ColumnHeaderContainerStyleProperty.OverrideMetadata(typeof(SortView),
+				new FrameworkPropertyMetadata(SortViewKeys.HeaderContainerLeftAlignStyle));
 		}
 		
 		protected override object DefaultStyleKey {

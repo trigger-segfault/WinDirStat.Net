@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -18,6 +19,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using WinDirStat.Net.Data;
 using WinDirStat.Net.Data.Nodes;
 using WinDirStat.Net.Drawing;
 using WinDirStat.Net.Settings;
@@ -26,15 +28,16 @@ using WinDirStat.Net.Utils;
 //using Bitmap = System.Drawing.Bitmap;
 //using Graphics = System.Drawing.Graphics;
 using Brush = System.Drawing.Brush;
+using Pen = System.Drawing.Pen;
 using Color = System.Drawing.Color;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace WinDirStat.Net.Controls {
 	public class GraphViewHoverEventArgs : RoutedEventArgs {
 
-		public FileNode Hover;
+		public FileNodeBase Hover;
 
-		public GraphViewHoverEventArgs(RoutedEvent routedEvent, FileNode hover)
+		public GraphViewHoverEventArgs(RoutedEvent routedEvent, FileNodeBase hover)
 			: base(routedEvent)
 		{
 			Hover = hover;
@@ -56,20 +59,21 @@ namespace WinDirStat.Net.Controls {
 		}
 
 		public static readonly DependencyProperty RootProperty =
-			DependencyProperty.Register("Root", typeof(FileNode), typeof(GraphView),
+			DependencyProperty.Register("Root", typeof(FileNodeBase), typeof(GraphView),
 				new FrameworkPropertyMetadata(null, OnRootChanged));
 
 		private static void OnRootChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
 			if (d is GraphView graphView) {
-				FileNode root = graphView.Root;
+				FileNodeBase root = graphView.Root;
 				if (root == null) {
 					graphView.AbortRender();
 				}
-				graphView.itemRoot = null;
+
 				graphView.fileRoot = null;
 
 				graphView.root = root;
 				graphView.HighlightNone();
+				graphView.Hover = null;
 				if (root != null) {
 					//lock (graphView.drawBitmapLock)
 					graphView.RenderAsync();
@@ -81,29 +85,13 @@ namespace WinDirStat.Net.Controls {
 			}
 		}
 
-		public FileNode Root {
-			get => (FileNode) GetValue(RootProperty);
+		public FileNodeBase Root {
+			get => (FileNodeBase) GetValue(RootProperty);
 			set => SetValue(RootProperty, value);
 		}
 
-		public static readonly DependencyProperty FileRootProperty =
-			DependencyProperty.Register("FileRoot", typeof(RootNode), typeof(GraphView),
-				new FrameworkPropertyMetadata(null, OnFileRootChanged));
-
-		private static void OnFileRootChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
-			if (d is GraphView graphView) {
-				
-
-			}
-		}
-
-		public RootNode FileRoot {
-			get => (RootNode) GetValue(FileRootProperty);
-			set => SetValue(FileRootProperty, value);
-		}
-
 		private static readonly DependencyPropertyKey HoverPropertyKey =
-			DependencyProperty.RegisterReadOnly("Hover", typeof(FileNode), typeof(GraphView),
+			DependencyProperty.RegisterReadOnly("Hover", typeof(FileNodeBase), typeof(GraphView),
 				new FrameworkPropertyMetadata(null, OnHoverChanged));
 
 		public static readonly DependencyProperty HoverProperty =
@@ -111,14 +99,14 @@ namespace WinDirStat.Net.Controls {
 
 		private static void OnHoverChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
 			if (d is GraphView graphView) {
-				FileNode hover = e.NewValue as FileNode;
+				FileNodeBase hover = e.NewValue as FileNodeBase;
 				graphView.HasHover = hover != null;
 				graphView.RaiseEvent(new GraphViewHoverEventArgs(HoverChangedEvent, hover));
 			}
 		}
 
-		public FileNode Hover {
-			get => (FileNode) GetValue(HoverProperty);
+		public FileNodeBase Hover {
+			get => (FileNodeBase) GetValue(HoverProperty);
 			private set => SetValue(HoverPropertyKey, value);
 		}
 
@@ -183,7 +171,7 @@ namespace WinDirStat.Net.Controls {
 			IsDimmed = IsActuallyRenderingFull || resizing || ForceDimmed;
 		}
 
-		private static readonly DependencyProperty OptionsProperty =
+		/*private static readonly DependencyProperty OptionsProperty =
 			DependencyProperty.Register("Options", typeof(TreemapOptions), typeof(GraphView),
 				new FrameworkPropertyMetadata(TreemapOptions.Default, OnOptionsChanged));
 
@@ -197,7 +185,7 @@ namespace WinDirStat.Net.Controls {
 		public TreemapOptions Options {
 			get => (TreemapOptions) GetValue(OptionsProperty);
 			set => SetValue(OptionsProperty, value);
-		}
+		}*/
 
 		/*private static readonly DependencyPropertyKey IsRenderingPropertyKey =
 			DependencyProperty.RegisterReadOnly("IsRendering", typeof(bool), typeof(WpfGraphView),
@@ -233,6 +221,33 @@ namespace WinDirStat.Net.Controls {
 			private set => SetValue(IsDimmedPropertyKey, value);
 		}
 
+		private static void OnDataContextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+			if (d is GraphView graphView) {
+				WinDirDocument oldDocument = e.OldValue as WinDirDocument;
+				WinDirDocument newDocument = e.NewValue as WinDirDocument;
+				if (oldDocument != null)
+					oldDocument.Settings.PropertyChanged -= graphView.OnSettingsChanged;
+				if (newDocument != null)
+					newDocument.Settings.PropertyChanged += graphView.OnSettingsChanged;
+				graphView.document = newDocument;
+			}
+		}
+
+		private void OnSettingsChanged(object sender, PropertyChangedEventArgs e) {
+			switch (e.PropertyName) {
+			case nameof(WinDirSettings.TreemapOptions):
+			case nameof(WinDirSettings.FilePalette):
+				RenderAsync();
+				break;
+			case nameof(WinDirSettings.HighlightColor):
+				if (highlightMode != HighlightMode.None)
+					RenderHighlight(treemapSize);
+				break;
+			}
+		}
+
+		public static readonly WinDirSettings DefaultSettings = new WinDirSettings(null);
+
 		private Point2I treemapSize;
 		private WriteableBitmap treemap;
 		private Point2I highlightSize;
@@ -242,20 +257,25 @@ namespace WinDirStat.Net.Controls {
 		private WriteableBitmap forceDimmedHighlight;
 		private readonly DispatcherTimer resizeTimer;
 		private Thread renderThread;
-		private FileNode root;
-		private FileNode fileRoot;
-		private TreemapItem itemRoot;
+		private FileNodeBase root;
+		private FileNodeBase fileRoot;
 		private bool resizing;
 		/// <summary>Check if the running render thread has finished rendering the treemap.</summary>
 		private volatile bool treemapRendered;
 		private volatile bool fullRender;
-		private TreemapOptions options;
+		//private TreemapOptions options;
+		private WinDirDocument document;
 
 		private readonly object renderLock = new object();
 		private readonly object drawBitmapLock = new object();
-		private FileNode[] selection;
+		private FileNodeBase[] selection;
 		private string extension;
 		private HighlightMode highlightMode;
+
+		static GraphView() {
+			DataContextProperty.AddOwner(typeof(GraphView),
+				new FrameworkPropertyMetadata(OnDataContextChanged));
+		}
 
 		public GraphView() {
 			InitializeComponent();
@@ -266,7 +286,6 @@ namespace WinDirStat.Net.Controls {
 				Dispatcher);
 			treemapSize = Point2I.Zero;
 			highlightSize = Point2I.Zero;
-			options = Options;
 			highlightMode = HighlightMode.None;
 			treemapRendered = true;
 		}
@@ -298,11 +317,11 @@ namespace WinDirStat.Net.Controls {
 		}
 
 		public void HighlightSelection(IEnumerable selection) {
-			if (this.selection != null && this.selection.Intersect(selection.Cast<FileNode>()).Count() == this.selection.Length)
+			if (this.selection != null && this.selection.Intersect(selection.Cast<FileNodeBase>()).Count() == this.selection.Length)
 				return;
 
 			highlightMode = HighlightMode.Selection;
-			this.selection = selection.Cast<FileNode>().ToArray();
+			this.selection = selection.Cast<FileNodeBase>().ToArray();
 			extension = null;
 			if (IsActuallyRendering) {
 				RenderHighlightAsync();
@@ -338,6 +357,15 @@ namespace WinDirStat.Net.Controls {
 		}
 		private bool IsActuallyRenderingFull {
 			get => renderThread?.IsAlive ?? false && fullRender;
+		}
+		private WinDirSettings Settings {
+			get => document?.Settings ?? DefaultSettings;
+		}
+		private TreemapOptions Options {
+			get => Settings.TreemapOptions;
+		}
+		private Rgba32Color HighlightColor {
+			get => Settings.HighlightColor;
 		}
 
 		private void Clear() {
@@ -383,14 +411,10 @@ namespace WinDirStat.Net.Controls {
 		private void RenderThread(Point2I size) {
 			try {
 				if (size.X != 0 && size.Y != 0) {
-					if (itemRoot == null) {
-						TreemapItem itemRoot = new TreemapItem(root);
-						RootNode fileRoot = new RootNode((RootNode) root);
-						this.itemRoot = itemRoot;
-						this.fileRoot = fileRoot;
-						Dispatcher.Invoke(() => {
-							FileRoot = fileRoot;
-						});
+					if (fileRoot == null) {
+						//RootNode fileRoot = new RootNode((RootNode) root);
+						//fileRoot.FinalValidate(fileRoot);
+						//this.fileRoot = fileRoot;
 					}
 					if (fullRender) {
 						RenderTreemap(size);
@@ -416,6 +440,7 @@ namespace WinDirStat.Net.Controls {
 					Console.WriteLine(ex.ToString());
 					renderThread = null;
 					UpdateDimmed();
+					UpdateHover();
 				});
 				Console.WriteLine($"Took {sw.ElapsedMilliseconds}ms to invoke EXCEPTION Dispatcher");
 			}
@@ -429,9 +454,7 @@ namespace WinDirStat.Net.Controls {
 					treemap = new WriteableBitmap(size.X, size.Y, 96, 96, PixelFormats.Bgra32, null);
 				});
 			}
-			Treemap.DrawTreemap(treemap, new Rectangle2I(size), root, options);
-			Treemap.DrawTreemap(treemap, new Rectangle2I(size), itemRoot, options);
-			Treemap.DrawTreemap(treemap, new Rectangle2I(size), fileRoot, options);
+			Treemap.DrawTreemap(treemap, new Rectangle2I(size), root, Options);
 			//Treemap.DrawTreemap(treemap, new Rectangle2I(size), fileRoot, options);
 			Console.WriteLine($"Took {sw.ElapsedMilliseconds}ms to render treemap");
 		}
@@ -446,8 +469,9 @@ namespace WinDirStat.Net.Controls {
 				highlightGdi = new Bitmap(size.X, size.Y, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 				Trace.WriteLine($"Took {sw.ElapsedMilliseconds}ms to setup highlight bitmap");
 			}
+			sw.Restart();
 			if (highlightMode == HighlightMode.Extension) {
-				HighlightAll(highlight, highlightGdi, new Rectangle2I(size), fileRoot);
+				//HighlightAll(highlight, highlightGdi, new Rectangle2I(size), fileRoot);
 			}
 			Trace.WriteLine($"Took {sw.ElapsedMilliseconds}ms to render file highlight");
 			sw.Restart();
@@ -460,17 +484,7 @@ namespace WinDirStat.Net.Controls {
 				Treemap.HighlightRectangles(highlight, highlightGdi, new Rectangle2I(size), Rgba32Color.White, rectangles);
 			}
 			Trace.WriteLine($"Took {sw.ElapsedMilliseconds}ms to render ui highlight");
-			sw.Restart();
-			if (highlightMode == HighlightMode.Extension) {
-				HighlightAll(highlight, highlightGdi, new Rectangle2I(size), itemRoot);
-			}
-			Trace.WriteLine($"Took {sw.ElapsedMilliseconds}ms to render item highlight");
 			Trace.WriteLine("");
-			//sw.Restart();
-			//if (highlightMode == HighlightMode.Extension) {
-			//Treemap.HighlightAll(highlight, highlightGdi, new Rectangle2I(size), fileRoot, Rgba32Color.White, MatchExtensionFile);
-			//}
-			//Console.WriteLine($"Took {sw.ElapsedMilliseconds}ms to render file highlight");
 		}
 
 		private bool MatchExtension(ITreemapItem item) {
@@ -479,12 +493,12 @@ namespace WinDirStat.Net.Controls {
 			return ((item as PreviewTreemapItem).Extension == extension);
 #else
 			//return (((FileNode) item).Extension == extension);
-			return ((item as FileNode).Extension == extension);
+			return ((item as FileNodeBase).Extension == extension);
 #endif
 		}
 		private bool MatchExtensionFile(ITreemapItem item) {
 			//return (((FileNode) item).Extension == extension);
-			return ((item as FileNode).Extension == extension);
+			return ((item as FileNodeBase).Extension == extension);
 		}
 
 		private void OnMouseMove(object sender, MouseEventArgs e) {
@@ -500,26 +514,32 @@ namespace WinDirStat.Net.Controls {
 		}
 
 		private void UpdateHover(Point2I point) {
+			if (root == null) {
+				Hover = null;
+				return;
+			}
 			if (Hover != null) {
 				Rectangle2I rc = ((ITreemapItem) Hover).Rectangle;
 				if (rc.Contains(point))
 					return; // Hover is the same
 			}
-			Hover = (FileNode) Treemap.FindItemAtPoint(root, point);
+			Hover = (FileNodeBase) Treemap.FindItemAtPoint(root, point);
 		}
 
-		private void HighlightAll(WriteableBitmap bitmap, Bitmap gdiBitmap, Rectangle2I rc, FileNode root) {
+		private void HighlightAll(WriteableBitmap bitmap, Bitmap gdiBitmap, Rectangle2I rc, FileNodeBase root) {
 			if (rc.Width <= 0 || rc.Height <= 0)
 				return;
 
-			using (Graphics g = Graphics.FromImage(gdiBitmap)) {
+			using (Graphics g = Graphics.FromImage(gdiBitmap))
+			using (Brush brush = new SolidBrush((Color) HighlightColor))
+			using (Pen pen = new Pen(brush)) {
 				g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
 				g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
 				g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
 				//using (Brush brush = new SolidBrush(C)) {
 				g.Clear(Color.Transparent);
 
-				RecurseHighlightAll(g, root);
+				RecurseHighlightAll(g, brush, pen, root);
 
 				BitmapData data = gdiBitmap.LockBits((Rectangle) rc, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
@@ -541,19 +561,19 @@ namespace WinDirStat.Net.Controls {
 			}
 		}
 
-		private void RecurseHighlightAll(Graphics g, FileNode parent) {
-			int count = parent.ChildCount;
-			//List<FileNode> chilren = parent.virtualChildren;
+		private void RecurseHighlightAll(Graphics g, Brush brush, Pen pen, FileNodeBase parent) {
+			List<FileNodeBase> children = parent.VirtualChildren;
+			int count = children.Count;
 			for (int i = 0; i < count; i++) {
-				FileNode child = parent[i];
+				FileNodeBase child = children[i];
 				Rectangle2S rc = child.Rectangle;
 				if (rc.Width > 0 && rc.Height > 0) {
 					if (child.IsLeaf) {
 						if (child.Extension == extension)
-							HighlightRectangle(g, (Rectangle) rc);
+							HighlightRectangle(g, brush, pen, (Rectangle) rc);
 					}
 					else {
-						RecurseHighlightAll(g, child);
+						RecurseHighlightAll(g, brush, pen, child);
 					}
 				}
 			}
@@ -563,14 +583,16 @@ namespace WinDirStat.Net.Controls {
 			if (rc.Width <= 0 || rc.Height <= 0)
 				return;
 
-			using (Graphics g = Graphics.FromImage(gdiBitmap)) {
+			using (Graphics g = Graphics.FromImage(gdiBitmap))
+			using (Brush brush = new SolidBrush((Color) HighlightColor))
+			using (Pen pen = new Pen(brush)) {
 				g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
 				g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
 				g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
 				//using (Brush brush = new SolidBrush(C)) {
 				g.Clear(Color.Transparent);
 
-				RecurseHighlightAll(g, root);
+				RecurseHighlightAll(g, brush, pen, root);
 
 				BitmapData data = gdiBitmap.LockBits((Rectangle) rc, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
@@ -592,7 +614,7 @@ namespace WinDirStat.Net.Controls {
 			}
 		}
 
-		private void RecurseHighlightAll(Graphics g, TreemapItem parent) {
+		private void RecurseHighlightAll(Graphics g, Brush brush, Pen pen, TreemapItem parent) {
 			int count = parent.ChildCount;
 			for (int i = 0; i < count; i++) {
 				TreemapItem child = parent[i];
@@ -600,19 +622,18 @@ namespace WinDirStat.Net.Controls {
 				if (rc.Width > 0 && rc.Height > 0) {
 					if (child.IsLeaf) {
 						if (child.Extension == extension)
-							HighlightRectangle(g, (Rectangle) rc);
+							HighlightRectangle(g, brush, pen, (Rectangle) rc);
 					}
 					else {
-						RecurseHighlightAll(g, child);
+						RecurseHighlightAll(g, brush, pen, child);
 					}
 				}
 			}
 		}
 
-		private void HighlightRectangle(Graphics g, Rectangle rc) {
+		private void HighlightRectangle(Graphics g, Brush brush, Pen pen, Rectangle rc) {
 			//Brush brush = System.Drawing.Brushes.White;
 			if (rc.Width >= 7 && rc.Height >= 7) {
-				System.Drawing.Pen pen = System.Drawing.Pens.White;
 				g.DrawRectangle(pen, rc);
 				rc.X++; rc.Y++; rc.Width -= 2; rc.Height -= 2;
 				g.DrawRectangle(pen, rc);
@@ -624,7 +645,7 @@ namespace WinDirStat.Net.Controls {
 				g.FillRectangle(brush, Rectangle.FromLTRB(rc.Right - 3, rc.Top + 3, rc.Right, rc.Bottom - 3));*/
 			}
 			else if (rc.Width > 0 && rc.Height > 0) {
-				g.FillRectangle(System.Drawing.Brushes.White, rc);
+				g.FillRectangle(brush, rc);
 				//g.FillRectangle(brush, rc);
 			}
 		}

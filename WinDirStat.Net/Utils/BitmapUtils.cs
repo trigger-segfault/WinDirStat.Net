@@ -52,8 +52,8 @@ namespace WinDirStat.Net.Utils {
 				finally {
 					bitmap.UnlockBits(data);
 				}
+				writeableBitmap.Freeze();
 			});
-			writeableBitmap.Freeze();
 			return writeableBitmap;
 		}
 
