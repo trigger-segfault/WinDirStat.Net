@@ -76,6 +76,8 @@
     <Compile Include="Data\IconCache.Queue.cs" />
     <Compile Include="Data\Nodes\FileNode.cs" />
     <Compile Include="Data\Nodes\FileNodeBase.Flags.cs" />
+    <Compile Include="Data\Nodes\FileNodeBase.FlatList.cs" />
+    <Compile Include="Data\Nodes\FileNodeBase.TreeNode.cs" />
     <Compile Include="Data\Nodes\FileNodeFlags.cs" />
     <Compile Include="Data\Nodes\FolderNode.Flags.cs" />
     <Compile Include="Data\Nodes\UnknownNode.cs" />
@@ -142,14 +144,12 @@
     <Compile Include="TreeView\FileNodeView.cs" />
     <Compile Include="TreeView\FileTreeView.cs" />
     <Compile Include="TreeView\FileTreeViewItem.cs" />
-    <Compile Include="Data\Nodes\FileNode.FlatList.cs" />
     <Compile Include="Data\Nodes\Collections\IFileNodeCollection.cs" />
     <Compile Include="TreeView\TreeTraversal.cs" />
     <Compile Include="TreeView\TreeFlattener.cs" />
     <Compile Include="Data\WinDirDocument.cs" />
     <Compile Include="Data\Nodes\Collections\EmptyFileNodeCollection.cs" />
     <Compile Include="Data\Nodes\FolderNode.cs" />
-    <Compile Include="Data\Nodes\FileNode.TreeNode.cs" />
     <Compile Include="Data\Nodes\FileNodeBase.cs" />
     <Compile Include="Data\Nodes\RootNode.cs" />
     <Compile Include="Utils\BitmapUtils.cs" />
