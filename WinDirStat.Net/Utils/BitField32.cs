@@ -27,6 +27,14 @@ namespace WinDirStat.Net.Utils {
 			Value = unchecked((int) value);
 		}
 
+		/// <summary>Gets or sets the bit at the specified index.</summary>
+		/// 
+		/// <param name="bit">The index of the bit.</param>
+		public bool this[int bit] {
+			get => GetBit(bit);
+			set => SetBit(bit, value);
+		}
+
 		/// <summary>Gets if a bit is 1.</summary>
 		/// 
 		/// <param name="bit">The index of the bit.</param>

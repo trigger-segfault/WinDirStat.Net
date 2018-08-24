@@ -45,53 +45,107 @@
     <ApplicationIcon>App.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Expression.Interactions, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\MicrosoftExpressionInteractions.3.0.40218.0\lib\net45\Microsoft.Expression.Interactions.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationFramework.Aero2" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Expression.Blend.Sdk.1.0.2\lib\net45\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\CommandButton.cs" />
+    <Compile Include="Controls\CommandMenuItem.cs" />
     <Compile Include="Controls\FlashyProgressBar.cs" />
+    <Compile Include="Controls\ImageButton.cs" />
     <Compile Include="Controls\PercentageBar.cs" />
     <Compile Include="Converters\DirectoryExistsToBoolean.cs" />
     <Compile Include="Converters\RadioButtonConverter.cs" />
-    <Compile Include="Data\IconCache.Queue.cs" />
-    <Compile Include="Data\Nodes\FileNode.cs" />
-    <Compile Include="Data\Nodes\FileNodeBase.Flags.cs" />
-    <Compile Include="Data\Nodes\FileNodeBase.FlatList.cs" />
-    <Compile Include="Data\Nodes\FileNodeBase.TreeNode.cs" />
-    <Compile Include="Data\Nodes\FileNodeFlags.cs" />
-    <Compile Include="Data\Nodes\FolderNode.Flags.cs" />
-    <Compile Include="Data\Nodes\UnknownNode.cs" />
+    <None Include="Model\View\IconCache.Queue.cs" />
     <Compile Include="Drawing\ColorSpace.cs" />
     <Compile Include="Controls\ImageMenuItem.cs" />
     <Compile Include="Drawing\TreemapItem.cs" />
+    <Compile Include="Model\Data\Extensions\ExtensionRecordEvents.cs" />
+    <Compile Include="Model\Data\SelectDrivesModel.cs" />
+    <Compile Include="Model\IRelayUICommand.cs" />
+    <Compile Include="Model\RelayCommand.Generic.cs" />
+    <Compile Include="Model\RelayUICommand.Generic.cs" />
+    <Compile Include="Model\ViewModel.cs" />
+    <Compile Include="Model\View\Comparers\DriveComparer.cs" />
+    <Compile Include="Model\View\Drives\Collections\DriveCollection.cs" />
+    <Compile Include="Model\View\Drives\DriveViewModel.cs" />
+    <Compile Include="Model\View\Nodes\FileNodeViewModel.Flags.cs" />
+    <Compile Include="Model\View\Nodes\FileNodeViewModelFlags.cs" />
+    <Compile Include="Model\View\DriveSelectViewModel.cs" />
+    <Compile Include="Model\View\Nodes\TreeTraversal.cs" />
+    <Compile Include="Model\View\WinDirStatViewModel.Events.cs" />
+    <Compile Include="Model\View\WinDirStatViewModel.Scanning.cs" />
+    <Compile Include="Utils\EmptyEnumerator.cs" />
+    <Compile Include="Model\View\Comparers\ExtensionComparer.cs" />
+    <Compile Include="Model\View\Comparers\FileComparer.cs" />
+    <Compile Include="Model\View\Comparers\SortComparer.cs" />
+    <Compile Include="Model\Data\Extensions\ExtensionRecord.cs" />
+    <Compile Include="Model\Data\Extensions\ExtensionRecords.cs" />
+    <Compile Include="Model\View\IconCache.cs" />
+    <Compile Include="Model\Data\Nodes\FileNode.cs" />
+    <Compile Include="Model\Data\Nodes\FileNodeBase.cs" />
+    <Compile Include="Model\Data\Nodes\FileNodeBase.Flags.cs" />
+    <Compile Include="Model\Data\Nodes\FileNodeEvents.cs" />
+    <Compile Include="Model\Data\Nodes\FileNodeFlags.cs" />
+    <Compile Include="Model\Data\Nodes\FolderNode.cs" />
+    <Compile Include="Model\Data\Nodes\FolderNode.Flags.cs" />
+    <Compile Include="Model\Data\Nodes\FreeSpaceNode.cs" />
+    <Compile Include="Model\Data\Nodes\RootNode.cs" />
+    <Compile Include="Model\Data\Nodes\UnknownNode.cs" />
+    <Compile Include="Model\ObservableObject.cs" />
+    <Compile Include="Model\RelayCommand.cs" />
+    <Compile Include="Model\RelayUIBinding.cs" />
+    <Compile Include="Model\RelayUICommand.cs" />
+    <Compile Include="Model\Data\ScanState.cs" />
+    <Compile Include="Model\Settings\WinDirStatSettings.cs" />
+    <Compile Include="Model\Settings\WinDirStatSettings.Defaults.cs" />
+    <Compile Include="Model\Settings\WinDirStatSettings.IO.cs" />
+    <Compile Include="Model\Data\WinDirStatModel.cs" />
+    <Compile Include="Model\Data\WinDirStatModel.Scanning.Private.cs" />
+    <Compile Include="Model\Data\WinDirStatModel.Scanning.Mft.cs" />
+    <Compile Include="Model\Data\WinDirStatModel.Scanning.Native.cs" />
+    <Compile Include="Model\Data\WinDirStatModel.Scanning.cs" />
+    <Compile Include="Model\View\Extensions\ExtensionRecordsViewModel.cs" />
+    <Compile Include="Model\View\Extensions\ExtensionRecordViewModel.cs" />
+    <Compile Include="Model\View\Nodes\Collections\EmptyFileNodeCollection.cs" />
+    <Compile Include="Model\View\Nodes\Collections\FileNodeCollection.cs" />
+    <Compile Include="Model\View\Nodes\Collections\IFileNodeCollection.cs" />
+    <Compile Include="Model\View\Nodes\FileNodeViewModel.FlatList.cs" />
+    <Compile Include="Model\View\Nodes\FileNodeViewModel.TreeNode.cs" />
+    <Compile Include="Model\View\Nodes\FileNodeViewModel.cs" />
+    <Compile Include="Model\View\Nodes\TreeFlattener.cs" />
+    <Compile Include="Model\View\WinDirStatViewModel.Commands.cs" />
+    <Compile Include="Model\View\WinDirStatViewModel.cs" />
+    <Compile Include="Resources\Images.cs" />
     <Compile Include="Settings\Geometry\Point2F.cs" />
     <Compile Include="Settings\Geometry\Point2I.cs" />
     <Compile Include="Settings\Geometry\Rectangle2I.cs" />
     <Compile Include="Settings\Geometry\Rgb24Color.cs" />
-    <Compile Include="Settings\WinDirSettings.Defaults.cs" />
-    <Compile Include="Settings\WinDirSettings.IO.cs" />
-    <Compile Include="Utils\BitField16.cs" />
-    <Compile Include="Utils\BitField32.cs" />
+    <None Include="Utils\BitField16.cs" />
+    <None Include="Utils\BitField32.cs" />
     <Compile Include="Utils\MathUtils.cs" />
     <Compile Include="Settings\IconCacheMode.cs" />
     <Compile Include="Settings\Geometry\Rectangle2S.cs" />
@@ -101,14 +155,20 @@
     <Compile Include="Utils\Native\Win32.Shell.cs" />
     <Compile Include="Utils\Native\Win32.SHGetStockIconInfo.cs" />
     <Compile Include="Utils\Native\Win32.Windows.cs" />
-    <Compile Include="Utils\SpeedTester.cs" />
+    <None Include="Utils\SpeedTester.cs" />
     <Compile Include="Utils\Native\Win32.cs" />
     <Compile Include="Utils\Native\Win32.SHGetFileInfo.cs" />
     <Compile Include="Utils\Native\Win32Extensions.cs" />
+    <Compile Include="Utils\WpfExtensions.cs" />
+    <Compile Include="WinDirStatWindow.xaml.cs">
+      <DependentUpon>WinDirStatWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\DriveSelectDialog.xaml.cs">
+      <DependentUpon>DriveSelectDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\FolderBrowserDialog.cs" />
     <Compile Include="Drawing\ITreemapItem.cs" />
     <Compile Include="Drawing\PreviewTreemapItem.cs" />
-    <Compile Include="Data\ExtensionRecordComparer.cs" />
     <Compile Include="Sorting\SortView.cs" />
     <Compile Include="Sorting\SortViewColumn.cs" />
     <Compile Include="Sorting\SortListView.cs" />
@@ -121,19 +181,8 @@
     <Compile Include="Converters\CollapsedWhenBoolean.cs" />
     <Compile Include="Converters\ScanTimeFormatter.cs" />
     <Compile Include="Converters\TextToHorizontalAlignment.cs" />
-    <Compile Include="Data\FileEnumerator.Native.cs" />
-    <Compile Include="Data\Nodes\FileNodeBase.VisualInfo.cs" />
-    <Compile Include="Settings\WinDirSettings.cs" />
     <Compile Include="Utils\ListExtensions.cs" />
-    <Compile Include="Utils\CompactList.cs" />
-    <Compile Include="Utils\TimedLock.cs" />
-    <Compile Include="Data\ExtensionRecords.cs" />
-    <Compile Include="Data\FileEnumerator.cs" />
-    <Compile Include="Data\IconCache.cs" />
-    <Compile Include="Data\SortMethods.cs" />
-    <Compile Include="Data\Nodes\Collections\FileNodeCollection.cs" />
-    <Compile Include="Data\Nodes\FileNodeComparer.cs" />
-    <Compile Include="Data\Nodes\FreeSpaceNode.cs" />
+    <None Include="Utils\TimedLock.cs" />
     <Compile Include="Settings\Geometry\Rgba32Color.cs" />
     <Compile Include="TreeView\EditTextBox.cs" />
     <Compile Include="TreeView\ExtensionMethods.cs" />
@@ -141,17 +190,9 @@
     <Compile Include="TreeView\InsertMarker.cs" />
     <Compile Include="TreeView\LinesRenderer.cs" />
     <Compile Include="TreeView\FileGridView.cs" />
-    <Compile Include="TreeView\FileNodeView.cs" />
+    <Compile Include="TreeView\FileTreeNodeView.cs" />
     <Compile Include="TreeView\FileTreeView.cs" />
     <Compile Include="TreeView\FileTreeViewItem.cs" />
-    <Compile Include="Data\Nodes\Collections\IFileNodeCollection.cs" />
-    <Compile Include="TreeView\TreeTraversal.cs" />
-    <Compile Include="TreeView\TreeFlattener.cs" />
-    <Compile Include="Data\WinDirDocument.cs" />
-    <Compile Include="Data\Nodes\Collections\EmptyFileNodeCollection.cs" />
-    <Compile Include="Data\Nodes\FolderNode.cs" />
-    <Compile Include="Data\Nodes\FileNodeBase.cs" />
-    <Compile Include="Data\Nodes\RootNode.cs" />
     <Compile Include="Utils\BitmapUtils.cs" />
     <Compile Include="Converters\EmptyWhenNegative.cs" />
     <Compile Include="Controls\SubtreePercentage.cs" />
@@ -159,27 +200,13 @@
     <Compile Include="Converters\ByteFormatter.cs" />
     <Compile Include="Utils\ByteFormatter.cs" />
     <Compile Include="Utils\PathUtils.cs" />
-    <Compile Include="Windows\SelectDriveComparer.cs" />
-    <Compile Include="Windows\SelectDrivesDialog.xaml.cs">
-      <DependentUpon>SelectDrivesDialog.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Utils\WindowExtensions.cs" />
-    <Compile Include="Windows\SelectDrivesDocument.cs" />
-    <Compile Include="Windows\SelectDrivesList.cs" />
     <Page Include="Controls\GraphView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Themes\Generic.xaml">
@@ -191,7 +218,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Windows\SelectDrivesDialog.xaml">
+    <Page Include="WinDirStatWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\DriveSelectDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -205,6 +236,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="packages.config" />
     <None Include="Properties\App.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -215,6 +247,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FunctionalFun.UI.Behaviours\FunctionalFun.UI.Behaviors.csproj">
+      <Project>{7da5a107-b474-4ac0-b861-63a489db0c02}</Project>
+      <Name>FunctionalFun.UI.Behaviors</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NtfsReader\NtfsReader.csproj">
       <Project>{dbacefc5-0234-4317-b096-f212ecae1dd1}</Project>
       <Name>NtfsReader</Name>
@@ -239,12 +275,34 @@
     <Resource Include="Resources\FileIcons\UnknownSpace2.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Icons\Delete.png" />
+    <Resource Include="Resources\Icons\DeleteFolder.png" />
     <Resource Include="Resources\Icons\Exit.png" />
     <Resource Include="Resources\Icons\Recycle.png" />
-    <Resource Include="Resources\Icons\Refresh.png" />
+    <Resource Include="Resources\Icons\Reload.png" />
     <Resource Include="Resources\Icons\Save.png" />
     <Resource Include="Resources\Icons\Search.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Cmd.png" />
+    <Resource Include="Resources\Icons\CmdElevated.png" />
+    <Resource Include="Resources\Icons\Copy.png" />
+    <Resource Include="Resources\Icons\Cut.png" />
+    <Resource Include="Resources\Icons\Delete.png" />
+    <Resource Include="Resources\Icons\DeleteRecycleBin.png" />
+    <Resource Include="Resources\Icons\Elevate.png" />
+    <Resource Include="Resources\Icons\Expand.png" />
+    <Resource Include="Resources\Icons\Explore.png" />
+    <Resource Include="Resources\Icons\Paste.png" />
+    <Resource Include="Resources\Icons\Path.png" />
+    <Resource Include="Resources\Icons\PowerShell.png" />
+    <Resource Include="Resources\Icons\PowerShellElevated.png" />
+    <Resource Include="Resources\Icons\Properties.png" />
+    <Resource Include="Resources\Icons\Redo.png" />
+    <Resource Include="Resources\Icons\RefreshSelected.png" />
+    <Resource Include="Resources\Icons\Run.png" />
+    <Resource Include="Resources\Icons\Settings.png" />
+    <Resource Include="Resources\Icons\Undo.png" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

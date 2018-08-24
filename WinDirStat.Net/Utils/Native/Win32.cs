@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace WinDirStat.Net.Utils.Native {
-	internal static partial class Win32 {
+	public static partial class Win32 {
 
 		/// <summary>An invalid handle value of -1 returned from some functions.</summary>
 		public static readonly IntPtr InvalidHandle = new IntPtr(-1);

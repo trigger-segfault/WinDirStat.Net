@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Markup;
-using WinDirStat.Net.Data.Nodes;
 using WinDirStat.Net.Utils;
 
 namespace WinDirStat.Net.Converters {

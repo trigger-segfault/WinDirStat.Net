@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using WinDirStat.Net.Utils;
 
 namespace WinDirStat.Net.Controls {
 	/// <summary>A menu item with easy access for setting its icon.</summary>
@@ -26,18 +27,17 @@ namespace WinDirStat.Net.Controls {
 
 		/// <summary>Called when the source property for the menu item is changed.</summary>
 		private static void OnSourceChanged(object sender, DependencyPropertyChangedEventArgs e) {
-			ImageMenuItem element = sender as ImageMenuItem;
-			if (element != null) {
-				element.image.Source = element.Source;
-			}
+			ImageMenuItem menuItem = (ImageMenuItem) sender;
+			menuItem.image.Source = menuItem.Source;
 		}
 
-		/// <summary>Called when the icon property for the menu item is changed.</summary>
-		private static void OnIconChanged(object sender, DependencyPropertyChangedEventArgs e) {
-			ImageMenuItem element = sender as ImageMenuItem;
-			if (element != null && element.Icon != element.image) {
-				element.Icon = element.image;
+		private static object CoerceIcon(DependencyObject d, object value) {
+			ImageMenuItem menuItem = (ImageMenuItem) d;
+
+			if (menuItem.IsValueUnsetAndNull(IconProperty, value)) {
+				return menuItem.image;
 			}
+			return value;
 		}
 
 		/// <summary>The image that contains the menu item's icon.</summary>
@@ -48,7 +48,7 @@ namespace WinDirStat.Net.Controls {
 			//DefaultStyleKeyProperty.OverrideMetadata(typeof(ImageMenuItem),
 			//		   new FrameworkPropertyMetadata(typeof(ImageMenuItem)));
 			IconProperty.OverrideMetadata(typeof(ImageMenuItem),
-				new FrameworkPropertyMetadata(OnIconChanged));
+				new FrameworkPropertyMetadata(null, CoerceIcon));
 		}
 
 		/// <summary>Constructs an empty menu item.</summary>
@@ -60,13 +60,13 @@ namespace WinDirStat.Net.Controls {
 		}
 
 		/// <summary>Constructs an menu item with an image and name.</summary>
-		public ImageMenuItem(ImageSource source, string name) {
+		public ImageMenuItem(ImageSource source, string header) {
 			image = new Image() {
 				Stretch = Stretch.None,
 				Source = source,
 			};
 			Icon = image;
-			Header = name;
+			Header = header;
 		}
 	}
 }

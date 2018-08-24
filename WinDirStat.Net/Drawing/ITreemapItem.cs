@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WinDirStat.Net.Data.Nodes;
 using WinDirStat.Net.Settings.Geometry;
 
 namespace WinDirStat.Net.Drawing {

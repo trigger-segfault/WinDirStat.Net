@@ -24,7 +24,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Data;
 using System.Windows;
-using WinDirStat.Net.Data.Nodes;
+using WinDirStat.Net.Model.View.Nodes;
 
 namespace WinDirStat.Net.TreeView {
 	class EditTextBox : TextBox {
@@ -39,7 +39,7 @@ namespace WinDirStat.Net.TreeView {
 
 		public FileTreeViewItem Item { get; set; }
 
-		public FileNodeBase Node {
+		public FileNodeViewModel Node {
 			get { return Item.Node; }
 		}
 
@@ -74,7 +74,7 @@ namespace WinDirStat.Net.TreeView {
 				if (!Node.SaveEditText(Text)) {
 					Item.Focus();
 				}
-				Node.RaisePropertyChanged("Text");
+				//Node.RaisePropertyChanged("Text");
 
 				//if (Node.SaveEditText(Text)) {
 				//    Node.IsEditing = false;

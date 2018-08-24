@@ -19,8 +19,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using WinDirStat.Net.Data;
-using WinDirStat.Net.Data.Nodes;
 using WinDirStat.Net.Drawing;
 using WinDirStat.Net.Settings;
 using WinDirStat.Net.Settings.Geometry;
@@ -31,6 +29,9 @@ using Brush = System.Drawing.Brush;
 using Pen = System.Drawing.Pen;
 using Color = System.Drawing.Color;
 using Rectangle = System.Drawing.Rectangle;
+using WinDirStat.Net.Model.Data.Nodes;
+using WinDirStat.Net.Model.View;
+using WinDirStat.Net.Model.Settings;
 
 namespace WinDirStat.Net.Controls {
 	public class GraphViewHoverEventArgs : RoutedEventArgs {
@@ -223,30 +224,30 @@ namespace WinDirStat.Net.Controls {
 
 		private static void OnDataContextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
 			if (d is GraphView graphView) {
-				WinDirDocument oldDocument = e.OldValue as WinDirDocument;
-				WinDirDocument newDocument = e.NewValue as WinDirDocument;
-				if (oldDocument != null)
-					oldDocument.Settings.PropertyChanged -= graphView.OnSettingsChanged;
-				if (newDocument != null)
-					newDocument.Settings.PropertyChanged += graphView.OnSettingsChanged;
-				graphView.document = newDocument;
+				WinDirStatViewModel oldViewModel = e.OldValue as WinDirStatViewModel;
+				WinDirStatViewModel newViewModel = e.NewValue as WinDirStatViewModel;
+				if (oldViewModel != null)
+					oldViewModel.Settings.PropertyChanged -= graphView.OnSettingsChanged;
+				if (newViewModel != null)
+					newViewModel.Settings.PropertyChanged += graphView.OnSettingsChanged;
+				graphView.viewModel = newViewModel;
 			}
 		}
 
 		private void OnSettingsChanged(object sender, PropertyChangedEventArgs e) {
 			switch (e.PropertyName) {
-			case nameof(WinDirSettings.TreemapOptions):
-			case nameof(WinDirSettings.FilePalette):
+			case nameof(WinDirStatSettings.TreemapOptions):
+			case nameof(WinDirStatSettings.FilePalette):
 				RenderAsync();
 				break;
-			case nameof(WinDirSettings.HighlightColor):
+			case nameof(WinDirStatSettings.HighlightColor):
 				if (highlightMode != HighlightMode.None)
 					RenderHighlight(treemapSize);
 				break;
 			}
 		}
 
-		public static readonly WinDirSettings DefaultSettings = new WinDirSettings(null);
+		public static readonly WinDirStatSettings DefaultSettings = new WinDirStatSettings(null);
 
 		private Point2I treemapSize;
 		private WriteableBitmap treemap;
@@ -264,7 +265,7 @@ namespace WinDirStat.Net.Controls {
 		private volatile bool treemapRendered;
 		private volatile bool fullRender;
 		//private TreemapOptions options;
-		private WinDirDocument document;
+		private WinDirStatViewModel viewModel;
 
 		private readonly object renderLock = new object();
 		private readonly object drawBitmapLock = new object();
@@ -358,8 +359,8 @@ namespace WinDirStat.Net.Controls {
 		private bool IsActuallyRenderingFull {
 			get => renderThread?.IsAlive ?? false && fullRender;
 		}
-		private WinDirSettings Settings {
-			get => document?.Settings ?? DefaultSettings;
+		private WinDirStatSettings Settings {
+			get => viewModel?.Settings ?? DefaultSettings;
 		}
 		private TreemapOptions Options {
 			get => Settings.TreemapOptions;

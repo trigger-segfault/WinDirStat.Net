@@ -32,8 +32,8 @@ namespace WinDirStat.Net.TreeView {
 
 		static Pen pen;
 
-		FileNodeView NodeView {
-			get { return TemplatedParent as FileNodeView; }
+		FileTreeNodeView NodeView {
+			get { return TemplatedParent as FileTreeNodeView; }
 		}
 
 		protected override void OnRender(DrawingContext dc) {

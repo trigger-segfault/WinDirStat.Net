@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinDirStat.Net", "WinDirSta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NtfsReader", "NtfsReader\NtfsReader.csproj", "{DBACEFC5-0234-4317-B096-F212ECAE1DD1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunctionalFun.UI.Behaviors", "FunctionalFun.UI.Behaviours\FunctionalFun.UI.Behaviors.csproj", "{7DA5A107-B474-4AC0-B861-63A489DB0C02}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{DBACEFC5-0234-4317-B096-F212ECAE1DD1}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{DBACEFC5-0234-4317-B096-F212ECAE1DD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBACEFC5-0234-4317-B096-F212ECAE1DD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DA5A107-B474-4AC0-B861-63A489DB0C02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DA5A107-B474-4AC0-B861-63A489DB0C02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DA5A107-B474-4AC0-B861-63A489DB0C02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DA5A107-B474-4AC0-B861-63A489DB0C02}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

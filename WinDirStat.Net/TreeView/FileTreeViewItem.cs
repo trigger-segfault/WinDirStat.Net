@@ -25,7 +25,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Diagnostics;
-using WinDirStat.Net.Data.Nodes;
+using WinDirStat.Net.Model.View.Nodes;
 
 namespace WinDirStat.Net.TreeView {
 	public class FileTreeViewItem : ListViewItem {
@@ -34,11 +34,11 @@ namespace WinDirStat.Net.TreeView {
 													 new FrameworkPropertyMetadata(typeof(FileTreeViewItem)));
 		}
 
-		public FileNodeBase Node {
-			get { return DataContext as FileNodeBase; }
+		public FileNodeViewModel Node {
+			get { return DataContext as FileNodeViewModel; }
 		}
 
-		public FileNodeView NodeView { get; internal set; }
+		public FileTreeNodeView NodeView { get; internal set; }
 		public FileTreeView ParentTreeView { get; internal set; }
 
 		protected override void OnKeyDown(KeyEventArgs e) {

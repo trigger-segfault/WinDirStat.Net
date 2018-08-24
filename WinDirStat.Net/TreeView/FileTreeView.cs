@@ -32,8 +32,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using WinDirStat.Net.Controls;
-using WinDirStat.Net.Data.Nodes;
+using WinDirStat.Net.Model.View.Nodes;
 using WinDirStat.Net.SortingView;
+using WinDirStat.Net.Utils;
 
 namespace WinDirStat.Net.TreeView {
 	public class FileTreeView : SortListView {
@@ -63,10 +64,10 @@ namespace WinDirStat.Net.TreeView {
 		}
 
 		public static readonly DependencyProperty RootProperty =
-			DependencyProperty.Register("Root", typeof(FileNodeBase), typeof(FileTreeView));
+			DependencyProperty.Register("Root", typeof(FileNodeViewModel), typeof(FileTreeView));
 
-		public RootNode Root {
-			get => (RootNode) GetValue(RootProperty);
+		public FileNodeViewModel Root {
+			get => (FileNodeViewModel) GetValue(RootProperty);
 			set => SetValue(RootProperty, value);
 		}
 
@@ -146,23 +147,23 @@ namespace WinDirStat.Net.TreeView {
 		void Flattener_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
 			// Deselect nodes that are being hidden, if any remain in the tree
 			if (e.Action == NotifyCollectionChangedAction.Remove && Items.Count > 0) {
-				List<FileNodeBase> selectedOldItems = null;
-				foreach (FileNodeBase node in e.OldItems) {
+				List<FileNodeViewModel> selectedOldItems = null;
+				foreach (FileNodeViewModel node in e.OldItems) {
 					if (node.IsSelected) {
 						if (selectedOldItems == null)
-							selectedOldItems = new List<FileNodeBase>();
+							selectedOldItems = new List<FileNodeViewModel>();
 						selectedOldItems.Add(node);
 					}
 				}
 				if (selectedOldItems != null) {
-					var list = SelectedItems.Cast<FileNodeBase>().Except(selectedOldItems).ToList();
+					var list = SelectedItems.Cast<FileNodeViewModel>().Except(selectedOldItems).ToList();
 					SetSelectedItems(list);
 					if (SelectedItem == null && this.IsKeyboardFocusWithin) {
 						// if we removed all selected nodes, then move the focus to the node
 						// preceding the first of the old selected nodes
 						SelectedIndex = Math.Max(0, e.OldStartingIndex - 1);
 						if (SelectedIndex >= 0)
-							FocusNode((FileNodeBase) SelectedItem);
+							FocusNode((FileNodeViewModel) SelectedItem);
 					}
 				}
 			}
@@ -192,7 +193,7 @@ namespace WinDirStat.Net.TreeView {
 		/// Handles the node expanding event in the tree view.
 		/// This method gets called only if the node is in the visible region (a SharpTreeNodeView exists).
 		/// </summary>
-		internal void HandleExpanding(FileNodeBase node) {
+		internal void HandleExpanding(FileNodeViewModel node) {
 			if (doNotScrollOnExpanding)
 				return;
 			/*FileNode lastVisibleChild = node;
@@ -298,10 +299,10 @@ namespace WinDirStat.Net.TreeView {
 				base.OnKeyDown(e);
 		}
 
-		void ExpandRecursively(FileNodeBase node) {
+		void ExpandRecursively(FileNodeViewModel node) {
 			if (node.CanExpandRecursively) {
 				node.IsExpanded = true;
-				foreach (FileNodeBase child in node.Children) {
+				foreach (FileNodeViewModel child in node.Children) {
 					ExpandRecursively(child);
 				}
 			}
@@ -310,7 +311,7 @@ namespace WinDirStat.Net.TreeView {
 		/// <summary>
 		/// Scrolls the specified node in view and sets keyboard focus on it.
 		/// </summary>
-		public void FocusNode(FileNodeBase node) {
+		public void FocusNode(FileNodeViewModel node) {
 			if (node == null)
 				throw new ArgumentNullException("node");
 			ScrollIntoView(node);
@@ -323,19 +324,18 @@ namespace WinDirStat.Net.TreeView {
 			}
 		}
 
-		public void ScrollIntoView(FileNodeBase node) {
+		public void ScrollIntoView(FileNodeViewModel node) {
 			if (node == null)
 				throw new ArgumentNullException("node");
 			doNotScrollOnExpanding = true;
-			foreach (FileNodeBase ancestor in node.VirtualAncestors())
+			foreach (FileNodeViewModel ancestor in node.Ancestors())
 				ancestor.IsExpanded = true;
 			doNotScrollOnExpanding = false;
 			base.ScrollIntoView(node);
 		}
 
 		object OnFocusItem(object item) {
-			FrameworkElement element = this.ItemContainerGenerator.ContainerFromItem(item) as FrameworkElement;
-			if (element != null) {
+			if (ItemContainerGenerator.ContainerFromItem(item) is FrameworkElement element) {
 				element.Focus();
 				Keyboard.Focus(element);
 			}
@@ -345,10 +345,10 @@ namespace WinDirStat.Net.TreeView {
 		#region Track selection
 
 		protected override void OnSelectionChanged(SelectionChangedEventArgs e) {
-			foreach (FileNodeBase node in e.RemovedItems) {
+			foreach (FileNodeViewModel node in e.RemovedItems) {
 				node.IsSelected = false;
 			}
-			foreach (FileNodeBase node in e.AddedItems) {
+			foreach (FileNodeViewModel node in e.AddedItems) {
 				node.IsSelected = true;
 			}
 			base.OnSelectionChanged(e);
@@ -689,9 +689,9 @@ namespace WinDirStat.Net.TreeView {
 		/// <summary>
 		/// Gets the selected items which do not have any of their ancestors selected.
 		/// </summary>
-		public IEnumerable<FileNodeBase> GetTopLevelSelection() {
-			var selection = this.SelectedItems.OfType<FileNodeBase>();
-			var selectionHash = new HashSet<FileNodeBase>(selection);
+		public IEnumerable<FileNodeViewModel> GetTopLevelSelection() {
+			var selection = this.SelectedItems.OfType<FileNodeViewModel>();
+			var selectionHash = new HashSet<FileNodeViewModel>(selection);
 			return selection.Where(item => item.Ancestors().All(a => !selectionHash.Contains(a)));
 		}
 

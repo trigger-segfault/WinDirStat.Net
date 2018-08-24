@@ -8,8 +8,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using WinDirStat.Net.Data.Nodes;
-using WinDirStat.Net.TreeView;
+using WinDirStat.Net.Model.View.Nodes;
+//using WinDirStat.Net.TreeView;
 
 namespace WinDirStat.Net.Controls {
 	public class SubtreePercentage : Control {
@@ -66,11 +66,11 @@ namespace WinDirStat.Net.Controls {
 			}
 		}
 
-		public FileNodeBase Node {
-			get => ((FileNodeBase) DataContext);
+		public FileNodeViewModel Node {
+			get => ((FileNodeViewModel) DataContext);
 		}
 
-		public FileTreeViewItem ParentItem { get; private set; }
+		/*public FileTreeViewItem ParentItem { get; private set; }
 
 		public FileTreeView ParentTreeView {
 			get { return ParentItem.ParentTreeView; }
@@ -79,16 +79,16 @@ namespace WinDirStat.Net.Controls {
 		protected override void OnVisualParentChanged(DependencyObject oldParent) {
 			base.OnVisualParentChanged(oldParent);
 			ParentItem = this.FindAncestor<FileTreeViewItem>();
-		}
+		}*/
 
 		protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e) {
 			base.OnPropertyChanged(e);
 			if (e.Property == DataContextProperty) {
-				UpdateDataContext(e.OldValue as FileNodeBase, e.NewValue as FileNodeBase);
+				UpdateDataContext(e.OldValue as FileNodeViewModel, e.NewValue as FileNodeViewModel);
 			}
 		}
 
-		void UpdateDataContext(FileNodeBase oldNode, FileNodeBase newNode) {
+		void UpdateDataContext(FileNodeViewModel oldNode, FileNodeViewModel newNode) {
 			if (newNode != null && Template != null) {
 				UpdateTemplate();
 			}
@@ -101,7 +101,7 @@ namespace WinDirStat.Net.Controls {
 			double intent = CalculateIndent(level);
 			spacer.Width = new GridLength(1d - intent, GridUnitType.Star);
 			filler.Width = new GridLength(intent, GridUnitType.Star);
-			Fill = new SolidColorBrush((Color) Node.Root.Document.Settings.GetSubtreePaletteColor(level));
+			Fill = new SolidColorBrush((Color) Node.ViewModel.Settings.GetSubtreePaletteColor(level));
 		}
 
 		private const double IndentRatio = 9d / 10d;

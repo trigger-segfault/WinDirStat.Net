@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel;
 using System.Windows.Forms;
-using Window = System.Windows.Window;
-using FormsFolderBrowserDialog = System.Windows.Forms.FolderBrowserDialog;
 using System.Windows.Interop;
 using System.Runtime.InteropServices;
-using System.ComponentModel;
+using FormsFolderBrowserDialog = System.Windows.Forms.FolderBrowserDialog;
+using Window = System.Windows.Window;
 
 namespace WinDirStat.Net.Windows {
 	/// <summary>

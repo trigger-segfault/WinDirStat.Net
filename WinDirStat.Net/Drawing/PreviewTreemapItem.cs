@@ -5,8 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WinDirStat.Net.Data;
-using WinDirStat.Net.Data.Nodes;
 using WinDirStat.Net.Settings.Geometry;
 using WinDirStat.Net.Utils;
 

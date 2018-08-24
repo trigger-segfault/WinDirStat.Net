@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
 namespace WinDirStat.Net.Utils.Native {
-	internal static partial class Win32 {
+	public static partial class Win32 {
 
 		/// <summary>
 		/// Searches a directory for a file or subdirectory with a name and attributes that match those

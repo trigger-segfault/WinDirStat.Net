@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace WinDirStat.Net.Utils.Native {
-	internal static partial class Win32 {
+	public static partial class Win32 {
 
 		/// <summary>Contains information about a file object.</summary>
 		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]

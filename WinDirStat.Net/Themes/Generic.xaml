@@ -4,15 +4,15 @@
                     xmlns:conv="clr-namespace:WinDirStat.Net.Converters"
                     xmlns:tree="clr-namespace:WinDirStat.Net.TreeView"
                     xmlns:sort="clr-namespace:WinDirStat.Net.SortingView"
-                    xmlns:data="clr-namespace:WinDirStat.Net.Data"
+                    xmlns:icon="clr-namespace:WinDirStat.Net.Model.View"
                     xmlns:System="clr-namespace:System;assembly=mscorlib"
                     xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2">
 
-    <BitmapImage x:Key="ShortcutIcon" UriSource="pack://application:,,,/WinDirStat.Net;component/Resources/FileIcons/Shortcut.png"/>
+    <!--<BitmapImage x:Key="ShortcutIcon" UriSource="pack://application:,,,/WinDirStat.Net;component/Resources/FileIcons/Shortcut.png"/>-->
     <Style TargetType="{x:Type local:SubtreePercentage}">
         <Setter Property="Focusable"
                 Value="False" />
-        <Setter Property="Margin" Value="2"/>
+        <Setter Property="Margin" Value="0,2"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="Background" Value="#FFE1E1E1"/>
         <Setter Property="BorderBrush" Value="#FFC6C6C6"/>
@@ -46,7 +46,7 @@
     <Style TargetType="{x:Type local:PercentageBar}">
         <Setter Property="Focusable"
                 Value="False" />
-        <Setter Property="Margin" Value="2"/>
+        <Setter Property="Margin" Value="0,2"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="Background" Value="#FFE1E1E1"/>
         <Setter Property="BorderBrush" Value="#FFC6C6C6"/>
@@ -336,7 +336,7 @@
                 <ControlTemplate TargetType="{x:Type tree:FileTreeViewItem}">
                     <Border Background="Transparent">
                         <Border Background="{TemplateBinding Background}">
-                            <tree:FileNodeView x:Name="nodeView"
+                            <tree:FileTreeNodeView x:Name="nodeView"
                                                        Foreground="{Binding Foreground}"
                                                        HorizontalAlignment="Left" />
                         </Border>
@@ -377,13 +377,13 @@
         </Setter>
     </Style>
 
-    <Style TargetType="{x:Type tree:FileNodeView}">
+    <Style TargetType="{x:Type tree:FileTreeNodeView}">
         <Setter Property="Focusable"
                 Value="False" />
         <Setter Property="Height" Value="20"/>
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type tree:FileNodeView}">
+                <ControlTemplate TargetType="{x:Type tree:FileTreeNodeView}">
                     <Grid>
                         <tree:LinesRenderer x:Name="linesRenderer"
                                                ClipToBounds="True"
@@ -397,7 +397,7 @@
                                           Margin="0 0 6 0"
                                           VerticalAlignment="Center" />
                             <DockPanel Background="Transparent"
-                                       ToolTip="{Binding Path}">
+                                       ToolTip="{Binding ToolTip}">
                                 <Grid>
                                     <Image Name="icon"
                                            Source="{Binding Icon}"
@@ -407,7 +407,7 @@
                                            VerticalAlignment="Center"
                                            Focusable="False"/>
                                     <Image Name="shortcut"
-                                           Source="{x:Static data:IconCache.ShortcutIcon}"
+                                           Source="{x:Static icon:IconCache.ShortcutIcon}"
                                            Width="16"
                                            Height="16"
                                            Margin="0 0 5 1"

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace WinDirStat.Net.Utils.Native {
-	internal static partial class Win32 {
+	public static partial class Win32 {
 		[DllImport("comctl32.dll", SetLastError = true)]
 		public static extern int ImageList_GetImageCount(
 			IntPtr hImageList);

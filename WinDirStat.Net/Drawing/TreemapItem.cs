@@ -1,8 +1,7 @@
 ﻿using System.IO;
 using System.Collections.Generic;
-using WinDirStat.Net.Data.Nodes;
 using WinDirStat.Net.Settings.Geometry;
-using WinDirStat.Net.Data;
+using WinDirStat.Net.Model.Data.Nodes;
 
 namespace WinDirStat.Net.Drawing {
 	public class TreemapItem : ITreemapItem {
@@ -60,7 +59,7 @@ namespace WinDirStat.Net.Drawing {
 			item.parent = this;
 		}
 
-		public void Validate(WinDirDocument document) {
+		/*public void Validate(WinDirDocument document) {
 			size = 0;
 			color = document.Extensions[extension].Color;
 			for (int i = 0; i < children.Count; i++) {
@@ -72,7 +71,7 @@ namespace WinDirStat.Net.Drawing {
 				size += child.size;
 			}
 			children.Sort(Compare);
-		}
+		}*/
 
 		private int Compare(TreemapItem a, TreemapItem b) {
 			int diff = b.Size.CompareTo(a.Size);

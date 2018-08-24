@@ -15,6 +15,7 @@ using WinDirStat.Net.Settings.Geometry;
 using WinDirStat.Net.Settings;
 using System.Threading;
 using System.Drawing;
+using WinDirStat.Net.Model.Settings;
 
 namespace WinDirStat.Net.Drawing {
 	public partial class Treemap {
@@ -859,7 +860,7 @@ namespace WinDirStat.Net.Drawing {
 		}
 
 		private unsafe void DrawSolidRect(Rgba32Color* bitmap, Rectangle2I rc, Rgba32Color color, float brightness) {
-			float factor = brightness / WinDirSettings.PaletteBrightness;
+			float factor = brightness / WinDirStatSettings.PaletteBrightness;
 
 			int red = (int) (color.R * factor);
 			int green = (int) (color.G * factor);
@@ -903,7 +904,7 @@ namespace WinDirStat.Net.Drawing {
 					// pixel= pow(pixel, m_options->contrast);
 
 					// Apply "brightness"
-					pixel *= brightness / WinDirSettings.PaletteBrightness;
+					pixel *= brightness / WinDirStatSettings.PaletteBrightness;
 
 					int red = (int) (r * pixel);
 					int green = (int) (g * pixel);

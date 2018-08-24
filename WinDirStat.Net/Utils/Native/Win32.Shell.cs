@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace WinDirStat.Net.Utils.Native {
-	internal static partial class Win32 {
+	public static partial class Win32 {
 
 		/// <summary>
 		/// Requests the form of an item's display name to retrieve through <see cref="SHGetNameFromIDList"

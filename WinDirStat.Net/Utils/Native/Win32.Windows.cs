@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 
 namespace WinDirStat.Net.Utils.Native {
-	internal static partial class Win32 {
+	public static partial class Win32 {
 
 		public enum WindowLongs : int {
 			ExStyle = -20,

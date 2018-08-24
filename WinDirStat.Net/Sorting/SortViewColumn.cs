@@ -48,11 +48,11 @@ namespace WinDirStat.Net.SortingView {
 		}
 
 		public static readonly DependencyProperty SortModeProperty =
-			DependencyProperty.Register("SortMode", typeof(object), typeof(SortViewColumn),
+			DependencyProperty.Register("SortMode", typeof(string), typeof(SortViewColumn),
 				new FrameworkPropertyMetadata(null));
 
-		public object SortMode {
-			get => GetValue(SortModeProperty);
+		public string SortMode {
+			get => (string) GetValue(SortModeProperty);
 			set => SetValue(SortModeProperty, value);
 		}
 

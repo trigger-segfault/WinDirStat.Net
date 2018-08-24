@@ -109,7 +109,7 @@ namespace WinDirStat.Net.SortingView {
 
 		public static readonly DependencyProperty SortDirectionProperty =
 			DependencyProperty.Register("SortDirection", typeof(ListSortDirection), typeof(SortListView),
-				new FrameworkPropertyMetadata(ListSortDirection.Ascending, OnSortChanged));
+				new FrameworkPropertyMetadata(ListSortDirection.Ascending, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSortChanged));
 
 		public ListSortDirection SortDirection {
 			get => (ListSortDirection) GetValue(SortDirectionProperty);
@@ -117,11 +117,11 @@ namespace WinDirStat.Net.SortingView {
 		}
 
 		public static readonly DependencyProperty SortModeProperty =
-			DependencyProperty.Register("SortMode", typeof(object), typeof(SortListView),
-				new FrameworkPropertyMetadata(null));
+			DependencyProperty.Register("SortMode", typeof(string), typeof(SortListView),
+				new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
-		public object SortMode {
-			get => GetValue(SortModeProperty);
+		public string SortMode {
+			get => (string) GetValue(SortModeProperty);
 			set => SetValue(SortModeProperty, value);
 		}
 
@@ -218,8 +218,8 @@ namespace WinDirStat.Net.SortingView {
 				if (column == null)
 					return;
 
-				object oldSortMode = listView.SortMode;
-				object newSortMode = column.SortMode;
+				string oldSortMode = listView.SortMode;
+				string newSortMode = column.SortMode;
 				
 				if (!object.Equals(oldSortMode, newSortMode)) {
 					listView.SetSort(newSortMode, column.DefaultSortDirection);
@@ -250,7 +250,7 @@ namespace WinDirStat.Net.SortingView {
 			UpdateColumns();
 		}
 
-		public void SetSort(object mode, ListSortDirection direction) {
+		public void SetSort(string mode, ListSortDirection direction) {
 			// Do all this extra work to avoid triggering a sort 'only' once, if needed
 			bool newMode = !object.Equals(mode, SortMode);
 			bool newDirection = direction != SortDirection;

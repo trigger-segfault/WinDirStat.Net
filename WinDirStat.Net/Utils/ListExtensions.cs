@@ -21,5 +21,9 @@ namespace WinDirStat.Net.Utils {
 			source.RemoveRange(oldIndex, count);
 			source.InsertRange(index, items);
 		}
+
+		public static List<T> ToList<T>(this List<T> source) {
+			return source.GetRange(0, source.Count);
+		}
 	}
 }
