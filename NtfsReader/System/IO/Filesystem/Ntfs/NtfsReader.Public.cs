@@ -100,6 +100,11 @@ namespace System.IO.Filesystem.Ntfs
             get { return _diskInfo; }
         }
 
+        public int NodeCount
+        {
+            get { return _nodes.Length; }
+        }
+        
         /// <summary>
         /// Get all nodes under the specified rootPath.
         /// </summary>

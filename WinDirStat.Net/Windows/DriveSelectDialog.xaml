@@ -10,12 +10,23 @@
         xmlns:bind="clr-namespace:WinDirStat.Net.Model"
         xmlns:vm="clr-namespace:WinDirStat.Net.Model.View"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
-        xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2"
+        xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:ff="clr-namespace:FunctionalFun.UI.Behaviors;assembly=FunctionalFun.UI.Behaviors"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
         mc:Ignorable="d"
         Title="WinDirStat.Net - Select Drives" Height="313" Width="435" Icon="/WinDirStat.Net;component/App.ico" ShowInTaskbar="False" WindowStartupLocation="CenterOwner" Background="#FFF0F0F0" SnapsToDevicePixels="True" UseLayoutRounding="True" SourceInitialized="OnSourceInitialized">
+    <Window.Resources>
+        <DataTemplate x:Key="IconDisplayNameTemplate">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,5,1" VerticalAlignment="Center" Focusable="False"/>
+                <TextBlock Text="{Binding DisplayName}" Margin="2,0,6,0" VerticalAlignment="Center" Focusable="False" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="PercentageBarTemplate">
+            <local:PercentageBar Percentage="{Binding Percent}" Fill="#FF0000AA"/>
+        </DataTemplate>
+    </Window.Resources>
     <Window.DataContext>
         <vm:DriveSelectViewModel x:Name="viewModel"/>
     </Window.DataContext>
@@ -55,16 +66,9 @@
             </i:Interaction.Triggers>
             <sort:SortListView.View>
                 <sort:SortView>
-                    <sort:SortViewColumn Header="Name" Width="127" SortMode="Name">
-                        <sort:SortViewColumn.CellDataTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,5,1" VerticalAlignment="Center" Focusable="False"/>
-                                    <TextBlock Text="{Binding DisplayName}" Margin="2,0,6,0" VerticalAlignment="Center" Focusable="False" TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </sort:SortViewColumn.CellDataTemplate>
-                    </sort:SortViewColumn>
+                    <sort:SortViewColumn Header="Name" Width="127"
+                                         SortMode="Name"
+                                         CellDataTemplate="{StaticResource IconDisplayNameTemplate}"/>
                     <sort:SortViewColumn Header="Total" Width="65" TextAlignment="Right"
                                          SortMode="Total" DefaultSortDirection="Descending"
                                          CellBinding="{Binding Total, Converter={conv:ByteFormatter}}"/>
@@ -72,13 +76,8 @@
                                          SortMode="Free" DefaultSortDirection="Descending"
                                          CellBinding="{Binding Free, Converter={conv:ByteFormatter}}"/>
                     <sort:SortViewColumn Header="Used/Total" Width="80"
-                                         SortMode="UsedTotalBar" DefaultSortDirection="Descending">
-                        <sort:SortViewColumn.CellDataTemplate>
-                            <DataTemplate>
-                                <local:PercentageBar Percentage="{Binding Percent}" Fill="#FF0000AA"/>
-                            </DataTemplate>
-                        </sort:SortViewColumn.CellDataTemplate>
-                    </sort:SortViewColumn>
+                                         SortMode="UsedTotalBar" DefaultSortDirection="Descending"
+                                         CellDataTemplate="{StaticResource PercentageBarTemplate}"/>
                     <sort:SortViewColumn Header="Used/Total" Width="62" TextAlignment="Right"
                                          SortMode="UsedTotalPercent" DefaultSortDirection="Descending"
                                          CellBinding="{Binding Percent, StringFormat=P1}"/>

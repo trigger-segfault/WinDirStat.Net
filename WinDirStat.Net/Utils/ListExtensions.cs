@@ -22,7 +22,7 @@ namespace WinDirStat.Net.Utils {
 			source.InsertRange(index, items);
 		}
 
-		public static List<T> ToList<T>(this List<T> source) {
+		public static List<T> GetFullRange<T>(this List<T> source) {
 			return source.GetRange(0, source.Count);
 		}
 	}

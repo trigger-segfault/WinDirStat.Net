@@ -11,7 +11,7 @@ using System.Windows.Data;
 using WinDirStat.Net.Model.Data.Nodes;
 
 namespace WinDirStat.Net.Model.View.Nodes {
-	public class FileNodeCollection : IFileNodeCollection {
+	public class FileNodeCollection : IList<FileNodeViewModel>, IFileNodeCollection {
 		private readonly FileNodeViewModel parent;
 		private List<FileNodeViewModel> list = new List<FileNodeViewModel>();
 		private bool isRaisingEvent;

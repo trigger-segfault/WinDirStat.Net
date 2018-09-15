@@ -8,12 +8,16 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace WinDirStat.Net.Settings {
+	/// <summary>The types of render methods for treemaps.</summary>
 	[Serializable]
 	public enum TreemapStyle {
+		/// <summary>Line align.</summary>
 		[Description("KDirStat")]
 		KDirStatStyle = 0,
+		/// <summary>Corner align.</summary>
 		[Description("SequoiaView")]
 		SequoiaViewStyle = 1,
+		/// <summary>Dunno.</summary>
 		[Description("Simple")]
 		SimpleStyle = 2,
 	}

@@ -89,7 +89,7 @@ namespace WinDirStat.Net.Model.View {
 				new KeyGesture(Key.F5), OnRefreshSelected, CanExecuteHasSelection));
 		}
 		public ICommand DeleteRecycle {
-			get => GetCommand(new RelayUICommand("Delete(to Recycle Bin)", Images.Recycle,
+			get => GetCommand(new RelayUICommand("Delete (to Recycle Bin)", Images.Recycle,
 				new KeyGesture(Key.Delete), OnDeleteRecycle, CanExecuteDelete));
 		}
 		public ICommand DeletePermanently {

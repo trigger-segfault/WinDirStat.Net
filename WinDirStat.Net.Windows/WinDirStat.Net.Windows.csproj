@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NtfsReader\NtfsReader.csproj" />
+    <ProjectReference Include="..\WinDirStat.Net.Base\WinDirStat.Net.Base.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Native\Win32.FindFile.cs">
+      <DependentUpon>Native\Win32.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Native\Win32.ImageList.cs">
+      <DependentUpon>Native\Win32.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Native\Win32.RecycleBin.cs">
+      <DependentUpon>Native\Win32.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Native\Win32.Shell.cs">
+      <DependentUpon>Native\Win32.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Native\Win32.ShellExecute.cs">
+      <DependentUpon>Native\Win32.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Native\Win32.SHFileOperation.cs">
+      <DependentUpon>Native\Win32.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Native\Win32.SHGetFileInfo.cs">
+      <DependentUpon>Native\Win32.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Native\Win32.SHGetStockIconInfo.cs">
+      <DependentUpon>Native\Win32.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Native\Win32.Windows.cs">
+      <DependentUpon>Native\Win32.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>

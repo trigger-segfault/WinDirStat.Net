@@ -55,6 +55,11 @@ namespace WinDirStat.Net.Model.Settings {
 		private string[] selectedDrives;
 		private string selectedFolderPath;
 
+		private bool showFileTypes;
+		private bool showTreemap;
+		private bool showToolBar;
+		private bool showStatusBar;
+
 		private readonly WinDirStatViewModel model;
 
 		public WinDirStatSettings(WinDirStatViewModel model) {
@@ -182,6 +187,46 @@ namespace WinDirStat.Net.Model.Settings {
 			set {
 				if (showFreeSpace != value) {
 					showFreeSpace = value;
+					AutoRaisePropertyChanged();
+				}
+			}
+		}
+
+		public bool ShowFileTypes {
+			get => showFileTypes;
+			set {
+				if (showFileTypes != value) {
+					showFileTypes = value;
+					AutoRaisePropertyChanged();
+				}
+			}
+		}
+
+		public bool ShowTreemap {
+			get => showTreemap;
+			set {
+				if (showTreemap != value) {
+					showTreemap = value;
+					AutoRaisePropertyChanged();
+				}
+			}
+		}
+
+		public bool ShowToolBar {
+			get => showToolBar;
+			set {
+				if (showToolBar != value) {
+					showToolBar = value;
+					AutoRaisePropertyChanged();
+				}
+			}
+		}
+
+		public bool ShowStatusBar {
+			get => showStatusBar;
+			set {
+				if (showStatusBar != value) {
+					showStatusBar = value;
 					AutoRaisePropertyChanged();
 				}
 			}

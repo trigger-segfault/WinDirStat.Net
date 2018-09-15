@@ -141,7 +141,7 @@ namespace WinDirStat.Net.Controls {
 			set => SetValue(RenderPriorityProperty, value);
 		}
 
-		private static readonly DependencyProperty ForceDimmedProperty =
+		/*private static readonly DependencyProperty ForceDimmedProperty =
 			DependencyProperty.Register("ForceDimmed", typeof(bool), typeof(GraphView),
 				new FrameworkPropertyMetadata(false, OnForceDimmedChanged));
 
@@ -155,21 +155,40 @@ namespace WinDirStat.Net.Controls {
 				graphView.UpdateDimmed();
 				if (graphView.ForceDimmed) {
 					graphView.AbortRender();
-					graphView.forceDimmedTreemap = graphView.treemap;
-					graphView.forceDimmedHighlight = graphView.highlight;
-					graphView.imageTreemap.Source = graphView.forceDimmedTreemap;
-					graphView.imageHighlight.Source = graphView.forceDimmedHighlight;
+					graphView.disabledTreemap = graphView.treemap;
+					graphView.disabledHighlight = graphView.highlight;
+					graphView.imageTreemap.Source = graphView.disabledTreemap;
+					graphView.imageHighlight.Source = graphView.disabledHighlight;
 				}
 				else {
-					graphView.forceDimmedTreemap = null;
+					graphView.disabledTreemap = null;
 					// GraphView will render if (!ForceDimmed and Root != null)
+					graphView.RenderAsync();
+				}
+			}
+		}*/
+
+		private static void OnIsEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+			if (d is GraphView graphView) {
+				graphView.UpdateDimmed();
+				if (!graphView.IsEnabled) {
+					graphView.AbortRender();
+					graphView.disabledTreemap = graphView.treemap;
+					graphView.disabledHighlight = graphView.highlight;
+					graphView.imageTreemap.Source = graphView.disabledTreemap;
+					graphView.imageHighlight.Source = graphView.disabledHighlight;
+				}
+				else {
+					graphView.disabledTreemap = null;
+					graphView.disabledHighlight = null;
+					// GraphView will render if (!IsEnabled and Root != null)
 					graphView.RenderAsync();
 				}
 			}
 		}
 
 		private void UpdateDimmed() {
-			IsDimmed = IsActuallyRenderingFull || resizing || ForceDimmed;
+			IsDimmed = IsActuallyRenderingFull || resizing || !IsEnabled;
 		}
 
 		/*private static readonly DependencyProperty OptionsProperty =
@@ -254,8 +273,8 @@ namespace WinDirStat.Net.Controls {
 		private Point2I highlightSize;
 		private WriteableBitmap highlight;
 		private Bitmap highlightGdi;
-		private WriteableBitmap forceDimmedTreemap;
-		private WriteableBitmap forceDimmedHighlight;
+		private WriteableBitmap disabledTreemap;
+		private WriteableBitmap disabledHighlight;
 		private readonly DispatcherTimer resizeTimer;
 		private Thread renderThread;
 		private FileNodeBase root;
@@ -276,6 +295,8 @@ namespace WinDirStat.Net.Controls {
 		static GraphView() {
 			DataContextProperty.AddOwner(typeof(GraphView),
 				new FrameworkPropertyMetadata(OnDataContextChanged));
+			IsEnabledProperty.AddOwner(typeof(GraphView),
+				new FrameworkPropertyMetadata(OnIsEnabledChanged));
 		}
 
 		public GraphView() {
@@ -396,7 +417,7 @@ namespace WinDirStat.Net.Controls {
 		}
 
 		private void RenderAsyncFinal(ThreadPriority? priority = null) {
-			if (!ForceDimmed && Root != null) {
+			if (IsEnabled && Root != null) {
 				AbortRender();
 				treemapRendered = false;
 				//IsDimmed = true;

@@ -168,7 +168,7 @@ namespace WinDirStat.Net.Model.Data {
 					else
 						return Dot;
 				}
-				if (ch == Path.DirectorySeparatorChar || ch == Path.AltDirectorySeparatorChar || ch == Path.VolumeSeparatorChar)
+				if (ch == Path.DirectorySeparatorChar || ch == Path.AltDirectorySeparatorChar)
 					break;
 			}
 			return Dot;

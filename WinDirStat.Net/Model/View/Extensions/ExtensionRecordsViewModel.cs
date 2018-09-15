@@ -39,24 +39,24 @@ namespace WinDirStat.Net.Model.View.Extensions {
 				records.Clear();
 				for (int i = 0; i < model.Count; i++) {
 					ExtensionRecord newRecord = (ExtensionRecord) model[i];
-					ExtensionRecordViewModel newRecordView = new ExtensionRecordViewModel(this, newRecord);
-					sortedRecords.Add(newRecordView);
-					records.Add(newRecord.Extension, newRecordView);
+					ExtensionRecordViewModel newRecordViewModel = new ExtensionRecordViewModel(this, newRecord);
+					sortedRecords.Add(newRecordViewModel);
+					records.Add(newRecord.Extension, newRecordViewModel);
 				}
 				break;
 			case NotifyCollectionChangedAction.Add:
 				for (int i = 0; i < e.NewItems.Count; i++) {
 					ExtensionRecord newRecord = (ExtensionRecord) e.NewItems[i];
-					ExtensionRecordViewModel newRecordView = new ExtensionRecordViewModel(this, newRecord);
-					sortedRecords.Add(newRecordView);
-					records.Add(newRecord.Extension, newRecordView);
+					ExtensionRecordViewModel newRecordViewModel = new ExtensionRecordViewModel(this, newRecord);
+					sortedRecords.Add(newRecordViewModel);
+					records.Add(newRecord.Extension, newRecordViewModel);
 				}
 				break;
 			case NotifyCollectionChangedAction.Remove:
 				for (int i = 0; i < e.OldItems.Count; i++) {
 					ExtensionRecord oldRecord = (ExtensionRecord) e.OldItems[i];
-					ExtensionRecordViewModel oldRecordView = records[oldRecord.Extension];
-					sortedRecords.Remove(oldRecordView);
+					ExtensionRecordViewModel oldRecordViewModel = records[oldRecord.Extension];
+					sortedRecords.Remove(oldRecordViewModel);
 					records.Remove(oldRecord.Extension);
 				}
 				break;

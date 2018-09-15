@@ -9,6 +9,7 @@ using WinDirStat.Net.Utils;
 
 namespace WinDirStat.Net.Model.View.Drives {
 	public class DriveViewModel : ObservableObject {
+
 		private readonly DriveSelectViewModel viewModel;
 		private readonly string name;
 		private readonly long total;

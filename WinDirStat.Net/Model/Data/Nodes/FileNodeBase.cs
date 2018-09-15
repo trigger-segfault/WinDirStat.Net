@@ -25,6 +25,7 @@ using WinDirStat.Net.Utils.Native;
 namespace WinDirStat.Net.Model.Data.Nodes {
 	public abstract partial class FileNodeBase : ITreemapItem, IComparable<FileNodeBase>, IComparable {
 		protected static readonly List<FileNodeBase> EmptyVirtualChildren = new List<FileNodeBase>();
+		protected const int NumberOfNonContainerTypes = 3;
 		
 		private string name;
 
@@ -137,7 +138,7 @@ namespace WinDirStat.Net.Model.Data.Nodes {
 			int length = path.Length;
 			for (int i = length; --i >= 0;) {
 				char ch = path[i];
-				if (ch == System.IO.Path.DirectorySeparatorChar || ch == System.IO.Path.AltDirectorySeparatorChar || ch == System.IO.Path.VolumeSeparatorChar)
+				if (ch == System.IO.Path.DirectorySeparatorChar || ch == System.IO.Path.AltDirectorySeparatorChar)
 					return PathUtils.TrimSeparatorDotEnd(path.Substring(i + 1, length - i - 1));
 
 			}

@@ -36,8 +36,9 @@ namespace WinDirStat.Net.Windows {
 		}
 
 		public static void ShowDialog(Window owner, WinDirStatViewModel viewModel, DriveSelectEventArgs e) {
-			DriveSelectDialog dialog = new DriveSelectDialog();
-			dialog.Owner = owner;
+			DriveSelectDialog dialog = new DriveSelectDialog {
+				Owner = owner,
+			};
 			dialog.viewModel.Initialize(viewModel, e);
 			e.Result = dialog.ShowDialog() ?? false;
 			if (e.Result) {

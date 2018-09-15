@@ -71,6 +71,11 @@ namespace WinDirStat.Net.Model.Settings {
 			DriveSelectMode = DriveSelectMode.Individual;
 			SelectedDrives = new[] { @"C:\" };
 			SelectedFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+			ShowFileTypes = true;
+			ShowTreemap = true;
+			ShowToolBar = true;
+			ShowStatusBar = true;
 		}
 
 	}

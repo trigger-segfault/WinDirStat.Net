@@ -69,7 +69,8 @@ namespace WinDirStat.Net.Model.Data {
 					if (find.IsDirectory) {
 						FolderNode folder = new FolderNode(find);
 						child = folder;
-						subdirs.Enqueue(new FolderState(folder, state));
+						if (!find.IsSymbolicLink)
+							subdirs.Enqueue(new FolderState(folder, state));
 					}
 					else {
 						FileNode file = new FileNode(find);

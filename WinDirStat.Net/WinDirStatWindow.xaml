@@ -10,7 +10,7 @@
         xmlns:bind="clr-namespace:WinDirStat.Net.Model"
         xmlns:vm="clr-namespace:WinDirStat.Net.Model.View"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
-        xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2"
+        xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:ff="clr-namespace:FunctionalFun.UI.Behaviors;assembly=FunctionalFun.UI.Behaviors"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
@@ -25,6 +25,12 @@
             </Style.Triggers>
         </Style>
         <SolidColorBrush x:Key="ListBorder" Color="#828790"/>
+        <DataTemplate x:Key="FileTreeNodeViewTemplate">
+            <tv:FileTreeNodeView />
+        </DataTemplate>
+        <DataTemplate x:Key="SubtreePercentageTemplate">
+            <local:SubtreePercentage Percentage="{Binding Percent}"/>
+        </DataTemplate>
         <DataTemplate x:Key="FilePercentTemplate">
             <TextBlock TextAlignment="Right">
                 <TextBlock.Style>
@@ -38,6 +44,15 @@
                     </Style>
                 </TextBlock.Style>
             </TextBlock>
+        </DataTemplate>
+        <DataTemplate x:Key="IconExtensionTemplate">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,5,1" VerticalAlignment="Center" Focusable="False"/>
+                <TextBlock Text="{Binding Extension}" Margin="2,0,6,0" VerticalAlignment="Center" Focusable="False" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="ExtensionPreviewTemplate">
+            <Image Source="{Binding Preview}" Stretch="Fill" VerticalAlignment="Center" Height="13"/>
         </DataTemplate>
         <SolidColorBrush x:Key="ToolBarHorizontalBackground" Color="#FFEEF5FD"/>
         <SolidColorBrush x:Key="ToolBarToggleButtonVerticalBackground" Color="#FFEEF5FD"/>
@@ -294,21 +309,38 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top" IsMainMenu="True">
             <MenuItem Header="File">
-                <local:CommandMenuItem Command="{Binding Open}"/>
+                <local:CommandMenuItem Header="Open..." Command="{Binding Open}"/>
+                <local:CommandMenuItem Header="Save..." Command="{Binding Save}"/>
                 <Separator/>
                 <local:CommandMenuItem Command="{Binding Reload}"/>
                 <local:CommandMenuItem Command="{Binding Close}"/>
                 <Separator/>
                 <local:CommandMenuItem Command="{Binding Exit}"/>
             </MenuItem>
+            <MenuItem Header="Edit">
+                <local:CommandMenuItem Command="{Binding CopyPath}"/>
+                <Separator/>
+                <local:CommandMenuItem Command="{Binding DeleteRecycle}"/>
+                <local:CommandMenuItem Command="{Binding DeletePermanently}"/>
+                <Separator/>
+                <local:CommandMenuItem Command="{Binding EmptyRecycleBin}"/>
+            </MenuItem>
             <MenuItem Header="Options">
                 <local:ImageMenuItem Header="Show Free Space" IsCheckable="True" IsChecked="{Binding Settings.ShowFreeSpace}" Source="Resources/FileIcons/FreeSpace.png"/>
                 <local:ImageMenuItem Header="Show Unknown" IsCheckable="True" IsChecked="{Binding Settings.ShowUnknown}" Source="Resources/FileIcons/UnknownSpace.png"/>
+                <Separator/>
+                <local:ImageMenuItem Header="Show File Types" IsCheckable="True" IsChecked="{Binding Settings.ShowFileTypes}"/>
+                <local:ImageMenuItem Header="Show Treemap" IsCheckable="True" IsChecked="{Binding Settings.ShowTreemap}"/>
+                <local:ImageMenuItem Header="Show Toolbar" IsCheckable="True" IsChecked="{Binding Settings.ShowToolBar}"/>
+                <local:ImageMenuItem Header="Show Statusbar" IsCheckable="True" IsChecked="{Binding Settings.ShowStatusBar}"/>
+                <Separator/>
+                <local:ImageMenuItem Header="Configure WinDirStat..." Source="Resources/Icons/Settings.png" />
             </MenuItem>
         </Menu>
-        <ToolBarTray DockPanel.Dock="Top" Background="{x:Null}">
+        <ToolBarTray DockPanel.Dock="Top" Background="{x:Null}" Visibility="{Binding Settings.ShowToolBar, Converter={conv:CollapsedWhenFalse}}">
             <ToolBar x:Name="toolBar" Background="#FFF0F0F0" Height="24">
                 <local:CommandButton Command="{Binding Open}"/>
+                <local:CommandButton Command="{Binding Save}"/>
                 <local:CommandButton Command="{Binding Reload}"/>
                 <Separator/>
                 <local:CommandButton Command="{Binding OpenItem}"/>
@@ -323,7 +355,7 @@
                 <local:CommandButton Command="{Binding Properties}"/>
             </ToolBar>
         </ToolBarTray>
-        <StatusBar x:Name="statusBar" DockPanel.Dock="Bottom">
+        <StatusBar x:Name="statusBar" DockPanel.Dock="Bottom" Visibility="{Binding Settings.ShowStatusBar, Converter={conv:CollapsedWhenFalse}}">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>
@@ -371,62 +403,16 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="3*"/>
-                <RowDefinition>
-                    <RowDefinition.Style>
-                        <Style TargetType="{x:Type RowDefinition}">
-                            <Setter Property="Height" Value="0"/>
-                            <Style.Triggers>
-                                <DataTrigger Value="Finished" Binding="{Binding DataContext.ScanState, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
-                                    <Setter Property="Height" Value="5"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </RowDefinition.Style>
-                </RowDefinition>
-                <RowDefinition x:Name="rowTreegraph">
-                    <RowDefinition.Style>
-                        <Style TargetType="{x:Type RowDefinition}">
-                            <Setter Property="Height" Value="0"/>
-                            <Setter Property="MinHeight" Value="0"/>
-                            <Style.Triggers>
-                                <DataTrigger Value="Finished" Binding="{Binding DataContext.ScanState, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
-                                    <Setter Property="Height" Value="2*"/>
-                                    <Setter Property="MinHeight" Value="1"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </RowDefinition.Style>
-                </RowDefinition>
+                <RowDefinition Height="{Binding HideTreemap, Converter={conv:ZeroWhenTrue}, ConverterParameter=5}"/>
+                <RowDefinition Height="{Binding HideTreemap, Converter={conv:ZeroWhenTrue}, ConverterParameter=2*}"
+                               MinHeight="{Binding HideTreemap, Converter={conv:ZeroWhenTrue}, ConverterParameter=1}"/>
             </Grid.RowDefinitions>
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="5*"/>
-                    <ColumnDefinition>
-                        <ColumnDefinition.Style>
-                            <Style TargetType="{x:Type ColumnDefinition}">
-                                <Setter Property="Width" Value="0"/>
-                                <Style.Triggers>
-                                    <DataTrigger Value="Finished" Binding="{Binding DataContext.ScanState, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
-                                        <Setter Property="Width" Value="5"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ColumnDefinition.Style>
-                    </ColumnDefinition>
-                    <ColumnDefinition>
-                        <ColumnDefinition.Style>
-                            <Style TargetType="{x:Type ColumnDefinition}">
-                                <Setter Property="Width" Value="0"/>
-                                <Setter Property="MinWidth" Value="0"/>
-                                <Style.Triggers>
-                                    <DataTrigger Value="Finished" Binding="{Binding DataContext.ScanState, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
-                                        <Setter Property="Width" Value="2*"/>
-                                        <Setter Property="MinWidth" Value="1"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ColumnDefinition.Style>
-                    </ColumnDefinition>
+                    <ColumnDefinition Width="{Binding HideFileTypes, Converter={conv:ZeroWhenTrue}, ConverterParameter=5}"/>
+                    <ColumnDefinition Width="{Binding HideFileTypes, Converter={conv:ZeroWhenTrue}, ConverterParameter=2*}"
+                                      MinWidth="{Binding HideFileTypes, Converter={conv:ZeroWhenTrue}, ConverterParameter=1}"/>
                 </Grid.ColumnDefinitions>
                 <tv:FileTreeView x:Name="tree" Grid.Column="0" Root="{Binding RootNode}"
                                  ff:MultiSelectorBehaviors.SynchronizedSelectedItems="{Binding SelectedFiles}"
@@ -440,21 +426,11 @@
                     <tv:FileTreeView.View>
                         <sort:SortView>
                             <sort:SortViewColumn Width="250" Header="Name"
-                                                 SortMode="Name">
-                                <sort:SortViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <tv:FileTreeNodeView />
-                                    </DataTemplate>
-                                </sort:SortViewColumn.CellTemplate>
-                            </sort:SortViewColumn>
+                                                 SortMode="Name"
+                                                 CellDataTemplate="{StaticResource FileTreeNodeViewTemplate}"/>
                             <sort:SortViewColumn Width="120" Header="Subtree Percentage"
-                                                 SortMode="Subtree" DefaultSortDirection="Descending">
-                                <sort:SortViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <local:SubtreePercentage Percentage="{Binding Percent}"/>
-                                    </DataTemplate>
-                                </sort:SortViewColumn.CellTemplate>
-                            </sort:SortViewColumn>
+                                                 SortMode="Subtree" DefaultSortDirection="Descending"
+                                                 CellDataTemplate="{StaticResource SubtreePercentageTemplate}"/>
                             <sort:SortViewColumn Width="62" Header="Percent" TextAlignment="Right"
                                                  SortMode="Percent" DefaultSortDirection="Descending"
                                                  CellDataTemplate="{StaticResource FilePercentTemplate}"/>
@@ -491,33 +467,22 @@
                     </i:Interaction.Triggers>
                     <sort:SortListView.View>
                         <sort:SortView x:Name="extensionsGridView">
-                            <sort:SortViewColumn Width="86" Header="Extension" SortMode="Extension">
-                                <sort:SortViewColumn.CellDataTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,5,1" VerticalAlignment="Center" Focusable="False"/>
-                                            <TextBlock Text="{Binding Extension}" Margin="2,0,6,0" VerticalAlignment="Center" Focusable="False" TextTrimming="CharacterEllipsis" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </sort:SortViewColumn.CellDataTemplate>
-                            </sort:SortViewColumn>
-                            <sort:SortViewColumn Width="50" Header="Color" SortMode="Color">
-                                <sort:SortViewColumn.CellDataTemplate>
-                                    <DataTemplate>
-                                        <Image Source="{Binding Preview}" Stretch="Fill" VerticalAlignment="Center" Height="13"/>
-                                    </DataTemplate>
-                                </sort:SortViewColumn.CellDataTemplate>
-                            </sort:SortViewColumn>
+                            <sort:SortViewColumn Width="86" Header="Extension"
+                                                 SortMode="Extension"
+                                                 CellDataTemplate="{StaticResource IconExtensionTemplate}"/>
+                            <sort:SortViewColumn Width="50" Header="Color"
+                                                 SortMode="Color"
+                                                 CellDataTemplate="{StaticResource ExtensionPreviewTemplate}"/>
                             <sort:SortViewColumn Width="105" Header="Description"
                                                   SortMode="Description"
                                                   CellBinding="{Binding Name}"/>
-                            <sort:SortViewColumn Width="60" Header="Bytes" TextAlignment="Right"
+                            <sort:SortViewColumn Width="64" Header="Bytes" TextAlignment="Right"
                                                   SortMode="Bytes" DefaultSortDirection="Descending"
                                                   CellBinding="{Binding Size, Converter={conv:ByteFormatter}}"/>
                             <sort:SortViewColumn Width="60" Header="% Bytes" TextAlignment="Right"
                                                   SortMode="Percent" DefaultSortDirection="Descending"
                                                   CellBinding="{Binding Percent, StringFormat=P1}"/>
-                            <sort:SortViewColumn Width="50" Header="Files" TextAlignment="Right"
+                            <sort:SortViewColumn Width="60" Header="Files" TextAlignment="Right"
                                                   SortMode="Files" DefaultSortDirection="Descending"
                                                   CellBinding="{Binding FileCount, Converter={conv:EmptyWhenNegative}}"/>
                         </sort:SortView>
@@ -526,7 +491,8 @@
             </Grid>
             <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" ResizeDirection="Rows" Focusable="False"/>
             <Border Grid.Row="2" BorderThickness="1" BorderBrush="{StaticResource ListBorder}">
-                <local:GraphView x:Name="graphView" ForceDimmed="{Binding IsRefreshing}"
+                <local:GraphView x:Name="graphView"
+                                 IsEnabled="{Binding GraphViewEnabled}"
                                  Root="{Binding GraphRootNode}"
                                  RenderPriority="{Binding Settings.RenderPriority}"
                                  MouseDown="OnGraphFileSelected"/>

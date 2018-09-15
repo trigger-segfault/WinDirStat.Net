@@ -48,7 +48,6 @@ namespace WinDirStat.Net.Model.View {
 			model.PropertyChanged += OnModelPropertyChanged;
 			selectedFiles.CollectionChanged += OnSelectedFilesChanged;
 			settings.PropertyChanged += OnSettingsPropertyChanged;
-			model.ScanEnded += OnScanEnded;
 			ramTimer = new DispatcherTimer(
 				settings.RAMInterval,
 				DispatcherPriority.Normal,
@@ -231,10 +230,15 @@ namespace WinDirStat.Net.Model.View {
 						GraphRootNode = model.RootNode;
 						break;
 					}
+					CommandManager.InvalidateRequerySuggested();
 					break;
 				case nameof(WinDirStatModel.IsFinished):
 				case nameof(WinDirStatModel.IsScanning):
+				case nameof(WinDirStatModel.IsRefreshing):
 					CommandManager.InvalidateRequerySuggested();
+					RaisePropertyChanged(nameof(HideFileTypes));
+					RaisePropertyChanged(nameof(HideTreemap));
+					RaisePropertyChanged(nameof(GraphViewEnabled));
 					break;
 				}
 				RaisePropertyChanged(e.PropertyName);
@@ -265,6 +269,13 @@ namespace WinDirStat.Net.Model.View {
 			case nameof(WinDirStatSettings.ScanPriority):
 				model.ScanPriority = settings.ScanPriority;
 				break;
+			case nameof(WinDirStatSettings.ShowFileTypes):
+				RaisePropertyChanged(nameof(HideFileTypes));
+				break;
+			case nameof(WinDirStatSettings.ShowTreemap):
+				RaisePropertyChanged(nameof(HideTreemap));
+				RaisePropertyChanged(nameof(GraphViewEnabled));
+				break;
 			}
 		}
 
@@ -278,9 +289,16 @@ namespace WinDirStat.Net.Model.View {
 			}
 			CommandManager.InvalidateRequerySuggested();
 		}
+		
+		public bool HideFileTypes {
+			get => !settings.ShowFileTypes || (!IsRefreshing && !IsFinished);
+		}
+		public bool HideTreemap {
+			get => !settings.ShowTreemap || (!IsRefreshing && !IsFinished);
+		}
 
-		private void OnScanEnded(object sender, ScanEventArgs e) {
-			
+		public bool GraphViewEnabled {
+			get => settings.ShowTreemap && !IsRefreshing && !IsScanning;
 		}
 	}
 }

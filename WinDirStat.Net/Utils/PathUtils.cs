@@ -254,7 +254,7 @@ namespace WinDirStat.Net.Utils {
 				return path2;
 
 			char ch = path1[path1.Length - 1];
-			if (ch != Path.DirectorySeparatorChar && ch != Path.AltDirectorySeparatorChar && ch != Path.VolumeSeparatorChar)
+			if (ch != Path.DirectorySeparatorChar && ch != Path.AltDirectorySeparatorChar)
 				return path1 + DirectorySeparatorCharAsString + path2;
 			return path1 + path2;
 		}

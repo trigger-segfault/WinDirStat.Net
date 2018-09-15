@@ -6,7 +6,7 @@
                     xmlns:sort="clr-namespace:WinDirStat.Net.SortingView"
                     xmlns:icon="clr-namespace:WinDirStat.Net.Model.View"
                     xmlns:System="clr-namespace:System;assembly=mscorlib"
-                    xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2">
+                    xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero">
 
     <!--<BitmapImage x:Key="ShortcutIcon" UriSource="pack://application:,,,/WinDirStat.Net;component/Resources/FileIcons/Shortcut.png"/>-->
     <Style TargetType="{x:Type local:SubtreePercentage}">

@@ -8,8 +8,11 @@
              d1p1:Ignorable="d"
              xmlns:d1p1="http://schemas.openxmlformats.org/markup-compatibility/2006">
   <Application.Resources>
-     <ResourceDictionary Source="Themes/SortView.xaml"/>
-     <!--<vm:ViewModelLocator x:Key="Locator" d:IsDataSource="True" xmlns:vm="clr-namespace:WinDirStat.Net.ViewModel" />-->
-
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Themes/SortView.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+      <vm:ViewModelLocator x:Key="Locator" d:IsDataSource="True" xmlns:vm="clr-namespace:WinDirStat.Net.ViewModel" />
+    </ResourceDictionary>
   </Application.Resources>
 </Application>

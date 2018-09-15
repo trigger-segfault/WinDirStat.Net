@@ -13,6 +13,7 @@ using Number = System.Double;
 #endif
 
 namespace WinDirStat.Net.Settings {
+	/// <summary>A structure containing treemap rendering options.</summary>
 	[Serializable]
 	public struct TreemapOptions {
 

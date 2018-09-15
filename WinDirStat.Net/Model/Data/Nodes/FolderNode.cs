@@ -107,8 +107,9 @@ namespace WinDirStat.Net.Model.Data.Nodes {
 				(virtualChildren[1].Type == FileNodeType.File));
 		}
 		private bool IsStoringNonFiles {
-			get => (virtualChildren.Count > 0 && virtualChildren[0].Type != FileNodeType.File) ||
-				(virtualChildren.Count > 1 && virtualChildren[1].Type != FileNodeType.File);
+			get => (virtualChildren.Count == 1 && virtualChildren[0].Type != FileNodeType.File) ||
+				(virtualChildren.Count > 1 && (virtualChildren[0].Type != FileNodeType.File ||
+				virtualChildren[1].Type != FileNodeType.File));
 		}
 		public bool IsEmpty {
 			get => virtualChildren == EmptyVirtualChildren;
@@ -234,7 +235,7 @@ namespace WinDirStat.Net.Model.Data.Nodes {
 			for (int i = 0; i < count; i++)
 				nodes[i].virtualParent = null;
 			if (IsWatched)
-				RaiseChanged(FileNodeAction.ChildrenRemoved, nodes.ToList(), index);
+				RaiseChanged(FileNodeAction.ChildrenRemoved, nodes.GetFullRange(), index);
 		}
 
 		private List<FileNodeBase> ClearAndGetRange() {
@@ -257,7 +258,7 @@ namespace WinDirStat.Net.Model.Data.Nodes {
 				for (int i = 0; i < count; i++)
 					virtualChildren[i].virtualParent = null;
 				if (IsWatched) {
-					List<FileNodeBase> oldChildren = virtualChildren.ToList();
+					List<FileNodeBase> oldChildren = virtualChildren.GetFullRange();
 					virtualChildren.Clear();
 					virtualChildren = EmptyVirtualChildren;
 					RaiseChanged(FileNodeAction.ChildrenRemoved, oldChildren, 0);
