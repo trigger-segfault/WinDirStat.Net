@@ -7,7 +7,7 @@
 
 A .NET/WPF implementation of [WinDirStat](https://windirstat.net/). Name needs to be changed due to it conflicting with the original WinDirStat's webpage url.
 
-![Preview](https://i.imgur.com/HbW3gz1.png)
+![Preview](https://i.imgur.com/BaFZZVI.png)
 
 ### Credits
 
