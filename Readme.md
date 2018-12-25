@@ -4,6 +4,7 @@
 [![Latest Release Date](https://img.shields.io/github/release-date-pre/trigger-death/WinDirStat.Net.svg?style=flat&label=released)](https://github.com/trigger-death/WinDirStat.Net/releases/latest)-->
 [![Total Downloads](https://img.shields.io/github/downloads/trigger-death/WinDirStat.Net/total.svg?style=flat)](https://github.com/trigger-death/WinDirStat.Net/releases)
 [![Creation Date](https://img.shields.io/badge/created-august%202018-A642FF.svg?style=flat)](https://github.com/trigger-death/WinDirStat.Net/commit/3aa1fde1cfb165ea8bc119df2944ede41f063179)
+[![Discord](https://img.shields.io/discord/436949335947870238.svg?style=flat&logo=discord&label=chat&colorB=7389DC&link=https://discord.gg/vB7jUbY)](https://discord.gg/vB7jUbY)
 
 A .NET/WPF implementation of [WinDirStat](https://windirstat.net/). Name needs to be changed due to it conflicting with the original WinDirStat's webpage url.
 
