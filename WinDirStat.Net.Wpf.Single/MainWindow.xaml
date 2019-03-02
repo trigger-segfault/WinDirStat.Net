@@ -17,7 +17,7 @@
         DataContext="{Binding Main, Source={StaticResource Locator}}"
         Title="{Binding Title}" Height="450" Width="800" SnapsToDevicePixels="True" UseLayoutRounding="True" Background="#FFF0F0F0"
         Loaded="OnLoaded"
-        Icon="App.ico"
+        Icon="Resources/App.ico"
         cmd:RelayInfo.Collection="{StaticResource MainCommands}">
   <Window.Resources>
     <ResourceDictionary>

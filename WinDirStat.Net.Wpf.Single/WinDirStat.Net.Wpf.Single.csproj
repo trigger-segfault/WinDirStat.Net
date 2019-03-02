@@ -39,7 +39,7 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>App.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\App.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>Properties\App.manifest</ApplicationManifest>
@@ -182,9 +182,6 @@
     <None Include="Properties\App.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\FunctionalFun.UI.Behaviours\FunctionalFun.UI.Behaviors.csproj">
       <Project>{7da5a107-b474-4ac0-b861-63a489db0c02}</Project>
       <Name>FunctionalFun.UI.Behaviors</Name>
@@ -288,7 +285,7 @@
     <Resource Include="Resources\Icons\ShowTotalSpace.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="App.ico" />
+    <Resource Include="Resources\App.ico" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\FileIcons\Missing.png" />

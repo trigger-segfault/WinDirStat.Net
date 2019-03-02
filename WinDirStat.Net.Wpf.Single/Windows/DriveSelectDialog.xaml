@@ -11,7 +11,7 @@
         xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
         mc:Ignorable="d"
         DataContext="{Binding DriveSelect, Source={StaticResource Locator}}"
-        Title="{Binding Title}" Height="313" Width="435" SourceInitialized="OnSourceInitialized" Loaded="OnLoaded" Icon="/WinDirStat.Net;component/App.ico" WindowStartupLocation="CenterOwner"
+        Title="{Binding Title}" Height="313" Width="435" SourceInitialized="OnSourceInitialized" Loaded="OnLoaded" Icon="/WinDirStat.Net;component/Resources/App.ico" WindowStartupLocation="CenterOwner"
         Background="#FFF0F0F0" SnapsToDevicePixels="True" UseLayoutRounding="True" ShowInTaskbar="False">
   <Window.Resources>
     <ResourceDictionary>
