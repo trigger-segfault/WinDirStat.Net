@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Media;
 using GalaSoft.MvvmLight;
 using WinDirStat.Net.Model.Extensions;
 using WinDirStat.Net.Services;
+using WinDirStat.Net.Services.Structures;
 
 namespace WinDirStat.Net.ViewModel.Extensions {
 	/// <summary>The view model that represents an <see cref="ExtensionItem"/>.</summary>
@@ -27,7 +27,7 @@ namespace WinDirStat.Net.ViewModel.Extensions {
 		public ExtensionItem Model { get; }
 
 		/// <summary>The icon of the associated file type.</summary>
-		private ImageSource icon;
+		private IImage icon;
 		/// <summary>The type name of the associated file type.</summary>
 		private string typeName;
 		/// <summary>The cache state for the icon.</summary>
@@ -35,7 +35,7 @@ namespace WinDirStat.Net.ViewModel.Extensions {
 		/// <summary>True if events have been hooked to the model.</summary>
 		private bool eventsHooked;
 		/// <summary>The preview image for the file palette color.</summary>
-		private ImageSource preview;
+		private IImage preview;
 
 		#endregion
 
@@ -104,7 +104,7 @@ namespace WinDirStat.Net.ViewModel.Extensions {
 		/// <summary>The callback for asynchronously caching the file type icon and type name.</summary>
 		/// 
 		/// <param name="iconName">The resulting icon and type name.</param>
-		private void OnCacheIconAndTypeName(IconAndName iconName) {
+		private void OnCacheIconAndTypeName(IIconAndName iconName) {
 			if (iconName != null) {
 				Icon = iconName.Icon;
 				TypeName = iconName.Name;
@@ -129,7 +129,7 @@ namespace WinDirStat.Net.ViewModel.Extensions {
 		public bool IsEmptyExtension => Model.IsEmptyExtension;
 
 		/// <summary>Gets the icon of the associated file type.</summary>
-		public ImageSource Icon {
+		public IImage Icon {
 			get => icon;
 			private set => Set(ref icon, value);
 		}
@@ -141,7 +141,7 @@ namespace WinDirStat.Net.ViewModel.Extensions {
 		}
 
 		/// <summary>Gets the preview image for the file palette color.</summary>
-		public ImageSource Preview {
+		public IImage Preview {
 			get => preview;
 			internal set => Set(ref preview, value);
 		}
@@ -153,7 +153,7 @@ namespace WinDirStat.Net.ViewModel.Extensions {
 		}
 
 		/// <summary>Gets the icon cache service.</summary>
-		private IconCacheService IconCache => extensions.IconCache;
+		private IIconCacheService IconCache => extensions.IconCache;
 
 		/// <summary>Gets the program settings service.</summary>
 		private SettingsService Settings => extensions.Settings;

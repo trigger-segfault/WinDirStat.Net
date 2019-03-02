@@ -7,7 +7,7 @@ using WinDirStat.Net.Services;
 
 namespace WinDirStat.Net.ViewModel {
 	/// <summary>The view model for the configure dialog.</summary>
-	public partial class ConfigureViewModel : ViewModelBaseEx {
+	public partial class ConfigureViewModel : ViewModelWindow {
 
 		#region Fields
 
@@ -26,7 +26,9 @@ namespace WinDirStat.Net.ViewModel {
 		/// <summary>Constructrs the <see cref="DriveSelectViewModel"/>.</summary>
 		public ConfigureViewModel(SettingsService settings,
 								  UIService ui,
-								  IMyDialogService dialog)
+								  IMyDialogService dialog,
+								  RelayCommandFactory relayFactory)
+			: base(relayFactory)
 		{
 			Settings = settings;
 			UI = ui;

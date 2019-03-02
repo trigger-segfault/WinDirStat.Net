@@ -11,6 +11,7 @@ using System.Windows.Input;
 using WinDirStat.Net.Model;
 using WinDirStat.Net.Utils;
 using WinDirStat.Net.ViewModel;
+using WinDirStat.Net.Wpf.Commands;
 using WinDirStat.Net.Wpf.Utils;
 using WinDirStat.Net.Wpf.ViewModel;
 
@@ -19,9 +20,9 @@ namespace WinDirStat.Net.Wpf.Controls {
 		private static void OnCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
 			CommandMenuItem menuItem = (CommandMenuItem) d;
 
-			if (e.OldValue is IRelayUICommand oldUICommand)
+			if (e.OldValue is IRelayInfoCommand oldUICommand)
 				oldUICommand.PropertyChanged -= menuItem.OnCommandPropertyChanged;
-			if (e.NewValue is IRelayUICommand newUICommand)
+			if (e.NewValue is IRelayInfoCommand newUICommand)
 				newUICommand.PropertyChanged += menuItem.OnCommandPropertyChanged;
 
 			d.CoerceValue(SourceProperty);
@@ -38,12 +39,12 @@ namespace WinDirStat.Net.Wpf.Controls {
 		// Set the header to the command text if no header has been explicitly specified
 		private static object CoerceHeader(DependencyObject d, object value) {
 			CommandMenuItem menuItem = (CommandMenuItem) d;
-			IRelayUICommand uiCommand;
+			IRelayInfoCommand uiCommand;
 
 			// If no header has been set, use the command's text
 			bool unset = menuItem.IsValueUnsetAndNull(HeaderProperty, value);
 			if (menuItem.IsValueUnsetAndNull(HeaderProperty, value)) {
-				uiCommand = menuItem.Command as IRelayUICommand;
+				uiCommand = menuItem.Command as IRelayInfoCommand;
 				if (uiCommand != null) {
 					value = uiCommand.Text;
 				}
@@ -51,7 +52,7 @@ namespace WinDirStat.Net.Wpf.Controls {
 			}
 
 			// If the header had been set to a UICommand by the ItemsControl, replace it with the command's text
-			uiCommand = value as IRelayUICommand;
+			uiCommand = value as IRelayInfoCommand;
 
 			if (uiCommand != null) {
 				// The header is equal to the command.
@@ -75,7 +76,7 @@ namespace WinDirStat.Net.Wpf.Controls {
 
 			// If no icon has been set, use the command's text
 			if (menuItem.IsValueUnsetAndNull(SourceProperty, value) &&
-				menuItem.Command is IRelayUICommand uiCommand)
+				menuItem.Command is IRelayInfoCommand uiCommand)
 			{
 				value = uiCommand.Icon;
 			}
@@ -88,7 +89,7 @@ namespace WinDirStat.Net.Wpf.Controls {
 			MenuItem menuItem = (MenuItem) d;
 
 			if (menuItem.IsValueUnsetAndNull(InputGestureTextProperty, value) &&
-				menuItem.Command is IRelayUICommand uiCommand && uiCommand.InputGesture != null)
+				menuItem.Command is IRelayInfoCommand uiCommand && uiCommand.InputGesture != null)
 			{
 				return uiCommand.InputGesture.GetDisplayStringForCulture(CultureInfo.CurrentCulture);
 			}

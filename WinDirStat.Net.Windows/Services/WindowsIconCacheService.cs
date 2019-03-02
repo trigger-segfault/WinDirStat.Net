@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
+using GalaSoft.MvvmLight;
 using WinDirStat.Net.Model.Extensions;
 using WinDirStat.Net.Services;
-using static WinDirStat.Net.Native.Win32;
+using WinDirStat.Net.Services.Structures;
+using static WinDirStat.Net.Windows.Native.Win32;
 
 namespace WinDirStat.Net.Windows.Services {
 	/// <summary>A service for caching file and folder icons.</summary>
-	public class WindowsIconCacheService {
+	public class WindowsIconCacheService : ObservableObject, IIconCacheService {
 
 		#region Constants
 
@@ -36,37 +33,37 @@ namespace WinDirStat.Net.Windows.Services {
 		#region Fields
 		
 		/// <summary>The default file icon.</summary>
-		private IBitmap fileIcon;
+		private IImage fileIcon;
 		/// <summary>The default folder icon.</summary>
-		private IBitmap folderIcon;
+		private IImage folderIcon;
 		/// <summary>The default drive icon.</summary>
-		private IBitmap volumeIcon;
+		private IImage volumeIcon;
 		/// <summary>The default shortcut icon.</summary>
-		private IBitmap shortcutIcon;
+		private IImage shortcutIcon;
 
 		/// <summary>The service for performing UI actions such as dispatcher invoking.</summary>
 		private readonly IUIService ui;
 		/// <summary>The service for creating and loading bitmaps.</summary>
 		private readonly IBitmapFactory bitmapFactory;
-		private readonly Dictionary<int, IBitmap> cachedIcons;
+		private readonly Dictionary<int, IImage> cachedIcons;
 		private readonly Dictionary<Environment.SpecialFolder, IIconAndName> cachedSpecialFolders;
 		private readonly Dictionary<string, IIconAndName> cachedFileTypes;
-		private readonly ObservableCollection<IBitmap> cachedIconList;
+		private readonly ObservableCollection<IImage> cachedIconList;
 
 		#endregion
 
 		#region Constructors
 
-		/// <summary>Constructs the <see cref="IconCacheService"/>.</summary>
+		/// <summary>Constructs the <see cref="WindowsIconCacheService"/>.</summary>
 		public WindowsIconCacheService(IUIService ui,
 									   IBitmapFactory bitmapFactory) {
 			this.ui = ui;
 			this.bitmapFactory = bitmapFactory;
 
-			cachedIcons = new Dictionary<int, IBitmap>();
+			cachedIcons = new Dictionary<int, IImage>();
 			cachedSpecialFolders = new Dictionary<Environment.SpecialFolder, IIconAndName>();
 			cachedFileTypes = new Dictionary<string, IIconAndName>();
-			cachedIconList = new ObservableCollection<IBitmap>();
+			cachedIconList = new ObservableCollection<IImage>();
 		}
 
 		#endregion
@@ -81,19 +78,19 @@ namespace WinDirStat.Net.Windows.Services {
 		#region Icon Properties
 
 		/// <summary>Gets the default file icon.</summary>
-		public IBitmap FileIcon {
+		public IImage FileIcon {
 			get => fileIcon ?? (fileIcon = CacheStockIcon(SHStockIconID.DocNoAssoc));
 		}
 		/// <summary>Gets the default folder icon.</summary>
-		public IBitmap FolderIcon {
+		public IImage FolderIcon {
 			get => folderIcon ?? (folderIcon = CacheStockIcon(SHStockIconID.Folder));
 		}
 		/// <summary>Gets the default drive icon.</summary>
-		public IBitmap VolumeIcon {
+		public IImage VolumeIcon {
 			get => volumeIcon ?? (volumeIcon = CacheStockIcon(SHStockIconID.DriveFixed));
 		}
 		/// <summary>Gets the default shortcut icon.</summary>
-		public IBitmap ShortcutIcon {
+		public IImage ShortcutIcon {
 			get => shortcutIcon ?? (shortcutIcon = CacheStockIcon(SHStockIconID.Link));
 		}
 
@@ -105,7 +102,7 @@ namespace WinDirStat.Net.Windows.Services {
 		/// 
 		/// <param name="path">The path of the file.</param>
 		/// <returns>The cached icon on success, otherwise null.</returns>
-		public IBitmap CacheIcon(string path) {
+		public IImage CacheIcon(string path) {
 			return ui.Invoke(() => CacheIconImpl(path, 0, SHFileInfoFlags.None, out _, out _));
 		}
 		/// <summary>Asynchronousy caches the icon of the specified file.</summary>
@@ -123,7 +120,7 @@ namespace WinDirStat.Net.Windows.Services {
 		/// <returns>The cached icon and icon on success, otherwise null.</returns>
 		public IIconAndName CacheIconAndDisplayName(string path) {
 			return ui.Invoke(() => {
-				IBitmap icon = CacheIconImpl(path, 0, SHFileInfoFlags.DisplayName, out string name, out _);
+				IImage icon = CacheIconImpl(path, 0, SHFileInfoFlags.DisplayName, out string name, out _);
 				if (icon != null)
 					return new IIconAndName(icon, name);
 				return null;
@@ -150,7 +147,7 @@ namespace WinDirStat.Net.Windows.Services {
 						string extensionPath = extension;
 						if (extension == ExtensionItem.EmptyExtension)
 							extensionPath = Guid.NewGuid().ToString();
-						IBitmap icon = CacheIconImpl(extensionPath, FileAttributes.Normal,
+						IImage icon = CacheIconImpl(extensionPath, FileAttributes.Normal,
 							CacheFileTypeFlags, out _, out string typeName);
 						if (icon != null)
 							iconName = new IIconAndName(icon, typeName);
@@ -178,7 +175,7 @@ namespace WinDirStat.Net.Windows.Services {
 			return ui.Invoke(() => {
 				if (!cachedSpecialFolders.TryGetValue(folder, out IIconAndName iconName)) {
 					try {
-						IBitmap icon = CacheSpecialFolderImpl(folder, 0, SHFileInfoFlags.DisplayName,
+						IImage icon = CacheSpecialFolderImpl(folder, 0, SHFileInfoFlags.DisplayName,
 							out string name, out _);
 						if (icon != null)
 							iconName = new IIconAndName(icon, name);
@@ -206,7 +203,7 @@ namespace WinDirStat.Net.Windows.Services {
 		/// 
 		/// <param name="id">The id of the stock icon.</param>
 		/// <returns>The icon on success, otherwise null.</returns>
-		private IBitmap CacheStockIcon(SHStockIconID id) {
+		private IImage CacheStockIcon(SHStockIconID id) {
 			return ui.Invoke(() =>  CacheStockIconImpl(id, SHStockIconFlags.None));
 		}
 
@@ -228,14 +225,14 @@ namespace WinDirStat.Net.Windows.Services {
 		/// "flags"/>.
 		/// </param>
 		/// <returns>The icon on success, otherwise null.</returns>
-		private IBitmap CacheIconImpl(string path, FileAttributes attributes, SHFileInfoFlags flags,
+		private IImage CacheIconImpl(string path, FileAttributes attributes, SHFileInfoFlags flags,
 			out string displayName, out string typeName)
 		{
 			displayName = null;
 			typeName = null;
 			flags |= CacheIconFlags;
 
-			IBitmap icon = null;
+			IImage icon = null;
 			SHFileInfo fileInfo = new SHFileInfo();
 			IntPtr hImageList = SHGetFileInfo(path, attributes, ref fileInfo, SHFileInfo.CBSize, flags);
 			try {
@@ -273,7 +270,7 @@ namespace WinDirStat.Net.Windows.Services {
 		/// "flags"/>.
 		/// </param>
 		/// <returns>The icon on success, otherwise null.</returns>
-		private IBitmap CacheSpecialFolderImpl(Environment.SpecialFolder folder, FileAttributes attributes,
+		private IImage CacheSpecialFolderImpl(Environment.SpecialFolder folder, FileAttributes attributes,
 			SHFileInfoFlags flags, out string displayName, out string typeName)
 		{
 			displayName = null;
@@ -281,7 +278,7 @@ namespace WinDirStat.Net.Windows.Services {
 			flags |= CacheSpecialFolderFlags;
 
 			IntPtr pidl = IntPtr.Zero;
-			IBitmap icon = null;
+			IImage icon = null;
 			SHFileInfo fileInfo = new SHFileInfo();
 			if (SHGetSpecialFolderLocation(IntPtr.Zero, folder, ref pidl))
 				return null;
@@ -313,10 +310,10 @@ namespace WinDirStat.Net.Windows.Services {
 		/// <param name="id">The id of the stock icon.</param>
 		/// <param name="flags">The flags for caching the stock icon.</param>
 		/// <returns>The icon on success, otherwise null.</returns>
-		private IBitmap CacheStockIconImpl(SHStockIconID id, SHStockIconFlags flags) {
+		private IImage CacheStockIconImpl(SHStockIconID id, SHStockIconFlags flags) {
 			flags |= CacheStockIconFlags;
 
-			IBitmap icon = null;
+			IImage icon = null;
 			SHStockIconInfo stockInfo = new SHStockIconInfo {
 				cbSize = SHStockIconInfo.CBSize,
 			};
@@ -349,8 +346,8 @@ namespace WinDirStat.Net.Windows.Services {
 		/// <param name="systemIndex">The system index of the icon.</param>
 		/// <param name="extract">The method to extract the icon.</param>
 		/// <returns>The extracted icon on success, otherwise null.</returns>
-		private IBitmap TryAddIconToCache(int systemIndex, Func<IBitmap> extract) {
-			if (!cachedIcons.TryGetValue(systemIndex, out IBitmap icon)) {
+		private IImage TryAddIconToCache(int systemIndex, Func<IImage> extract) {
+			if (!cachedIcons.TryGetValue(systemIndex, out IImage icon)) {
 				try {
 					icon = extract();
 					cachedIcons.Add(systemIndex, icon);
@@ -366,7 +363,7 @@ namespace WinDirStat.Net.Windows.Services {
 		/// <param name="hImageList">The handle to the image list.</param>
 		/// <param name="systemIndex">The system index of the icon.</param>
 		/// <returns>The extracted icon on success, otherwise null.</returns>
-		private IBitmap ExtractIcon(IntPtr hImageList, int systemIndex) {
+		private IImage ExtractIcon(IntPtr hImageList, int systemIndex) {
 			IntPtr hIcon = ImageList_GetIcon(hImageList, systemIndex, ImageListDrawFlags.Normal);
 			try {
 				return ExtractIcon(hIcon);
@@ -381,7 +378,7 @@ namespace WinDirStat.Net.Windows.Services {
 		/// 
 		/// <param name="hIcon">The handle to the icon.</param>
 		/// <returns>The extracted icon on success, otherwise null.</returns>
-		protected IBitmap ExtractIcon(IntPtr hIcon) {
+		protected IImage ExtractIcon(IntPtr hIcon) {
 			return bitmapFactory.FromHIcon(hIcon);
 		}
 

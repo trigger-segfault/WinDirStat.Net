@@ -24,11 +24,11 @@ namespace WinDirStat.Net.ViewModel.Drives {
 		/// <summary>Gets the scanning service.</summary>
 		public ScanningService Scanning { get; }
 		/// <summary>Gets the icon cache service.</summary>
-		public IconCacheService IconCache { get; }
+		public IIconCacheService IconCache { get; }
 		/// <summary>Gets the program settings service.</summary>
 		public SettingsService Settings { get; }
 		/// <summary>Gets the UI service.</summary>
-		public UIService UI { get; }
+		public IUIService UI { get; }
 		
 		/// <summary>The list of sorted drive items.</summary>
 		private readonly List<DriveItemViewModel> drives;

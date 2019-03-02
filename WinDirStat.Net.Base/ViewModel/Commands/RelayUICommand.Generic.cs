@@ -5,8 +5,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using System.Windows.Media;
+using WinDirStat.Net.Services;
+using WinDirStat.Net.Services.Structures;
 #if WPF
 using GalaSoft.MvvmLight.CommandWpf;
 #else
@@ -19,31 +19,31 @@ namespace WinDirStat.Net.ViewModel {
 		#region Fields
 
 		private string text;
-		private ImageSource icon;
-		private readonly KeyGesture keyGesture;
+		private IImage icon;
+		private readonly IShortcut keyGesture;
 
 		#endregion
 
 		#region Constructors
 		
-		public RelayUICommand(string text, ImageSource icon, Action<T> execute)
+		public RelayUICommand(string text, IImage icon, Action<T> execute)
 			: this(text, icon, null, execute, null)
 		{
 		}
 
-		public RelayUICommand(string text, ImageSource icon, Action<T> execute,
+		public RelayUICommand(string text, IImage icon, Action<T> execute,
 			Func<T, bool> canExecute)
 			: this(text, icon, null, execute, canExecute)
 		{
 		}
 
-		public RelayUICommand(string text, ImageSource icon, KeyGesture keyGesture,
+		public RelayUICommand(string text, IImage icon, IShortcut keyGesture,
 			Action<T> execute)
 			: this(text, icon, keyGesture, execute, null)
 		{
 		}
 
-		public RelayUICommand(string text, ImageSource icon, KeyGesture keyGesture,
+		public RelayUICommand(string text, IImage icon, IShortcut keyGesture,
 			Action<T> execute, Func<T, bool> canExecute)
 			: base(execute, canExecute)
 		{
@@ -66,7 +66,7 @@ namespace WinDirStat.Net.ViewModel {
 			}
 		}
 
-		public ImageSource Icon {
+		public IImage Icon {
 			get => icon;
 			set {
 				if (icon != value) {
@@ -76,7 +76,7 @@ namespace WinDirStat.Net.ViewModel {
 			}
 		}
 
-		public KeyGesture InputGesture {
+		public IShortcut Shortcut {
 			get => keyGesture;
 		}
 

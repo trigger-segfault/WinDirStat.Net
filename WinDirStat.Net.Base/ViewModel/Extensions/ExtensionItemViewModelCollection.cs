@@ -22,11 +22,11 @@ namespace WinDirStat.Net.ViewModel.Extensions {
 		public MainViewModel ViewModel { get; }
 		public ScanningService Scanning { get; }
 		public ExtensionItems Model { get; }
-		public IconCacheService IconCache { get; }
+		public IIconCacheService IconCache { get; }
 		/// <summary>Gets the images service.</summary>
 		public ImagesServiceBase Images { get; }
 		public SettingsService Settings { get; }
-		public UIService UI { get; }
+		public IUIService UI { get; }
 
 		/// <summary>The collection of mapped extension items.</summary>
 		private readonly Dictionary<string, ExtensionItemViewModel> extensions;

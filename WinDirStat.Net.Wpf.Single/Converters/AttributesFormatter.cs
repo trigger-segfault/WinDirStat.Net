@@ -6,7 +6,7 @@ using System.Windows.Markup;
 
 namespace WinDirStat.Net.Wpf.Converters {
 	public class AttributesFormatter : MarkupExtension, IValueConverter {
-		public static AttributesFormatter Instance = new AttributesFormatter();
+		public static readonly AttributesFormatter Instance = new AttributesFormatter();
 
 		public override object ProvideValue(IServiceProvider serviceProvider) {
 			return Instance;

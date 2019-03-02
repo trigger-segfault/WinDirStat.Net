@@ -7,7 +7,97 @@
                     xmlns:System="clr-namespace:System;assembly=mscorlib"
                     xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero">
 
-  <Style TargetType="{x:Type local:SubtreePercentage}">
+  <!--<Style x:Key="SortViewColumnHeaderStyle"
+           TargetType="{x:Type GridViewColumnHeader}">
+    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    <Setter Property="ContentTemplate">
+      <Setter.Value>
+        <DataTemplate>
+          <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" Padding="4,0,4,0"/>
+        </DataTemplate>
+      </Setter.Value>
+    </Setter>
+    <Setter Property="Height" Value="24"/>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type GridViewColumnHeader}">
+          <Grid SnapsToDevicePixels="True">
+            <Border x:Name="HeaderBorder" BorderBrush="#FFE5E5E5" BorderThickness="0,0,0,1" Background="White">
+              <Border Padding="{TemplateBinding Padding}">
+                <DockPanel Margin="5,0,4,0">
+                  <Path Name="AscendingArrow" DockPanel.Dock="Left" Data="M 0 4 L 4 0 L 8 4" Fill="Black" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                  <Path Name="DescendingArrow" DockPanel.Dock="Left" Data="M 0 0 L 4 4 L 8 0" Fill="Black" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                  <ContentPresenter x:Name="HeaderContent" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="0,0,0,1" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                </DockPanel>
+              </Border>
+            </Border>
+            <Border x:Name="HeaderHoverBorder" BorderThickness="1,0,1,1" Margin="1,1,0,0"/>
+            <Border x:Name="HeaderPressBorder" BorderThickness="1,1,1,0" Margin="1,0,0,1"/>
+            <Canvas>
+              <Thumb x:Name="PART_HeaderGripper">
+                <Thumb.Style>
+                  <Style TargetType="{x:Type Thumb}">
+                    <Setter Property="Canvas.Right" Value="-9"/>
+                    <Setter Property="Width" Value="18"/>
+                    <Setter Property="Height" Value="{Binding ActualHeight, RelativeSource={RelativeSource TemplatedParent}}"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Background" Value="#FFE5E5E5"/>
+                    <Setter Property="Template">
+                      <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Thumb}">
+                          <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                            <Rectangle Fill="{TemplateBinding Background}" HorizontalAlignment="Center" Width="1"/>
+                          </Border>
+                        </ControlTemplate>
+                      </Setter.Value>
+                    </Setter>
+                  </Style>
+                </Thumb.Style>
+              </Thumb>
+            </Canvas>
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="sort:SortListView.ColumnSortDirection" Value="Ascending">
+              <Setter TargetName="AscendingArrow" Property="Visibility" Value="Visible"/>
+            </Trigger>
+            <Trigger Property="sort:SortListView.ColumnSortDirection" Value="Descending">
+              <Setter TargetName="DescendingArrow" Property="Visibility" Value="Visible"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter Property="Background" TargetName="HeaderBorder" Value="#D9EBF9"/>
+              <Setter Property="Background" TargetName="PART_HeaderGripper" Value="Transparent"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+              <Setter Property="Background" TargetName="HeaderBorder" Value="#BCDCF4"/>
+              <Setter Property="Visibility" TargetName="PART_HeaderGripper" Value="Hidden"/>
+              <Setter Property="Margin" TargetName="HeaderContent" Value="1,1,0,0"/>
+            </Trigger>
+            <Trigger Property="Height" Value="Auto">
+              <Setter Property="MinHeight" Value="20"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="{x:Static sort:SortViewKeys.HeaderContainerLeftAlignStyleKey}"
+           TargetType="{x:Type GridViewColumnHeader}" BasedOn="{StaticResource SortViewColumnHeaderStyle}">
+    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+  </Style>
+  <Style x:Key="{x:Static sort:SortViewKeys.HeaderContainerCenterAlignStyleKey}"
+           TargetType="{x:Type GridViewColumnHeader}" BasedOn="{StaticResource SortViewColumnHeaderStyle}">
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+  </Style>
+  <Style x:Key="{x:Static sort:SortViewKeys.HeaderContainerRightAlignStyleKey}"
+           TargetType="{x:Type GridViewColumnHeader}" BasedOn="{StaticResource SortViewColumnHeaderStyle}">
+    <Setter Property="HorizontalContentAlignment" Value="Right"/>
+  </Style>-->
+
+
+    <Style TargetType="{x:Type local:SubtreePercentage}">
     <Setter Property="Focusable"
                 Value="False" />
     <Setter Property="Margin" Value="0,2"/>
@@ -746,6 +836,9 @@
   </Style>
 
   <Style x:Key="{x:Static sort:SortView.SortViewStyleKey}" TargetType="{x:Type sort:SortListView}" BasedOn="{StaticResource {x:Type sort:SortListView}}">
+    <Style.Resources>
+      <Style TargetType="{x:Type GridViewColumnHeader}" BasedOn="{x:Static sort:SortViewKeys.HeaderContainerLeftAlignStyle}"/>
+    </Style.Resources>
     <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
   </Style>
 </ResourceDictionary>

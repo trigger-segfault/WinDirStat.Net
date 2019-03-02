@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using WinDirStat.Net.Services;
+using WinDirStat.Net.Services.Structures;
 using WinDirStat.Net.Utils;
 
 namespace WinDirStat.Net.ViewModel {

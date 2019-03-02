@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using WinDirStat.Net.ViewModel;
 using WinDirStat.Net.ViewModel.Extensions;
 using WinDirStat.Net.ViewModel.Files;
+using WinDirStat.Net.Wpf.Services.Structures;
 
 namespace WinDirStat.Net.Wpf {
 	/// <summary>
@@ -40,7 +41,7 @@ namespace WinDirStat.Net.Wpf {
 		#region Event Handlers
 
 		private void OnLoaded(object sender, RoutedEventArgs e) {
-			ViewModel.WindowOwner = this;
+			ViewModel.WindowOwner = new WpfWindow(this);
 		}
 
 		private void OnFileSelectionChanged(object sender, SelectionChangedEventArgs e) {

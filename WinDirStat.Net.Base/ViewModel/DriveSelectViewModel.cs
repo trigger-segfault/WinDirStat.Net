@@ -15,7 +15,7 @@ using WinDirStat.Net.ViewModel.Drives;
 
 namespace WinDirStat.Net.ViewModel {
 	/// <summary>The view model for the drive select dialog.</summary>
-	public partial class DriveSelectViewModel : ViewModelBaseEx {
+	public partial class DriveSelectViewModel : ViewModelWindowBase {
 
 		#region Fields
 
@@ -23,11 +23,11 @@ namespace WinDirStat.Net.ViewModel {
 		/// <summary>Gets the program settings service.</summary>
 		public SettingsService Settings { get; }
 		/// <summary>Gets the UI service.</summary>
-		public UIService UI { get; }
+		public IUIService UI { get; }
 		/// <summary>Gets the dialog service.</summary>
-		public IMyDialogService Dialogs { get; }
+		public IWindowDialogService Dialogs { get; }
 		/// <summary>Gets the icon cache service.</summary>
-		public IconCacheService IconCache { get; }
+		public IIconCacheService IconCache { get; }
 		/// <summary>Gets the scanning service.</summary>
 		public ScanningService Scanning { get; }
 
@@ -57,9 +57,9 @@ namespace WinDirStat.Net.ViewModel {
 
 		/// <summary>Constructrs the <see cref="DriveSelectViewModel"/>.</summary>
 		public DriveSelectViewModel(SettingsService settings,
-									UIService ui,
-									IMyDialogService dialog,
-									IconCacheService iconCache,
+									IUIService ui,
+									IWindowDialogService dialog,
+									IIconCacheService iconCache,
 									ScanningService scanning)
 		{
 			Settings = settings;

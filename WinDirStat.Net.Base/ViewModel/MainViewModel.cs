@@ -13,6 +13,7 @@ using GalaSoft.MvvmLight;
 using WinDirStat.Net.Model.Files;
 using WinDirStat.Net.Rendering;
 using WinDirStat.Net.Services;
+using WinDirStat.Net.Services.Structures;
 using WinDirStat.Net.Utils;
 using WinDirStat.Net.ViewModel.Comparers;
 using WinDirStat.Net.ViewModel.Extensions;
@@ -20,20 +21,21 @@ using WinDirStat.Net.ViewModel.Files;
 
 namespace WinDirStat.Net.ViewModel {
 	/// <summary>The main view model for the program.</summary>
-	public partial class MainViewModel : ViewModelBaseEx {
+	public partial class MainViewModel : ViewModelWindowBase {
 
 		#region Fields
 
 		public SettingsService Settings { get; }
 		public ScanningService Scanning { get; }
-		public IconCacheService IconCache { get; }
-		public UIService UI { get; }
-		public BitmapFactory BitmapFactory { get; }
+		public IIconCacheService IconCache { get; }
+		public IUIService UI { get; }
+		public IBitmapFactory BitmapFactory { get; }
 		/// <summary>Gets the images service.</summary>
 		public ImagesServiceBase Images { get; }
-		public ClipboardService Clipboard { get; }
-		public OSService OS { get; }
-		public IMyDialogService Dialogs { get; }
+		public IClipboardService Clipboard { get; }
+		public IOSService OS { get; }
+		public IWindowDialogService Dialogs { get; }
+		public IShortcutsService Shortcuts { get; }
 		public TreemapRenderer Treemap { get; }
 
 		public ExtensionItemViewModelCollection Extensions { get; }
@@ -48,8 +50,8 @@ namespace WinDirStat.Net.ViewModel {
 		private long gcRAMUsage;
 		private FileItemViewModel rootItem;
 		private RootItem graphViewRootItem;
-		private readonly UITimer ramTimer;
-		private readonly UITimer statusTimer;
+		private readonly IUITimer ramTimer;
+		private readonly IUITimer statusTimer;
 
 		private RecycleBinInfo allRecycleBinInfo;
 		private string emptyRecycleBinLabel;
@@ -65,14 +67,16 @@ namespace WinDirStat.Net.ViewModel {
 		/// </summary>
 		public MainViewModel(SettingsService settings,
 							 ScanningService scanning,
-							 IconCacheService iconCache,
-							 UIService ui,
-							 BitmapFactory bitmapFactory,
+							 IIconCacheService iconCache,
+							 IUIService ui,
+							 IBitmapFactory bitmapFactory,
 							 ImagesServiceBase images,
-							 ClipboardService clipboard,
-							 OSService os,
-							 IMyDialogService dialogs,
-							 TreemapRendererFactory treemapFactory)
+							 IClipboardService clipboard,
+							 IOSService os,
+							 IWindowDialogService dialogs,
+							 TreemapRendererFactory treemapFactory,
+							 IShortcutsService shortcuts,
+							 RelayCommandService relayFactory)
 		{
 			Settings = settings;
 			Scanning = scanning;
@@ -83,6 +87,7 @@ namespace WinDirStat.Net.ViewModel {
 			Clipboard = clipboard;
 			OS = os;
 			Dialogs = dialogs;
+			Shortcuts = shortcuts;
 			Treemap = treemapFactory.Create();
 
 			Settings.PropertyChanged += OnSettingsPropertyChanged;

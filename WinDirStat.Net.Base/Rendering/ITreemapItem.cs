@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WinDirStat.Net.Structures;
+﻿using WinDirStat.Net.Structures;
 
 namespace WinDirStat.Net.Rendering {
 	/// <summary>An interface for items to use in treemap rendering.</summary>

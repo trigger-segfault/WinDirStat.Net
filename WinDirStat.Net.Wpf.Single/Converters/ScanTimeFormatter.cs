@@ -5,7 +5,7 @@ using System.Windows.Markup;
 
 namespace WinDirStat.Net.Wpf.Converters {
 	public class ScanTimeFormatter : MarkupExtension, IValueConverter {
-		public static ScanTimeFormatter Instance = new ScanTimeFormatter();
+		public static readonly ScanTimeFormatter Instance = new ScanTimeFormatter();
 
 		public override object ProvideValue(IServiceProvider serviceProvider) {
 			return Instance;

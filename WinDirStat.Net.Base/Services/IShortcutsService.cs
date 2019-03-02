@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using WinDirStat.Net.Services.Structures;
 
 namespace WinDirStat.Net.Services {
 	/// <summary>A service for storing platform independent shortcuts.</summary>
@@ -11,12 +12,16 @@ namespace WinDirStat.Net.Services {
 		IShortcut Open { get; }
 		IShortcut Save { get; }
 		IShortcut Reload { get; }
+		IShortcut Close { get; }
+		IShortcut Cancel { get; }
+		IShortcut Elevate { get; }
 		IShortcut Exit { get; }
 
 		#endregion
 
 		#region Context Menu/Toolbar
 
+		IShortcut Expand { get; }
 		IShortcut OpenItem { get; }
 		IShortcut CopyPath { get; }
 		IShortcut Explore { get; }
@@ -25,6 +30,7 @@ namespace WinDirStat.Net.Services {
 		IShortcut RefreshSelected { get; }
 		IShortcut DeleteRecycle { get; }
 		IShortcut DeletePermanently { get; }
+		IShortcut Properties { get; }
 
 		#endregion
 

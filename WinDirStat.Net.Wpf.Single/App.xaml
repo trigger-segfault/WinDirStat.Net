@@ -9,6 +9,7 @@
   <Application.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Themes/RelayCommands.xaml"/>
         <ResourceDictionary Source="Themes/SortView.xaml"/>
       </ResourceDictionary.MergedDictionaries>
       <vm:ViewModelLocator x:Key="Locator" d:IsDataSource="True" xmlns:vm="clr-namespace:WinDirStat.Net.Wpf.ViewModel" />

@@ -139,10 +139,7 @@ namespace WinDirStat.Net.Model.Files {
 			return usedSize;
 		}
 
-		private void UpdateSpace(object sender, EventArgs e) {
-			if (IsEmpty)
-				return;
-
+		private void UpdateSpace(object sender = null, EventArgs e = null) {
 			if (Type == FileItemType.Computer) {
 				int count = children.Count;
 				for (int i = 0; i < count; i++) {
@@ -157,12 +154,19 @@ namespace WinDirStat.Net.Model.Files {
 			bool baseShow = (IsAbsoluteRootType && scanning.ShowTotalSpace) ||
 							(IsFileRootType && !scanning.ShowTotalSpace);
 
+			bool showFree = scanning.ShowFreeSpace && baseShow;
+			bool showUnknown = scanning.ShowUnknown && baseShow;
+
 			// Create some children so we can lock things down
 			EnsureChildren(2);
 
 			lock (children) {
-				AddOrRemove(FreeSpace, scanning.ShowFreeSpace && baseShow);
-				AddOrRemove(Unknown, scanning.ShowUnknown && baseShow);
+				if (showFree)
+					FreeSpace.UpdateSize();
+				if (showUnknown)
+					Unknown.UpdateSize(GetUsedSize());
+				AddOrRemove(FreeSpace, showFree);
+				AddOrRemove(Unknown, showUnknown);
 
 				// If nothing was added or removed and children was created,
 				// children was never set back to empty.
@@ -180,26 +184,21 @@ namespace WinDirStat.Net.Model.Files {
 		/// <summary>Refreshes the item. Returns true if it still exists.</summary>
 		/// 
 		/// <returns>True if the file still exists.</returns>
-		/*public override bool Refresh() {
+		public override bool Refresh() {
 			DirectoryInfo info = new DirectoryInfo(FullName);
-			if (info.Exists && !info.Attributes.HasFlag(FileAttributes.Directory)) {
+			// Remove all of our children first, they will be repopulated
+			ClearItems();
+			if (info.Exists && info.Attributes.HasFlag(FileAttributes.Directory)) {
+				//CaseSensitive = DirectoryCaseSensitivity.IsCaseSensitive(info.FullName);
 				Attributes = info.Attributes;
-
-				long oldSize = Size;
-				if (!info.Attributes.HasFlag(FileAttributes.ReparsePoint))
-					Size = info.Length;
-				else
-					Size = 0L;
-				ExtensionItem.RefreshFile(Size, oldSize);
-
+				Size = 0L;
 				LastWriteTimeUtc = info.LastWriteTimeUtc;
+				UpdateSpace();
 
-				return true;
+				return RefreshFinal(true);
 			}
-			ExtensionItem.RemoveFile(Size);
-			return false;
-
-		}*/
+			return RefreshFinal(false);
+		}
 		
 		/// <summary>Checks if it still exists.</summary>
 		/// 

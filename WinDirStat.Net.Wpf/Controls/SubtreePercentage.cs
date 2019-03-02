@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using WinDirStat.Net.ViewModel.Files;
+using WinDirStat.Net.Wpf.Utils;
 using WinDirStat.Net.Wpf.ViewModel;
 //using WinDirStat.Net.Wpf.Controls.FileList;
 
@@ -102,7 +103,7 @@ namespace WinDirStat.Net.Wpf.Controls {
 			double intent = CalculateIndent(level);
 			spacer.Width = new GridLength(1d - intent, GridUnitType.Star);
 			filler.Width = new GridLength(intent, GridUnitType.Star);
-			Fill = new SolidColorBrush((Color) Item.ViewModel.Settings.GetSubtreePaletteColor(level));
+			Fill = new SolidColorBrush(Item.ViewModel.Settings.GetSubtreePaletteColor(level).ToWpfColor());
 		}
 
 		private const double IndentRatio = 9d / 10d;

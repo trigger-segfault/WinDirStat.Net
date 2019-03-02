@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
@@ -20,7 +22,7 @@ using WinDirStat.Net.ViewModel.Files;
 
 namespace WinDirStat.Net.ViewModel {
 	/// <summary>The main view model for the program.</summary>
-	public partial class MainViewModel : ViewModelBaseEx {
+	public partial class MainViewModel : ViewModelWindow {
 
 		#region Fields
 
@@ -56,6 +58,12 @@ namespace WinDirStat.Net.ViewModel {
 
 		private bool suppressRefresh;
 
+		private Thread recycleInfoThread;
+
+		private readonly object recycleLock = new object();
+
+		private Stopwatch lastRecycleWatch;
+
 		#endregion
 
 		#region Constructors
@@ -72,7 +80,9 @@ namespace WinDirStat.Net.ViewModel {
 							 ClipboardService clipboard,
 							 OSService os,
 							 IMyDialogService dialogs,
-							 TreemapRendererFactory treemapFactory)
+							 TreemapRendererFactory treemapFactory,
+							 RelayCommandFactory relayFactory)
+			: base(relayFactory)
 		{
 			Settings = settings;
 			Scanning = scanning;

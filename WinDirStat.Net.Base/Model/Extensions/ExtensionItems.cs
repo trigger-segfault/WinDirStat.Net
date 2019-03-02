@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WinDirStat.Net.Services;
+using WinDirStat.Net.Services.Structures;
 using WinDirStat.Net.Utils;
 using static WinDirStat.Net.Model.Extensions.ExtensionItem;
 

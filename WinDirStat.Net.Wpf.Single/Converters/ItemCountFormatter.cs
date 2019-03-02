@@ -5,7 +5,7 @@ using System.Windows.Markup;
 
 namespace WinDirStat.Net.Wpf.Converters {
 	public class ItemCountFormatter : MarkupExtension, IValueConverter {
-		public static ItemCountFormatter Instance = new ItemCountFormatter();
+		public static readonly ItemCountFormatter Instance = new ItemCountFormatter();
 
 		public override object ProvideValue(IServiceProvider serviceProvider) {
 			return Instance;

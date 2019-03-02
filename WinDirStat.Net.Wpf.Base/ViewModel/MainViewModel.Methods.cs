@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using WinDirStat.Net.Services;
@@ -29,6 +30,20 @@ namespace WinDirStat.Net.ViewModel {
 		}
 		
 		public void UpdateEmptyRecycleBin() {
+			UpdateEmptyRecycleBin(false);
+		}
+		public void UpdateEmptyRecycleBin(bool force) {
+			lock (recycleLock) {
+				if ((recycleInfoThread == null || !recycleInfoThread.IsAlive) &&
+					(lastRecycleWatch == null || lastRecycleWatch.Elapsed > TimeSpan.FromSeconds(1)) || force) {
+					recycleInfoThread = new Thread(UpdateEmptyRecycleBinThread) {
+						Name = "Update Recycle Bin Info",
+					};
+					recycleInfoThread.Start();
+				}
+			}
+		}
+		private void UpdateEmptyRecycleBinThread() {
 			Debug.WriteLine("UpdateEmptyRecycleBin");
 			RecycleBinInfo info = OS.GetAllRecycleBinInfo();
 			string label = "Empty Recycle Bins";
@@ -50,6 +65,10 @@ namespace WinDirStat.Net.ViewModel {
 			EmptyRecycleBinLabel = label;
 			allRecycleBinInfo = info;
 			EmptyRecycleBin.RaiseCanExecuteChanged();
+			if (lastRecycleWatch == null)
+				lastRecycleWatch = Stopwatch.StartNew();
+			else
+				lastRecycleWatch.Restart();
 		}
 
 		public void WindowShown() {

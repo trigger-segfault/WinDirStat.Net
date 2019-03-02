@@ -8,16 +8,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using WinDirStat.Net.Services;
-using static WinDirStat.Net.Native.Win32;
+using WinDirStat.Net.Services.Structures;
+using static WinDirStat.Net.Windows.Native.Win32;
 
 namespace WinDirStat.Net.Windows.Services {
 	/// <summary>A service for OS-specific actions.</summary>
-	public class WindowsOSService {
+	public class WindowsOSService : IOSService {
 
 		#region Fields
 
 		/// <summary>The service for performing UI actions such as dispatcher invoking.</summary>
-		private readonly UIService ui;
+		private readonly IUIService ui;
 		/// <summary>True if the current process has elevated privileges.</summary>
 		private bool? isElevated;
 
@@ -25,8 +26,8 @@ namespace WinDirStat.Net.Windows.Services {
 
 		#region Constructors
 
-		/// <summary>Constructs the <see cref="UIService"/>.</summary>
-		public WindowsOSService(UIService ui) {
+		/// <summary>Constructs the <see cref="WindowsOSService"/>.</summary>
+		public WindowsOSService(IUIService ui) {
 			this.ui = ui;
 		}
 
@@ -44,11 +45,11 @@ namespace WinDirStat.Net.Windows.Services {
 			}
 		}
 
-		public void StartNewElevated() {
+		public void StartNewElevated(string arguments = "") {
 			Process current = Process.GetCurrentProcess();
 			ProcessStartInfo startInfo = new ProcessStartInfo {
 				FileName = current.MainModule.FileName,
-				Arguments = string.Join(" ", Environment.GetCommandLineArgs().Select(a => "\"" + a + "\"")),
+				Arguments = arguments + " " + string.Join(" ", Environment.GetCommandLineArgs().Select(a => "\"" + a + "\"")),
 				WorkingDirectory = Directory.GetCurrentDirectory(),
 				Verb = "runas",
 			};

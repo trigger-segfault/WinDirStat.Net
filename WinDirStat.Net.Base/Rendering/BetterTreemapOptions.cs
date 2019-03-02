@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WinDirStat.Net.Structures;
 using WinDirStat.Net.Utils;
 
 #if DOUBLE
 using Number = System.Double;
+using Point2N = WinDirStat.Net.Structures.Point2D;
 #else
 using Number = System.Single;
+using Point2N = WinDirStat.Net.Structures.Point2F;
 #endif
 
 namespace WinDirStat.Net.Rendering {
@@ -28,7 +26,7 @@ namespace WinDirStat.Net.Rendering {
 		/// <summary>0..1.0   (default = 0.15)    Factor "Ia"</summary>
 		private Number ambientLight;
 		/// <summary>(-4.0,-4.0)..(+4.0,+4.0) (default = (-1.0,-1.0), negative = top-left</summary>
-		private Point2F lightSource;
+		private Point2N lightSource;
 
 		/// <summary>Squarification method</summary>
 		public TreemapStyle Style {
@@ -66,7 +64,7 @@ namespace WinDirStat.Net.Rendering {
 		}
 
 		/// <summary>(-4.0,-4.0)..(+4.0,+4.0) (default = (-1.0,-1.0), negative = top-left</summary>
-		public Point2F LightSource {
+		public Point2N LightSource {
 			get => lightSource;
 			set {
 				LightSourceX = value.X;

@@ -5,7 +5,7 @@ using System.Windows.Markup;
 
 namespace WinDirStat.Net.Wpf.Converters {
 	public class ZeroWhenFalse : MarkupExtension, IValueConverter {
-		public static ZeroWhenFalse Instance = new ZeroWhenFalse();
+		public static readonly ZeroWhenFalse Instance = new ZeroWhenFalse();
 
 		public override object ProvideValue(IServiceProvider serviceProvider) {
 			return Instance;

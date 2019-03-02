@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 using System.Windows.Input;
-using System.Windows.Media;
+using WinDirStat.Net.Services;
+using WinDirStat.Net.Services.Structures;
 
 namespace WinDirStat.Net.ViewModel {
 	/// <summary>An interface for working with generic and non-generic RelayUICommands.</summary>
-	public interface IRelayUICommand : ICommand, INotifyPropertyChanged {
-		string Text { get; set; }
-		ImageSource Icon { get; set; }
-		KeyGesture InputGesture { get; }
+	public interface IRelayUICommand : IRelayCommand {
+		string Text { get; }
+		IImage Icon { get; }
+		IShortcut Shortcut { get; }
 	}
 }

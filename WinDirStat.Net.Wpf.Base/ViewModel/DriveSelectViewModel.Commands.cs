@@ -3,19 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GalaSoft.MvvmLight.CommandWpf;
 using WinDirStat.Net.Model.Drives;
+using WinDirStat.Net.ViewModel.Commands;
 
 namespace WinDirStat.Net.ViewModel {
 	partial class DriveSelectViewModel {
 		
-		public RelayCommand OK {
-			get => GetCommand(OnOK);
-		}
+		public IRelayCommand OK => GetCommand(OnOK);
 
-		public RelayCommand SelectFolder {
-			get => GetCommand(OnSelectFolder);
-		}
+		public IRelayCommand SelectFolder => GetCommand(OnSelectFolder);
 
 		private void OnOK() {
 			// Apply the settings for future use

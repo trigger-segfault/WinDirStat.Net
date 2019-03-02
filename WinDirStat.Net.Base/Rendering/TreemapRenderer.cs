@@ -1,19 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Media.Imaging;
 using WinDirStat.Net.Utils;
 using WinDirStat.Net.Services;
 using WinDirStat.Net.Structures;
+using WinDirStat.Net.Services.Structures;
 
 #if DOUBLE
 using Number = System.Double;
+using Point2N = WinDirStat.Net.Structures.Point2D;
 #else
 using Number = System.Single;
+using Point2N = WinDirStat.Net.Structures.Point2F;
 #endif
 
 namespace WinDirStat.Net.Rendering {
@@ -23,7 +20,7 @@ namespace WinDirStat.Net.Rendering {
 		#region Fields
 
 		/// <summary>The UI service.</summary>
-		private readonly UIService ui;
+		private readonly IUIService ui;
 
 		/// <summary>The last pixel array used for drawing.</summary>
 		private Rgba32Color[] pixels;
@@ -44,7 +41,7 @@ namespace WinDirStat.Net.Rendering {
 		#region Constructors
 
 		/// <summary>Constructs the <see cref="TreemapRenderer"/>.</summary>
-		public TreemapRenderer(UIService ui) {
+		public TreemapRenderer(IUIService ui) {
 			this.ui = ui;
 			Options = TreemapOptions.Default;
 		}
@@ -61,7 +58,7 @@ namespace WinDirStat.Net.Rendering {
 
 				Number lx = options.LightSourceX;
 				Number ly = options.LightSourceY;
-				const Number lz = 10f;
+				const Number lz = 10;
 
 				Number lenght = (Number) Math.Sqrt(lx*lx + ly*ly + lz*lz);
 				this.lx = lx / lenght;
@@ -97,7 +94,7 @@ namespace WinDirStat.Net.Rendering {
 			}
 		}
 		
-		public void DrawTreemap(WriteableBitmap bitmap, Rectangle2I rc, ITreemapItem root) {
+		public void DrawTreemap(IWriteableBitmap bitmap, Rectangle2I rc, ITreemapItem root) {
 			RecurseCheckTree(root);
 
 			Rectangle2I fullRc = rc;
@@ -124,16 +121,12 @@ namespace WinDirStat.Net.Rendering {
 					Number[] surface = { 0, 0, 0, 0 };
 					RecurseDrawGraph(pBitmapBits, root, rc, true, surface, options.Height, 0);
 				}
-
-				IntPtr bitmapBitsPtr = (IntPtr) pBitmapBits;
-
-				ui.Invoke(() => {
-					bitmap.WritePixels((Int32Rect) fullRc, bitmapBitsPtr, fullRc.Width * fullRc.Height * 4, bitmap.BackBufferStride);
-				});
+				
+				bitmap.SetPixels(pBitmapBits);
 			}
 		}
 		
-		public void DrawColorPreview(WriteableBitmap bitmap, Rectangle2I rc, Rgb24Color color) {
+		public void DrawColorPreview(IWriteableBitmap bitmap, Rectangle2I rc, Rgb24Color color) {
 			if (rc.Width <= 0 || rc.Height <= 0)
 				return;
 
@@ -148,12 +141,8 @@ namespace WinDirStat.Net.Rendering {
 
 				AddRidge(rc, surface, options.Height * options.ScaleFactor);
 				RenderRectangle(pBitmapBits, rc, surface, color);
-
-				IntPtr bitmapBitsPtr = (IntPtr) pBitmapBits;
-
-				ui.Invoke(() => {
-					bitmap.WritePixels((Int32Rect) rc, bitmapBitsPtr, rc.Width * rc.Height * 4, bitmap.BackBufferStride);
-				});
+				
+				bitmap.SetPixels(pBitmapBits);
 			}
 		}
 

@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-using WinDirStat.Net.Utils;
-
-using GdiRectangle = System.Drawing.Rectangle;
-using GdiRectangleF = System.Drawing.RectangleF;
-using WpfInt32Rect = System.Windows.Int32Rect;
-
 namespace WinDirStat.Net.Structures {
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
@@ -76,6 +70,8 @@ namespace WinDirStat.Net.Structures {
 
 		#endregion
 
+		#region Properties
+
 		public int Left {
 			get => X;
 			set {
@@ -104,6 +100,39 @@ namespace WinDirStat.Net.Structures {
 			set => Height = value - Y;
 		}
 
+		#endregion
+
+		#region Casting
+
+		public static implicit operator Rectangle2I(Rectangle2S rect) {
+			return new Rectangle2I(
+				(rect.X == ushort.MaxValue ? -1 : rect.X),
+				(rect.Y == ushort.MaxValue ? -1 : rect.Y),
+				rect.Width,
+				rect.Height);
+		}
+
+		public static explicit operator Rectangle2S(Rectangle2I rect) {
+			return new Rectangle2S(rect.X, rect.Y, rect.Width, rect.Height);
+		}
+
+		#endregion
+
+		#region Accessors
+
+		public bool Contains(int x, int y) {
+			return Contains(new Point2I(x, y));
+		}
+
+		public bool Contains(Point2I point) {
+			return (point.X >= Left && point.X <= Right &&
+					point.Y >= Top && point.Y <= Bottom);
+		}
+
+		#endregion
+
+		#region Mutators
+
 		public void Inflate(int x, int y) {
 			X -= x;
 			Y -= y;
@@ -118,49 +147,6 @@ namespace WinDirStat.Net.Structures {
 			Height -= y * 2;
 		}
 
-		public static explicit operator GdiRectangle(Rectangle2I rect) {
-			return new GdiRectangle(rect.X, rect.Y, rect.Width, rect.Height);
-		}
-
-		public static explicit operator GdiRectangleF(Rectangle2I rect) {
-			return new GdiRectangleF(rect.X, rect.Y, rect.Width, rect.Height);
-		}
-
-		public static explicit operator WpfInt32Rect(Rectangle2I rect) {
-			return new WpfInt32Rect(rect.X, rect.Y, rect.Width, rect.Height);
-		}
-
-		public static implicit operator Rectangle2I(GdiRectangle rect) {
-			return new Rectangle2I(rect.X, rect.Y, rect.Width, rect.Height);
-		}
-
-		public static explicit operator Rectangle2I(GdiRectangleF rect) {
-			return new Rectangle2I((int) rect.X, (int) rect.Y, (int) rect.Width, (int) rect.Height);
-		}
-
-		public static implicit operator Rectangle2I(WpfInt32Rect rect) {
-			return new Rectangle2I(rect.X, rect.Y, rect.Width, rect.Height);
-		}
-
-		public static implicit operator Rectangle2I(Rectangle2S rect) {
-			return new Rectangle2I(
-				(rect.X == ushort.MaxValue ? -1 : rect.X),
-				(rect.Y == ushort.MaxValue ? -1 : rect.Y),
-				rect.Width,
-				rect.Height);
-		}
-
-		public static explicit operator Rectangle2S(Rectangle2I rect) {
-			return new Rectangle2S(rect.X, rect.Y, rect.Width, rect.Height);
-		}
-
-		public bool Contains(int x, int y) {
-			return Contains(new Point2I(x, y));
-		}
-
-		public bool Contains(Point2I point) {
-			return (point.X >= Left && point.X <= Right &&
-					point.Y >= Top && point.Y <= Bottom);
-		}
+		#endregion
 	}
 }

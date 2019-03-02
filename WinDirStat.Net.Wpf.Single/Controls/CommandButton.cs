@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using WinDirStat.Net.Model;
 using WinDirStat.Net.Utils;
 using WinDirStat.Net.ViewModel;
+using WinDirStat.Net.Wpf.Commands;
 using WinDirStat.Net.Wpf.Utils;
 using WinDirStat.Net.Wpf.ViewModel;
 
@@ -18,9 +19,9 @@ namespace WinDirStat.Net.Wpf.Controls {
 		private static void OnCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
 			CommandButton button = (CommandButton) d;
 
-			if (e.OldValue is IRelayUICommand oldUICommand)
+			if (e.OldValue is IRelayInfoCommand oldUICommand)
 				oldUICommand.PropertyChanged -= button.OnCommandPropertyChanged;
-			if (e.NewValue is IRelayUICommand newUICommand)
+			if (e.NewValue is IRelayInfoCommand newUICommand)
 				newUICommand.PropertyChanged += button.OnCommandPropertyChanged;
 
 			d.CoerceValue(SourceProperty);
@@ -53,7 +54,7 @@ namespace WinDirStat.Net.Wpf.Controls {
 			CommandButton button = (CommandButton) d;
 
 			// If no icon has been set, use the command's icon
-			if (button.IsValueUnsetAndNull(SourceProperty, value) && button.Command is IRelayUICommand uiCommand) {
+			if (button.IsValueUnsetAndNull(SourceProperty, value) && button.Command is IRelayInfoCommand uiCommand) {
 				value = uiCommand.Icon;
 			}
 			return value;
@@ -63,7 +64,7 @@ namespace WinDirStat.Net.Wpf.Controls {
 		private static object CoerceToolTip(DependencyObject d, object value) {
 			CommandButton button = (CommandButton) d;
 
-			if (button.IsValueUnsetAndNull(ToolTipProperty, value) && button.Command is IRelayUICommand uiCommand) {
+			if (button.IsValueUnsetAndNull(ToolTipProperty, value) && button.Command is IRelayInfoCommand uiCommand) {
 
 				string tooltip = "";
 				if (!string.IsNullOrEmpty(uiCommand.Text)) {

@@ -4,10 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Media;
 using GalaSoft.MvvmLight;
 using WinDirStat.Net.Model.Drives;
 using WinDirStat.Net.Services;
+using WinDirStat.Net.Services.Structures;
 using WinDirStat.Net.Utils;
 
 namespace WinDirStat.Net.ViewModel.Drives {
@@ -22,7 +22,7 @@ namespace WinDirStat.Net.ViewModel.Drives {
 		public DriveItem Model { get; }
 
 		/// <summary>The display icon for the drive.</summary>
-		private ImageSource icon;
+		private IImage icon;
 		/// <summary>The display name for the drive.</summary>
 		private string displayName;
 
@@ -38,7 +38,7 @@ namespace WinDirStat.Net.ViewModel.Drives {
 			this.drives = drives;
 			Model = model;
 
-			IconAndName iconName = IconCache.CacheIconAndDisplayName(Name);
+			IIconAndName iconName = IconCache.CacheIconAndDisplayName(Name);
 			if (iconName != null) {
 				Icon = iconName.Icon;
 				DisplayName = iconName.Name;
@@ -54,7 +54,7 @@ namespace WinDirStat.Net.ViewModel.Drives {
 		#region Properties
 
 		/// <summary>Gets the display icon for the drive.</summary>
-		public ImageSource Icon {
+		public IImage Icon {
 			get => icon;
 			private set => Set(ref icon, value);
 		}
@@ -81,7 +81,7 @@ namespace WinDirStat.Net.ViewModel.Drives {
 		public double Percent => Model.Percent;
 
 		/// <summary>Gets the icon cache service.</summary>
-		private IconCacheService IconCache => drives.IconCache;
+		private IIconCacheService IconCache => drives.IconCache;
 
 		/// <summary>Gets the program settings service.</summary>
 		private SettingsService Settings => drives.Settings;

@@ -9,7 +9,7 @@ using System.Windows.Markup;
 
 namespace WinDirStat.Net.Wpf.Converters {
 	public class InverseBoolean : MarkupExtension, IValueConverter {
-		public static InverseBoolean Instance = new InverseBoolean();
+		public static readonly InverseBoolean Instance = new InverseBoolean();
 
 		public override object ProvideValue(IServiceProvider serviceProvider) {
 			return Instance;

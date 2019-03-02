@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using WinDirStat.Net.ViewModel;
+using WinDirStat.Net.Wpf.Services.Structures;
 
 namespace WinDirStat.Net.Wpf.Controls {
 	public class RelayUIBinding : KeyBinding {
@@ -23,8 +24,8 @@ namespace WinDirStat.Net.Wpf.Controls {
 				new UIPropertyMetadata(OnCommandChanged));
 		}
 
-		public IRelayUICommand RelayUICommand {
-			get => Command as IRelayUICommand;
+		public IWpfRelayCommand RelayUICommand {
+			get => Command as IWpfRelayCommand;
 		}
 
 		public override InputGesture Gesture {

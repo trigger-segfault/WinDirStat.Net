@@ -10,7 +10,7 @@ using System.Windows.Markup;
 
 namespace WinDirStat.Net.Wpf.Converters {
 	public class DirectoryExistsToBoolean : MarkupExtension, IValueConverter {
-		public static DirectoryExistsToBoolean Instance = new DirectoryExistsToBoolean();
+		public static readonly DirectoryExistsToBoolean Instance = new DirectoryExistsToBoolean();
 
 		public override object ProvideValue(IServiceProvider serviceProvider) {
 			return Instance;

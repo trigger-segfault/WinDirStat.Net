@@ -5,7 +5,7 @@ using System.Windows.Markup;
 
 namespace WinDirStat.Net.Wpf.Converters {
 	public class ScaleConverter : MarkupExtension, IValueConverter {
-		public static ScaleConverter Instance = new ScaleConverter();
+		public static readonly ScaleConverter Instance = new ScaleConverter();
 
 		public override object ProvideValue(IServiceProvider serviceProvider) {
 			return Instance;

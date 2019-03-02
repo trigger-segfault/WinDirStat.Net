@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WinDirStat.Net.Services;
+﻿using WinDirStat.Net.Services;
 
 namespace WinDirStat.Net.Rendering {
 	/// <summary>A factory for treemap renderers.</summary>
@@ -12,14 +7,14 @@ namespace WinDirStat.Net.Rendering {
 		#region Fields
 
 		/// <summary>The UI service.</summary>
-		private readonly UIService ui;
+		private readonly IUIService ui;
 
 		#endregion
 
 		#region Constructors
 
 		/// <summary>Constructs the<see cref="TreemapRendererFactory"/>.</summary>
-		public TreemapRendererFactory(UIService ui) {
+		public TreemapRendererFactory(IUIService ui) {
 			this.ui = ui;
 		}
 

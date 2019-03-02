@@ -505,7 +505,7 @@ namespace WinDirStat.Net.Model.Files {
 				Add(item);
 				Invalidate();
 
-				Debug.Assert(IsInvalidated);
+				//Debug.Assert(IsInvalidated);
 			}
 		}
 		

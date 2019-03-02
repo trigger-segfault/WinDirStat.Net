@@ -9,7 +9,7 @@ using System.Windows.Markup;
 
 namespace WinDirStat.Net.Wpf.Converters {
 	public class RadioButtonConverter : MarkupExtension, IValueConverter {
-		public static RadioButtonConverter Instance = new RadioButtonConverter();
+		public static readonly RadioButtonConverter Instance = new RadioButtonConverter();
 
 		public override object ProvideValue(IServiceProvider serviceProvider) {
 			return Instance;

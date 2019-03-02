@@ -6,10 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Media;
 using GalaSoft.MvvmLight;
 using WinDirStat.Net.Model.Files;
 using WinDirStat.Net.Services;
+using WinDirStat.Net.Services.Structures;
 using WinDirStat.Net.Utils;
 using WinDirStat.Net.ViewModel.Extensions;
 
@@ -31,7 +31,7 @@ namespace WinDirStat.Net.ViewModel.Files {
 		/// <summary>The parent of the view model item.</summary>
 		private FileItemViewModel parent;
 		/// <summary>The loaded icon of the view model item.</summary>
-		private ImageSource icon;
+		private IImage icon;
 		/// <summary>The loaded display name of the view model item. Only used with certain types.</summary>
 		private string displayName;
 
@@ -79,13 +79,13 @@ namespace WinDirStat.Net.ViewModel.Files {
 			private set => Set(ref parent, value);
 		}
 		/// <summary>Gets the icon of the item.</summary>
-		public ImageSource Icon {
+		public IImage Icon {
 			get => icon;
 			private set => Set(ref icon, value);
 		}
 
 		/// <summary>Gets the overlay icon if there is one.</summary>
-		public ImageSource OverlayIcon {
+		public IImage OverlayIcon {
 			get {
 				if (!Exists)
 					return Images.Missing;
@@ -209,13 +209,13 @@ namespace WinDirStat.Net.ViewModel.Files {
 		private IconCacheMode CacheMode => ViewModel.Settings.IconCacheMode;
 
 		/// <summary>Gets the UI service.</summary>
-		private UIService UI => ViewModel.UI;
+		private IUIService UI => ViewModel.UI;
 
 		/// <summary>Gets the images service.</summary>
 		private ImagesServiceBase Images => ViewModel.Images;
 
 		/// <summary>Gets the icon cache service.</summary>
-		private IconCacheService IconCache => ViewModel.IconCache;
+		private IIconCacheService IconCache => ViewModel.IconCache;
 		
 		/// <summary>Gets if the UI refreshing should be supressed due to validation.</summary>
 		private bool SuppressRefresh => ViewModel.SuppressFileTreeRefresh;
@@ -229,7 +229,7 @@ namespace WinDirStat.Net.ViewModel.Files {
 			IconCacheMode cacheMode = CacheMode;
 			if (cacheMode == IconCacheMode.None)
 				return;
-			IconAndName iconName;
+			IIconAndName iconName;
 			switch (Type) {
 			case FileItemType.File:
 				if (cacheMode >= IconCacheMode.FileType) {
@@ -298,7 +298,7 @@ namespace WinDirStat.Net.ViewModel.Files {
 		/// 
 		/// <param name="icon">The icon to use.</param>
 		/// <returns>True if the <paramref name="icon"/> was non-null and was assigned.</returns>
-		private bool SetIcon(ImageSource icon) {
+		private bool SetIcon(IImage icon) {
 			if (icon != null) {
 				this.icon = icon;
 				RaisePropertyChanged(nameof(Icon));
@@ -312,7 +312,7 @@ namespace WinDirStat.Net.ViewModel.Files {
 		/// <param name="icon">The icon to use.</param>
 		/// <param name="defaultIcon">The default icon to use if the result is null.</param>
 		/// <returns>True if the <paramref name="icon"/> was non-null and was assigned.</returns>
-		private bool SetIcon(ImageSource icon, ImageSource defaultIcon) {
+		private bool SetIcon(IImage icon, IImage defaultIcon) {
 			if (icon != null) {
 				this.icon = icon;
 				RaisePropertyChanged(nameof(Icon));
@@ -331,7 +331,7 @@ namespace WinDirStat.Net.ViewModel.Files {
 		/// <param name="defaultIcon">The default icon to use if the result is null.</param>
 		/// <param name="defaultName">The default name to use if the result is null.</param>
 		/// <returns>True if the <paramref name="iconName"/> was non-null and was assigned.</returns>
-		private bool SetIconAndDisplayName(IconAndName iconName, ImageSource defaultIcon, string defaultName) {
+		private bool SetIconAndDisplayName(IIconAndName iconName, IImage defaultIcon, string defaultName) {
 			if (iconName != null) {
 				icon = iconName.Icon;
 				displayName = iconName.Name;
@@ -357,14 +357,14 @@ namespace WinDirStat.Net.ViewModel.Files {
 		/// <summary>The callback for caching a an individual file icon.</summary>
 		/// 
 		/// <param name="icon">The newly cached icon.</param>
-		private void OnCacheFileIcon(ImageSource icon) {
+		private void OnCacheFileIcon(IImage icon) {
 			SetIcon(icon, ExtensionItem.Icon);
 		}
 
 		/// <summary>The callback for caching a an individual folder icon.</summary>
 		/// 
 		/// <param name="icon">The newly cached icon.</param>
-		private void OnCacheFolderIcon(ImageSource icon) {
+		private void OnCacheFolderIcon(IImage icon) {
 			SetIcon(icon, IconCache.FolderIcon);
 		}
 

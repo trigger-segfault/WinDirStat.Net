@@ -47,42 +47,21 @@
     <ApplicationManifest>Properties\App.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CommonServiceLocator, Version=2.0.2.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
-      <HintPath>..\packages\CommonServiceLocator.2.0.2\lib\net45\CommonServiceLocator.dll</HintPath>
-    </Reference>
-    <Reference Include="GalaSoft.MvvmLight, Version=5.4.1.0, Culture=neutral, PublicKeyToken=e7570ab207bcb616, processorArchitecture=MSIL">
-      <HintPath>..\packages\MvvmLightLibs.5.4.1\lib\net45\GalaSoft.MvvmLight.dll</HintPath>
-    </Reference>
-    <Reference Include="GalaSoft.MvvmLight.Extras, Version=5.4.1.0, Culture=neutral, PublicKeyToken=669f0b5e8f868abf, processorArchitecture=MSIL">
-      <HintPath>..\packages\MvvmLightLibs.5.4.1\lib\net45\GalaSoft.MvvmLight.Extras.dll</HintPath>
-    </Reference>
-    <Reference Include="GalaSoft.MvvmLight.Platform, Version=5.4.1.0, Culture=neutral, PublicKeyToken=5f873c45e98af8a1, processorArchitecture=MSIL">
-      <HintPath>..\packages\MvvmLightLibs.5.4.1\lib\net45\GalaSoft.MvvmLight.Platform.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Expression.Interactions, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="PresentationFramework.Aero" />
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\MvvmLightLibs.5.4.1\lib\net45\System.Windows.Interactivity.dll</HintPath>
-    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="TriggersTools.Build.BuildTime, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\TriggersTools.Build.BuildTime.1.0.0\lib\net40\TriggersTools.Build.BuildTime.dll</HintPath>
-    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
-    <Reference Include="WriteableBitmapEx.Wpf, Version=1.5.0.0, Culture=neutral, PublicKeyToken=50375ca6144f1c69, processorArchitecture=MSIL">
-      <HintPath>..\packages\WriteableBitmapEx.1.5.1.0\lib\net40\WriteableBitmapEx.Wpf.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -132,15 +111,25 @@
     <Compile Include="Converters\TextToHorizontalAlignment.cs" />
     <None Include="Converters\ZeroGridLengthWhenBoolean.cs" />
     <Compile Include="Converters\ZeroWhenBoolean.cs" />
-    <None Include="Services\WpfUIService.cs" />
-    <None Include="Services\WpfClipboardService.cs" />
-    <None Include="Services\WpfBitmapFactory.cs" />
-    <Compile Include="Services\DialogService.cs" />
-    <Compile Include="Services\Misc\WpfWindow.cs" />
+    <Compile Include="Resources\ImageResources.cs" />
+    <Compile Include="Services\Structures\IWpfRelayCommand.cs" />
+    <Compile Include="Services\Structures\WpfImage.cs" />
+    <Compile Include="Services\Structures\WpfRelayCommand.cs" />
+    <Compile Include="Services\Structures\WpfRelayCommandInfo.cs" />
+    <Compile Include="Services\Structures\WpfRelayUICommand.cs" />
+    <Compile Include="Services\Structures\WpfShortcut.cs" />
+    <Compile Include="Services\Structures\WpfUITimer.cs" />
+    <Compile Include="Services\WpfUIService.cs" />
+    <Compile Include="Services\WpfClipboardService.cs" />
+    <Compile Include="Services\WpfBitmapFactory.cs" />
+    <Compile Include="Services\WpfWindowDialogService.cs" />
+    <Compile Include="Services\Structures\WpfWindow.cs" />
     <Compile Include="Services\ResourceImagesService.cs" />
     <Compile Include="Utils\WindowExtensions.cs" />
     <Compile Include="Utils\DependencyObjectExtensions.cs" />
+    <Compile Include="Utils\WpfCasting.cs" />
     <Compile Include="Utils\WpfExtensions.cs" />
+    <Compile Include="Utils\WpfUtils.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
     <Compile Include="Windows\DriveSelectDialog.xaml.cs">
       <DependentUpon>DriveSelectDialog.xaml</DependentUpon>
@@ -186,7 +175,6 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <None Include="packages.config" />
     <None Include="Properties\App.manifest" />
   </ItemGroup>
   <ItemGroup>
@@ -200,6 +188,10 @@
     <ProjectReference Include="..\WinDirStat.Net.Base\WinDirStat.Net.Base.csproj">
       <Project>{0ed71f8b-0797-468b-8420-2e2879da2302}</Project>
       <Name>WinDirStat.Net.Base</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WinDirStat.Net.Windows\WinDirStat.Net.Windows.csproj">
+      <Project>{6416aa44-0296-4ff8-b408-a39a6c80dc2b}</Project>
+      <Name>WinDirStat.Net.Windows</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -307,14 +299,19 @@
   <ItemGroup>
     <Resource Include="Resources\Icons\ShowFileTypes.png" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MvvmLight">
+      <Version>5.4.1.1</Version>
+    </PackageReference>
+    <PackageReference Include="TriggersTools.Build.BuildTime">
+      <Version>1.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="TriggersTools.Build.CopyrightYear">
+      <Version>1.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="WriteableBitmapEx">
+      <Version>1.6.2</Version>
+    </PackageReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\TriggersTools.Build.BuildTime.1.0.0\build\TriggersTools.Build.BuildTime.targets" Condition="Exists('..\packages\TriggersTools.Build.BuildTime.1.0.0\build\TriggersTools.Build.BuildTime.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\TriggersTools.Build.BuildTime.1.0.0\build\TriggersTools.Build.BuildTime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TriggersTools.Build.BuildTime.1.0.0\build\TriggersTools.Build.BuildTime.targets'))" />
-    <Error Condition="!Exists('..\packages\TriggersTools.Build.CopyrightYear.1.0.0\build\TriggersTools.Build.CopyrightYear.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TriggersTools.Build.CopyrightYear.1.0.0\build\TriggersTools.Build.CopyrightYear.targets'))" />
-  </Target>
-  <Import Project="..\packages\TriggersTools.Build.CopyrightYear.1.0.0\build\TriggersTools.Build.CopyrightYear.targets" Condition="Exists('..\packages\TriggersTools.Build.CopyrightYear.1.0.0\build\TriggersTools.Build.CopyrightYear.targets')" />
 </Project>

@@ -32,19 +32,6 @@
       <Setter.Value>
         <DataTemplate>
           <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" Padding="4,0,4,0"/>
-          <!--<StackPanel Orientation="Horizontal" Margin="5,0,4,0">
-                        <Path Name="AscendingArrow" Data="M 0 4 L 4 0 L 8 4" Fill="Black" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                        <Path Name="DescendingArrow" Data="M 0 0 L 4 4 L 8 0" Fill="Black" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                        <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" Padding="4,0,4,0"/>
-                    </StackPanel>-->
-          <!--<DataTemplate.Triggers>
-                        <Trigger Property="sort:SortListView.ColumnSortDirection" Value="Ascending">
-                            <Setter TargetName="AscendingArrow" Property="Visibility" Value="Visible"/>
-                        </Trigger>
-                        <Trigger Property="sort:SortListView.ColumnSortDirection" Value="Descending">
-                            <Setter TargetName="DescendingArrow" Property="Visibility" Value="Visible"/>
-                        </Trigger>
-                    </DataTemplate.Triggers>-->
         </DataTemplate>
       </Setter.Value>
     </Setter>

@@ -1,0 +1,37 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="clr-namespace:WinDirStat.Net.Wpf.Commands"
+                    xmlns:vm="clr-namespace:WinDirStat.Net.ViewModel;assembly=WinDirStat.Net.Wpf.Base">
+  <c:RelayInfoCollection x:Key="MainCommands" ViewModelType="{x:Type vm:MainViewModel}">
+    <c:RelayInfo Name="Open" Text="Open..." Key="O" Modifiers="Ctrl" Icon="/WinDirStat.Net;component/Resources/Icons/Open.png"/>
+    <c:RelayInfo Name="Save" Text="Save..." Key="S" Modifiers="Ctrl" Icon="/WinDirStat.Net;component/Resources/Icons/Save.png"/>
+    <c:RelayInfo Name="Reload" Text="Reload" Key="F5" Modifiers="Shift" Icon="/WinDirStat.Net;component/Resources/Icons/Reload.png"/>
+    <c:RelayInfo Name="Close" Text="Close" Icon="/WinDirStat.Net;component/Resources/Icons/Close.png"/>
+    <c:RelayInfo Name="Cancel" Text="Cancel"/>
+    <c:RelayInfo Name="Elevate" Text="Elevate" Icon="/WinDirStat.Net;component/Resources/Icons/Elevate.png"/>
+    <c:RelayInfo Name="Exit" Text="Exit" Key="W" Modifiers="Ctrl" Icon="/WinDirStat.Net;component/Resources/Icons/Exit.png"/>
+
+    <c:RelayInfo Name="Expand" Text="Expand" Icon="/WinDirStat.Net;component/Resources/Icons/Expand.png"/>
+    <c:RelayInfo Name="Collapse" Text="Collapse" Icon="/WinDirStat.Net;component/Resources/Icons/Expand.png"/>
+    <c:RelayInfo Name="OpenItem" Text="Open Item" Key="Return" Icon="/WinDirStat.Net;component/Resources/Icons/Run.png"/>
+    <c:RelayInfo Name="CopyPath" Text="Copy Path" Key="C" Modifiers="Ctrl" Icon="/WinDirStat.Net;component/Resources/Icons/CopyPath.png"/>
+    <c:RelayInfo Name="Explore" Text="Explore Here" Key="E" Modifiers="Ctrl" Icon="/WinDirStat.Net;component/Resources/Icons/Explore.png"/>
+    <c:RelayInfo Name="CommandPrompt" Text="Command Prompt Here" Key="P" Modifiers="Ctrl" Icon="/WinDirStat.Net;component/Resources/Icons/Cmd.png"/>
+    <c:RelayInfo Name="PowerShell" Text="PowerShell Here" Key="P" Modifiers="Ctrl+Shift" Icon="/WinDirStat.Net;component/Resources/Icons/PowerShell.png"/>
+    <c:RelayInfo Name="RefreshSelected" Text="Refresh Selected" Key="F5" Icon="/WinDirStat.Net;component/Resources/Icons/RefreshSelected.png"/>
+    <c:RelayInfo Name="DeleteRecycle" Text="Delete (to Recycle Bin)" Key="Delete" Icon="/WinDirStat.Net;component/Resources/Icons/RecycleBin.png"/>
+    <c:RelayInfo Name="DeletePermanently" Text="Delete (Permanently!)" Key="Delete" Modifiers="Shift" Icon="/WinDirStat.Net;component/Resources/Icons/Delete.png"/>
+    <c:RelayInfo Name="Properties" Text="Properties" Icon="/WinDirStat.Net;component/Resources/Icons/Properties.png"/>
+
+    <c:RelayInfo Name="ShowFreeSpace" Text="Show Free Space" Key="F6" Icon="/WinDirStat.Net;component/Resources/FileIcons/FreeSpace.png"/>
+    <c:RelayInfo Name="ShowUnknown" Text="Show Unknown" Key="F7" Icon="/WinDirStat.Net;component/Resources/FileIcons/UnknownSpace.png"/>
+    <c:RelayInfo Name="ShowTotalSpace" Text="Show Total Space" Icon="/WinDirStat.Net;component/Resources/Icons/TotalSpace.png"/>
+    <c:RelayInfo Name="ShowFileTypes" Text="Show File Types" Key="F8" Icon="/WinDirStat.Net;component/Resources/FileIcons/FileCollection.png"/>
+    <c:RelayInfo Name="ShowTreemap" Text="Show Treemap" Key="F9" Icon="/WinDirStat.Net;component/Resources/Icons/Treemap.png"/>
+    <c:RelayInfo Name="ShowToolBar" Text="Show Toolbar" Icon="/WinDirStat.Net;component/Resources/Icons/ToolBar.png"/>
+    <c:RelayInfo Name="ShowStatusBar" Text="Show Statusbar" Icon="/WinDirStat.Net;component/Resources/Icons/StatusBar.png"/>
+    <c:RelayInfo Name="Configure" Text="Configure WinDirStat..." Icon="/WinDirStat.Net;component/Resources/Icons/Settings.png"/>
+
+    <c:RelayInfo Name="EmptyRecycleBin" Text="Empty Recycle Bins" Icon="/WinDirStat.Net;component/Resources/Icons/EmptyRecycleBin.png"/>
+  </c:RelayInfoCollection>
+</ResourceDictionary>

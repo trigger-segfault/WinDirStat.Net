@@ -185,6 +185,8 @@ namespace WinDirStat.Net.Wpf.Controls.SortList {
 
 				for (int i = 0; i < e.NewItems.Count; i++) {
 					ColumnPair pair = GetColumnPairAt(presenter, i + e.NewStartingIndex);
+					//if (pair.Column.HeaderContainerStyle == null)
+					//	pair.Column.HeaderContainerStyle = SortViewKeys.HeaderContainerLeftAlignStyle;
 					if (mode == null || !object.Equals(mode, pair.Column.SortMode)) {
 						SetColumnSortDirection(pair.Column, null);
 						SetColumnSortDirection(pair.Header, null);

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace WinDirStat.Net.Native {
+namespace WinDirStat.Net.Windows.Native {
 	partial class Win32 {
 
 		public enum WindowLongs : int {

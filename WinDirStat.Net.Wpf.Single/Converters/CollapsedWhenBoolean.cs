@@ -10,7 +10,7 @@ using System.Windows.Markup;
 
 namespace WinDirStat.Net.Wpf.Converters {
 	public class CollapsedWhenFalse : MarkupExtension, IValueConverter {
-		public static CollapsedWhenFalse Instance = new CollapsedWhenFalse();
+		public static readonly CollapsedWhenFalse Instance = new CollapsedWhenFalse();
 
 		public override object ProvideValue(IServiceProvider serviceProvider) {
 			return Instance;
@@ -26,7 +26,7 @@ namespace WinDirStat.Net.Wpf.Converters {
 	}
 
 	public class CollapsedWhenTrue : MarkupExtension, IValueConverter {
-		public static CollapsedWhenTrue Instance = new CollapsedWhenTrue();
+		public static readonly CollapsedWhenTrue Instance = new CollapsedWhenTrue();
 
 		public override object ProvideValue(IServiceProvider serviceProvider) {
 			return Instance;

@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using WinDirStat.Net.Model.Drives;
 using WinDirStat.Net.ViewModel;
+using WinDirStat.Net.Wpf.Services.Structures;
 using WinDirStat.Net.Wpf.Utils;
 
 namespace WinDirStat.Net.Wpf.Windows {
@@ -39,7 +40,7 @@ namespace WinDirStat.Net.Wpf.Windows {
 		#region Event Handlers
 
 		private void OnLoaded(object sender, RoutedEventArgs e) {
-			ViewModel.WindowOwner = this;
+			ViewModel.WindowOwner = new WpfWindow(this);
 			list.Focus();
 			Keyboard.Focus(list);
 		}

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
-using static WinDirStat.Net.Native.Win32;
+using static WinDirStat.Net.Windows.Native.Win32;
 
 namespace WinDirStat.Net.Wpf.Utils {
 	public static class WindowExtensions {

@@ -10,7 +10,7 @@ using System.Windows.Markup;
 
 namespace WinDirStat.Net.Wpf.Converters {
 	public class TextToHorizontalAlignment : MarkupExtension, IValueConverter {
-		public static TextToHorizontalAlignment Instance = new TextToHorizontalAlignment();
+		public static readonly TextToHorizontalAlignment Instance = new TextToHorizontalAlignment();
 
 		public override object ProvideValue(IServiceProvider serviceProvider) {
 			return Instance;

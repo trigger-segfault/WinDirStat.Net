@@ -26,8 +26,45 @@ namespace WinDirStat.Net.Wpf.ViewModel {
 	/// application and provides an entry point for the bindings.
 	/// </summary>
 	public class ViewModelLocator {
+
+		//public SimpleIoc Ioc { get; private set; }
+
 		/// <summary>Initializes the ViewModelLocator class.</summary>
 		static ViewModelLocator() {
+			/*ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
+
+			////if (ViewModelBase.IsInDesignModeStatic)
+			////{
+			////    // Create design time view services and models
+			////    SimpleIoc.Default.Register<IDataService, DesignDataService>();
+			////}
+			////else
+			////{
+			////    // Create run time view services and models
+			////    SimpleIoc.Default.Register<IDataService, DataService>();
+			////}
+
+			SimpleIoc.Default.Register<SettingsService>();
+			SimpleIoc.Default.Register<ScanningService>();
+			SimpleIoc.Default.Register<UIService>();
+			SimpleIoc.Default.Register<BitmapFactory>();
+			SimpleIoc.Default.Register<IconCacheService>();
+			SimpleIoc.Default.Register<ClipboardService>();
+			SimpleIoc.Default.Register<OSService>();
+			SimpleIoc.Default.Register<IMyDialogService, DialogService>();
+			SimpleIoc.Default.Register<ImagesServiceBase, ResourceImagesService>();
+			SimpleIoc.Default.Register<TreemapRendererFactory>();
+			SimpleIoc.Default.Register<RelayCommandFactory, RelayInfoCommandFactory>();
+
+			SimpleIoc.Default.Register<MainViewModel>();
+			SimpleIoc.Default.Register<DriveSelectViewModel>();
+			SimpleIoc.Default.Register<ConfigureViewModel>();*/
+		}
+
+		/// <summary>Initializes a new instance of the ViewModelLocator class.</summary>
+		public ViewModelLocator() {
+			SimpleIoc.Default.Reset();
+
 			ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
 
 			////if (ViewModelBase.IsInDesignModeStatic)
@@ -51,15 +88,11 @@ namespace WinDirStat.Net.Wpf.ViewModel {
 			SimpleIoc.Default.Register<IMyDialogService, DialogService>();
 			SimpleIoc.Default.Register<ImagesServiceBase, ResourceImagesService>();
 			SimpleIoc.Default.Register<TreemapRendererFactory>();
+			SimpleIoc.Default.Register<RelayCommandFactory, RelayInfoCommandFactory>();
 
 			SimpleIoc.Default.Register<MainViewModel>();
 			SimpleIoc.Default.Register<DriveSelectViewModel>();
 			SimpleIoc.Default.Register<ConfigureViewModel>();
-		}
-
-		/// <summary>Initializes a new instance of the ViewModelLocator class.</summary>
-		public ViewModelLocator() {
-
 		}
 
 		public MainViewModel Main => ServiceLocator.Current.GetInstance<MainViewModel>();

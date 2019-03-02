@@ -8,46 +8,42 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-#if WPF
-using GalaSoft.MvvmLight.CommandWpf;
-#else
-using GalaSoft.MvvmLight.Command;
-#endif
 using WinDirStat.Net.Model.Drives;
 using WinDirStat.Net.Model.Files;
 using WinDirStat.Net.Services;
+using WinDirStat.Net.Services.Structures;
 
 namespace WinDirStat.Net.ViewModel {
 	partial class MainViewModel {
 		
 		#region File Menu
 		
-		public RelayUICommand Open {
-			get => GetCommand("Open...", Images.Open, new KeyGesture(Key.O, ModifierKeys.Control),
+		public IRelayUICommand Open {
+			get => GetCommand("Open...", Images.Open, Shortcuts.Open,
 				OnOpen);
 		}
-		public RelayUICommand Save {
-			get => GetCommand("Save...", Images.Save, new KeyGesture(Key.S, ModifierKeys.Control),
+		public IRelayUICommand Save {
+			get => GetCommand("Save...", Images.Save, Shortcuts.Save,
 				OnSave, CanExecuteIsOpen);
 		}
-		public RelayUICommand Reload {
-			get => GetCommand("Reload", Images.Reload, new KeyGesture(Key.F5, ModifierKeys.Shift),
+		public IRelayUICommand Reload {
+			get => GetCommand("Reload", Images.Reload, Shortcuts.Reload,
 				OnReload, CanExecuteIsOpen);
 		}
-		public RelayUICommand Close {
-			get => GetCommand("Close", Images.Close,
+		public IRelayUICommand Close {
+			get => GetCommand("Close", Images.Close, Shortcuts.Close,
 				OnClose, CanExecuteIsOpen);
 		}
-		public RelayCommand Cancel {
-			get => GetCommand("Cancel",
+		public IRelayCommand Cancel {
+			get => GetCommand("Cancel", (IImage) null, Shortcuts.Cancel,
 				OnCancel, CanExecuteIsScanning);
 		}
-		public RelayUICommand Elevate {
-			get => GetCommand("Elevate", Images.Elevate,
+		public IRelayUICommand Elevate {
+			get => GetCommand("Elevate", Images.Elevate, Shortcuts.Elevate,
 				OnElevate, CanExecuteElevate);
 		}
-		public RelayUICommand Exit {
-			get => GetCommand("Exit", Images.Exit, new KeyGesture(Key.W, ModifierKeys.Control),
+		public IRelayUICommand Exit {
+			get => GetCommand("Exit", Images.Exit, Shortcuts.Exit,
 				OnExit);
 		}
 
@@ -55,49 +51,49 @@ namespace WinDirStat.Net.ViewModel {
 
 		#region Context Menu/Toolbar
 
-		public RelayUICommand Expand {
-			get => GetCommand("Expand", Images.Expand,
+		public IRelayUICommand Expand {
+			get => GetCommand("Expand", Images.Expand, Shortcuts.Expand,
 				OnExpand, CanExecuteExpand);
 		}
-		public RelayUICommand Collapse {
-			get => GetCommand("Collapse", Images.Expand,
+		public IRelayUICommand Collapse {
+			get => GetCommand("Collapse", Images.Expand, Shortcuts.Expand,
 				OnExpand, CanExecuteExpand);
 		}
 
-		public RelayUICommand OpenItem {
-			get => GetCommand("Open Item", Images.Run, new KeyGesture(Key.Return),
+		public IRelayUICommand OpenItem {
+			get => GetCommand("Open Item", Images.Run, Shortcuts.OpenItem,
 				OnOpenItem, CanExecuteOpenItem);
 		}
-		public RelayUICommand CopyPath {
-			get => GetCommand("Copy Path", Images.CopyPath, new KeyGesture(Key.C, ModifierKeys.Control),
+		public IRelayUICommand CopyPath {
+			get => GetCommand("Copy Path", Images.CopyPath, Shortcuts.CopyPath,
 				OnCopyPath, CanExecuteIsSelectionSingleFileType);
 		}
-		public RelayUICommand Explore {
-			get => GetCommand("Explore Here", Images.Explore, new KeyGesture(Key.C, ModifierKeys.Control),
+		public IRelayUICommand Explore {
+			get => GetCommand("Explore Here", Images.Explore, Shortcuts.Explore,
 				OnExplore, CanExecuteExplore);
 		}
-		public RelayUICommand CommandPrompt {
-			get => GetCommand("Command Prompt Here", Images.Cmd, new KeyGesture(Key.P, ModifierKeys.Control),
+		public IRelayUICommand CommandPrompt {
+			get => GetCommand("Command Prompt Here", Images.Cmd, Shortcuts.CommandPrompt,
 				OnCommandPrompt, CanExecuteCommandPrompt);
 		}
-		public RelayUICommand PowerShell {
-			get => GetCommand("PowerShell Here", Images.PowerShell, new KeyGesture(Key.P, ModifierKeys.Control | ModifierKeys.Shift),
+		public IRelayUICommand PowerShell {
+			get => GetCommand("PowerShell Here", Images.PowerShell, Shortcuts.PowerShell,
 				OnPowerShell, CanExecuteIsSelectionSingleFileType);
 		}
-		public RelayUICommand RefreshSelected {
-			get => GetCommand("Refresh Selected", Images.RefreshSelected, new KeyGesture(Key.F5),
+		public IRelayUICommand RefreshSelected {
+			get => GetCommand("Refresh Selected", Images.RefreshSelected, Shortcuts.RefreshSelected,
 				OnRefreshSelected, CanExecuteRefreshSelected);
 		}
-		public RelayUICommand DeleteRecycle {
-			get => GetCommand("Delete (to Recycle Bin)", Images.RecycleBin, new KeyGesture(Key.Delete),
+		public IRelayUICommand DeleteRecycle {
+			get => GetCommand("Delete (to Recycle Bin)", Images.RecycleBin, Shortcuts.DeleteRecycle,
 				OnDeleteRecycle, CanExecuteDeleteSingle);
 		}
-		public RelayUICommand DeletePermanently {
-			get => GetCommand("Delete (Permanently!)", Images.Delete, new KeyGesture(Key.Delete, ModifierKeys.Shift),
+		public IRelayUICommand DeletePermanently {
+			get => GetCommand("Delete (Permanently!)", Images.Delete, Shortcuts.DeletePermanently,
 				OnDeletePermanently, CanExecuteDeleteSingle);
 		}
-		public RelayUICommand Properties {
-			get => GetCommand("Properties", Images.Properties,
+		public IRelayUICommand Properties {
+			get => GetCommand("Properties", Images.Properties, Shortcuts.Properties,
 				OnProperties, CanExecuteOpenItem);
 		}
 
@@ -105,33 +101,35 @@ namespace WinDirStat.Net.ViewModel {
 
 		#region Options Menu
 
-		public RelayUICommand ShowFreeSpace {
-			get => GetCommand("Show Free Space", Images.FreeSpace, new KeyGesture(Key.F6),
+		public IRelayUICommand ShowFreeSpace {
+			get => GetCommand("Show Free Space", Images.FreeSpace, Shortcuts.Properties,
 				OnShowFreeSpace);
 		}
-		public RelayUICommand ShowUnknown {
-			get => GetCommand("Show Unknown", Images.UnknownSpace, new KeyGesture(Key.F7),
+		public IRelayUICommand ShowUnknown {
+			get => GetCommand("Show Unknown", Images.UnknownSpace, Shortcuts.Properties,
 				OnShowUnknown);
 		}
-		public RelayUICommand ShowTotalSpace {
-			get => GetCommand("Show Total Space", Images.ShowTotalSpace,
+		public IRelayUICommand ShowTotalSpace {
+			get => GetCommand("Show Total Space", Images.ShowTotalSpace, Shortcuts.Properties,
 				OnShowTotalSpace);
 		}
-		public RelayUICommand ShowFileTypes {
-			get => GetCommand("Show File Types", Images.FileCollection, new KeyGesture(Key.F8),
+		public IRelayUICommand ShowFileTypes {
+			get => GetCommand("Show File Types", Images.FileCollection, Shortcuts.Properties,
 				OnShowFileTypes);
 		}
-		public RelayUICommand ShowTreemap {
-			get => GetCommand("Show Treemap", Images.ShowTreemap, new KeyGesture(Key.F9),
+		public IRelayUICommand ShowTreemap {
+			get => GetCommand("Show Treemap", Images.ShowTreemap, Shortcuts.Properties,
 				OnShowTreemap);
 		}
-		public RelayUICommand ShowToolBar {
-			get => GetCommand("Show Toolbar", (ImageSource) null, OnShowToolBar);
+		public IRelayUICommand ShowToolBar {
+			get => GetCommand("Show Toolbar", (IImage) null, Shortcuts.Properties,
+				OnShowToolBar);
 		}
-		public RelayUICommand ShowStatusBar {
-			get => GetCommand("Show Statusbar", (ImageSource) null, OnShowStatusBar);
+		public IRelayUICommand ShowStatusBar {
+			get => GetCommand("Show Statusbar", (IImage) null, Shortcuts.Properties,
+				OnShowStatusBar);
 		}
-		public RelayUICommand Configure {
+		public IRelayUICommand Configure {
 			get => GetCommand("Configure WinDirStat...", Images.Settings,
 				OnConfigure);
 		}
@@ -140,7 +138,7 @@ namespace WinDirStat.Net.ViewModel {
 
 		#region Other
 
-		public RelayUICommand EmptyRecycleBin {
+		public IRelayUICommand EmptyRecycleBin {
 			get => GetCommand("Empty Recycle Bins", Images.EmptyRecycleBin,
 				OnEmptyRecycleBin, CanExecuteEmptyRecycleBin);
 		}
@@ -230,13 +228,13 @@ namespace WinDirStat.Net.ViewModel {
 		private void OnElevate() {
 			// Dialog warn progress will be lost.
 			// If yes, close then start new process.
-			MessageBoxResult result = MessageBoxResult.Yes;
+			MessageResult result = MessageResult.Yes;
 			if (Scanning.ScanState != ScanState.NotStarted) {
 				result = Dialogs.ShowWarning(WindowOwner,
 					"Elevating the process will start a new instance and all progress will be lost. Would you like to continue?",
-					"Elevate", MessageBoxButton.YesNo);
+					"Elevate", MessageButton.YesNo);
 			}
-			if (result == MessageBoxResult.Yes) {
+			if (result == MessageResult.Yes) {
 				try {
 					OS.StartNewElevated();
 					UI.Shutdown();

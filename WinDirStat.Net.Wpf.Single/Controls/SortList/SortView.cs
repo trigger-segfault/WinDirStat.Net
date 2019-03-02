@@ -14,10 +14,20 @@ namespace WinDirStat.Net.Wpf.Controls.SortList {
 	public class SortView : GridView {
 
 		static SortView() {
-			ColumnHeaderContainerStyleProperty.OverrideMetadata(typeof(SortView),
-				new FrameworkPropertyMetadata(SortViewKeys.HeaderContainerLeftAlignStyle));
+			//Console.WriteLine($"DEFAULT: {GridView.ColumnHeaderContainerStyleProperty.DefaultMetadata.DefaultValue}");
+			//Console.WriteLine($"COERCE: {GridView.ColumnHeaderContainerStyleProperty.DefaultMetadata.CoerceValueCallback}");
+			//ColumnHeaderContainerStyleProperty.OverrideMetadata(typeof(SortView),
+			//	new FrameworkPropertyMetadata(null, null, CoerceColumnHeaderContainerStyle));
+				//new FrameworkPropertyMetadata(null, null, CoerceColumnHeaderContainerStyle));
 		}
-		
+
+		private static object CoerceColumnHeaderContainerStyle(DependencyObject d, object baseValue) {
+			if (baseValue == null)
+				return SortViewKeys.HeaderContainerLeftAlignStyle;
+			return baseValue;
+		}
+
+
 		protected override object DefaultStyleKey {
 			get => SortViewStyleKey;
 		}

@@ -2,10 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
-    <AssemblyName>WinDirStat.Net.Lib</AssemblyName>
     <RootNamespace>WinDirStat.Net</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -36,8 +36,8 @@
 
   <!-- NuGet References -->
   <ItemGroup>
-    <PackageReference Include="MvvmLight" Version="5.4.1" />
-    <PackageReference Include="WriteableBitmapEx" Version="1.5.1" />
+    <PackageReference Include="MvvmLight" Version="5.4.1.1" />
+    <PackageReference Include="WriteableBitmapEx" Version="1.6.2" />
   </ItemGroup>
 
   <!-- Assembly References -->

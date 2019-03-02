@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
-namespace WinDirStat.Net.Native {
+namespace WinDirStat.Net.Windows.Native {
 	partial class Win32 {
 
 		/// <summary>

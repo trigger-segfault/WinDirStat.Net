@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WinDirStat.Net.Native {
+namespace WinDirStat.Net.Windows.Native {
 	partial class Win32 {
 		/// <summary>
 		/// Used by <see cref="SHGetStockIconInfo"/> to identify which stock system icon to retrieve.

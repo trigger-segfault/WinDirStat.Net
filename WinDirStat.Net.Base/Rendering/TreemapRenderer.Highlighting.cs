@@ -1,26 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Media.Imaging;
-using WinDirStat.Net.Utils;
+﻿using System.Collections.Generic;
 using WinDirStat.Net.Model.Files;
 using WinDirStat.Net.Services;
+using WinDirStat.Net.Services.Structures;
 using WinDirStat.Net.Structures;
 
 #if DOUBLE
 using Number = System.Double;
+using Point2N = WinDirStat.Net.Structures.Point2D;
 #else
 using Number = System.Single;
+using Point2N = WinDirStat.Net.Structures.Point2F;
 #endif
 
 namespace WinDirStat.Net.Rendering {
 	unsafe partial class TreemapRenderer {
 
-		public void HighlightItems(WriteableBitmap bitmap, Rectangle2I rc, Rgba32Color color, IEnumerable<ITreemapItem> items) {
+		public void HighlightItems(IWriteableBitmap bitmap, Rectangle2I rc, Rgba32Color color, IEnumerable<ITreemapItem> items) {
 			if (rc.Width <= 0 || rc.Height <= 0)
 				return;
 
@@ -33,15 +28,11 @@ namespace WinDirStat.Net.Rendering {
 				foreach (FileItemBase item in items)
 					HighlightRectangle(pBitmapBits, item.Rectangle, color);
 
-				IntPtr bitmapBitsPtr = (IntPtr) pBitmapBits;
-				
-				ui.Invoke(() => {
-					bitmap.WritePixels((Int32Rect) rc, bitmapBitsPtr, rc.Width * rc.Height * 4, bitmap.BackBufferStride);
-				});
+				bitmap.SetPixels(pBitmapBits);
 			}
 		}
 
-		public void HighlightExtensions(WriteableBitmap bitmap, Rectangle2I rc, FileItemBase root, Rgba32Color color, string extension) {
+		public void HighlightExtensions(IWriteableBitmap bitmap, Rectangle2I rc, FileItemBase root, Rgba32Color color, string extension) {
 			if (rc.Width <= 0 || rc.Height <= 0)
 				return;
 
@@ -53,11 +44,7 @@ namespace WinDirStat.Net.Rendering {
 				
 				RecurseHighlightExtensions(pBitmapBits, root, color, extension);
 
-				IntPtr bitmapBitsPtr = (IntPtr) pBitmapBits;
-
-				ui.Invoke(() => {
-					bitmap.WritePixels((Int32Rect) rc, bitmapBitsPtr, rc.Width * rc.Height * 4, bitmap.BackBufferStride);
-				});
+				bitmap.SetPixels(pBitmapBits);
 			}
 		}
 

@@ -5,7 +5,7 @@ using System.Windows.Markup;
 
 namespace WinDirStat.Net.Wpf.Converters {
 	public class FileTimeFormatter : MarkupExtension, IValueConverter {
-		public static FileTimeFormatter Instance = new FileTimeFormatter();
+		public static readonly FileTimeFormatter Instance = new FileTimeFormatter();
 
 		public override object ProvideValue(IServiceProvider serviceProvider) {
 			return Instance;

@@ -7,6 +7,7 @@
         xmlns:conv="clr-namespace:WinDirStat.Net.Wpf.Converters"
         xmlns:file="clr-namespace:WinDirStat.Net.Wpf.Controls.FileList"
         xmlns:sort="clr-namespace:WinDirStat.Net.Wpf.Controls.SortList"
+        xmlns:cmd="clr-namespace:WinDirStat.Net.Wpf.Commands"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:ff="clr-namespace:FunctionalFun.UI.Behaviors;assembly=FunctionalFun.UI.Behaviors"
@@ -16,12 +17,10 @@
         DataContext="{Binding Main, Source={StaticResource Locator}}"
         Title="{Binding Title}" Height="450" Width="800" SnapsToDevicePixels="True" UseLayoutRounding="True" Background="#FFF0F0F0"
         Loaded="OnLoaded"
-        Icon="App.ico">
+        Icon="App.ico"
+        cmd:RelayInfo.Collection="{StaticResource MainCommands}">
   <Window.Resources>
     <ResourceDictionary>
-      <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="Themes/SortView.xaml"/>
-      </ResourceDictionary.MergedDictionaries>
       <SolidColorBrush x:Key="ListBorder" Color="#828790"/>
       <DataTemplate x:Key="FileTreeNodeViewTemplate">
         <file:FileTreeNodeView />
@@ -284,7 +283,7 @@
             <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
           </DataTrigger>
         </Style.Triggers>
-        </Style>
+      </Style>
 
 
       <ContextMenu x:Key="FileContextMenu" DataContext="{Binding Main, Source={StaticResource Locator}}">
@@ -305,20 +304,6 @@
       </ContextMenu>
     </ResourceDictionary>
   </Window.Resources>
-  <Window.InputBindings>
-    <local:RelayUIBinding Command="{Binding Open}"/>
-    <local:RelayUIBinding Command="{Binding Save}"/>
-    <local:RelayUIBinding Command="{Binding Reload}"/>
-    <local:RelayUIBinding Command="{Binding Exit}"/>
-
-    <local:RelayUIBinding Command="{Binding CopyPath}"/>
-    <local:RelayUIBinding Command="{Binding Explore}"/>
-    <local:RelayUIBinding Command="{Binding CommandPrompt}"/>
-    <local:RelayUIBinding Command="{Binding PowerShell}"/>
-    <local:RelayUIBinding Command="{Binding RefreshSelected}"/>
-    <local:RelayUIBinding Command="{Binding DeleteRecycle}"/>
-    <local:RelayUIBinding Command="{Binding DeletePermanently}"/>
-  </Window.InputBindings>
   <i:Interaction.Triggers>
     <i:EventTrigger EventName="Closing">
       <ei:CallMethodAction TargetObject="{Binding}" MethodName="Dispose"/>

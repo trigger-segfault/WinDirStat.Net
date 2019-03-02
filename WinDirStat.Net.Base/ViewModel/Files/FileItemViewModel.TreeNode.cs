@@ -8,9 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using WinDirStat.Net.Utils;
+using WinDirStat.Net.Services;
 
 namespace WinDirStat.Net.ViewModel.Files {
 	partial class FileItemViewModel {
@@ -126,11 +124,11 @@ namespace WinDirStat.Net.ViewModel.Files {
 			}
 		}
 
-		public Brush Foreground  => SystemColors.WindowTextBrush;
+		//public IBrush Foreground => IBrush.Black;
 		
-		public int Level  => Parent != null ? Parent.Level + 1 : 0;
+		public int Level => Parent != null ? Parent.Level + 1 : 0;
 
-		public bool IsRoot  => Parent == null;
+		public bool IsRoot => Parent == null;
 
 		public bool IsHidden {
 			get => isHidden;
@@ -763,10 +761,6 @@ namespace WinDirStat.Net.ViewModel.Files {
 		/// Gets called when the item is double-clicked.
 		/// </summary>
 		public void ActivateItem() {
-		}
-
-		public void ShowContextMenu(ContextMenuEventArgs e) {
-			
 		}
 
 		public override string ToString() {

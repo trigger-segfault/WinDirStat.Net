@@ -19,6 +19,7 @@ using WinDirStat.Net.ViewModel;
 using WinDirStat.Net.Rendering;
 using WinDirStat.Net.Services;
 using WinDirStat.Net.Wpf.Services;
+using WinDirStat.Net.Windows.Services;
 
 namespace WinDirStat.Net.Wpf.ViewModel {
 	/// <summary>
@@ -42,13 +43,13 @@ namespace WinDirStat.Net.Wpf.ViewModel {
 			////}
 
 			SimpleIoc.Default.Register<SettingsService>();
-			SimpleIoc.Default.Register<ScanningService>();
-			SimpleIoc.Default.Register<UIService>();
-			SimpleIoc.Default.Register<BitmapFactory>();
-			SimpleIoc.Default.Register<IconCacheService>();
-			SimpleIoc.Default.Register<ClipboardService>();
-			SimpleIoc.Default.Register<OSService>();
-			SimpleIoc.Default.Register<IMyDialogService, DialogService>();
+			SimpleIoc.Default.Register<ScanningService, WindowsScanningService>();
+			SimpleIoc.Default.Register<IUIService, WpfUIService>();
+			SimpleIoc.Default.Register<IBitmapFactory, WpfBitmapFactory>();
+			SimpleIoc.Default.Register<IIconCacheService, WindowsIconCacheService>();
+			SimpleIoc.Default.Register<IClipboardService, WpfClipboardService>();
+			SimpleIoc.Default.Register<IOSService, WindowsOSService>();
+			SimpleIoc.Default.Register<IWindowDialogService, WpfWindowDialogService>();
 			SimpleIoc.Default.Register<ImagesServiceBase, ResourceImagesService>();
 			SimpleIoc.Default.Register<TreemapRendererFactory>();
 

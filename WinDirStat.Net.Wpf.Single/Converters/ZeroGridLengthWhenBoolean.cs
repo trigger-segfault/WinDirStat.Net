@@ -6,7 +6,7 @@ using System.Windows.Markup;
 
 namespace WinDirStat.Net.Wpf.Converters {
 	public class ZeroGridLengthWhenFalse : MarkupExtension, IValueConverter {
-		public static ZeroGridLengthWhenFalse Instance = new ZeroGridLengthWhenFalse();
+		public static readonly ZeroGridLengthWhenFalse Instance = new ZeroGridLengthWhenFalse();
 
 		private GridLengthConverter converter = new GridLengthConverter();
 
@@ -23,7 +23,7 @@ namespace WinDirStat.Net.Wpf.Converters {
 		}
 	}
 	public class ZeroGridLengthWhenTrue : MarkupExtension, IValueConverter {
-		public static ZeroGridLengthWhenTrue Instance = new ZeroGridLengthWhenTrue();
+		public static readonly ZeroGridLengthWhenTrue Instance = new ZeroGridLengthWhenTrue();
 
 		private GridLengthConverter converter = new GridLengthConverter();
 

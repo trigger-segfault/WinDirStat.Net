@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace WinDirStat.Net.Native {
+namespace WinDirStat.Net.Windows.Native {
 	/// <summary>A static class for native methods, structs, and enums.</summary>
 	public static partial class Win32 {
 

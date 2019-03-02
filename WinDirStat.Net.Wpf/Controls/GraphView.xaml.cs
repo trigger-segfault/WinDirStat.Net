@@ -479,7 +479,7 @@ namespace WinDirStat.Net.Wpf.Controls {
 		}
 
 		private void OnMouseMove(object sender, MouseEventArgs e) {
-			UpdateHover((Point2I) e.GetPosition(this));
+			UpdateHover(e.GetPosition(this).ToPoint2I());
 		}
 
 		private void OnMouseLeave(object sender, MouseEventArgs e) {
@@ -487,7 +487,7 @@ namespace WinDirStat.Net.Wpf.Controls {
 		}
 
 		private void UpdateHover() {
-			UpdateHover((Point2I) Mouse.GetPosition(this));
+			UpdateHover(Mouse.GetPosition(this).ToPoint2I());
 		}
 
 		private void UpdateHover(Point2I point) {

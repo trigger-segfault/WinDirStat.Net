@@ -6,7 +6,7 @@ using WinDirStat.Net.Utils;
 
 namespace WinDirStat.Net.Wpf.Converters {
 	public class ByteFormatter : MarkupExtension, IValueConverter {
-		public static ByteFormatter Instance = new ByteFormatter();
+		public static readonly ByteFormatter Instance = new ByteFormatter();
 
 		public override object ProvideValue(IServiceProvider serviceProvider) {
 			return Instance;

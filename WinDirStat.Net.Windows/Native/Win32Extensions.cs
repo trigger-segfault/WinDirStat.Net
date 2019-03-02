@@ -1,7 +1,7 @@
 ﻿using System;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
-namespace WinDirStat.Net.Native {
+namespace WinDirStat.Net.Windows.Native {
 	/// <summary>Extentions for native Win32 structures.</summary>
 	internal static class Win32Extensions {
 

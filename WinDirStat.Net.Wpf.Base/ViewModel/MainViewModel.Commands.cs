@@ -9,138 +9,59 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using GalaSoft.MvvmLight.CommandWpf;
 using WinDirStat.Net.Model.Drives;
 using WinDirStat.Net.Model.Files;
 using WinDirStat.Net.Services;
+using WinDirStat.Net.ViewModel.Commands;
 
 namespace WinDirStat.Net.ViewModel {
 	partial class MainViewModel {
 		
 		#region File Menu
 		
-		public RelayUICommand Open {
-			get => GetCommand("Open...", Images.Open, new KeyGesture(Key.O, ModifierKeys.Control),
-				OnOpen);
-		}
-		public RelayUICommand Save {
-			get => GetCommand("Save...", Images.Save, new KeyGesture(Key.S, ModifierKeys.Control),
-				OnSave, CanExecuteIsOpen);
-		}
-		public RelayUICommand Reload {
-			get => GetCommand("Reload", Images.Reload, new KeyGesture(Key.F5, ModifierKeys.Shift),
-				OnReload, CanExecuteIsOpen);
-		}
-		public RelayUICommand Close {
-			get => GetCommand("Close", Images.Close,
-				OnClose, CanExecuteIsOpen);
-		}
-		public RelayCommand Cancel {
-			get => GetCommand("Cancel",
-				OnCancel, CanExecuteIsScanning);
-		}
-		public RelayUICommand Elevate {
-			get => GetCommand("Elevate", Images.Elevate,
-				OnElevate, CanExecuteElevate);
-		}
-		public RelayUICommand Exit {
-			get => GetCommand("Exit", Images.Exit, new KeyGesture(Key.W, ModifierKeys.Control),
-				OnExit);
-		}
+		public IRelayCommand Open => GetCommand(OnOpen);
+		public IRelayCommand Save => GetCommand(OnSave, CanExecuteIsOpen);
+		public IRelayCommand Reload => GetCommand(OnReload, CanExecuteIsOpen);
+		public IRelayCommand Close => GetCommand(OnClose, CanExecuteIsOpen);
+		public IRelayCommand Cancel => GetCommand(OnCancel, CanExecuteIsScanning);
+		public IRelayCommand Elevate => GetCommand(OnElevate, CanExecuteElevate);
+		public IRelayCommand Exit => GetCommand(OnExit);
 
 		#endregion
 
 		#region Context Menu/Toolbar
 
-		public RelayUICommand Expand {
-			get => GetCommand("Expand", Images.Expand,
-				OnExpand, CanExecuteExpand);
-		}
-		public RelayUICommand Collapse {
-			get => GetCommand("Collapse", Images.Expand,
-				OnExpand, CanExecuteExpand);
-		}
+		public IRelayCommand Expand => GetCommand(OnExpand, CanExecuteExpand);
+		public IRelayCommand Collapse => GetCommand(OnExpand, CanExecuteExpand);
 
-		public RelayUICommand OpenItem {
-			get => GetCommand("Open Item", Images.Run, new KeyGesture(Key.Return),
-				OnOpenItem, CanExecuteOpenItem);
-		}
-		public RelayUICommand CopyPath {
-			get => GetCommand("Copy Path", Images.CopyPath, new KeyGesture(Key.C, ModifierKeys.Control),
-				OnCopyPath, CanExecuteIsSelectionSingleFileType);
-		}
-		public RelayUICommand Explore {
-			get => GetCommand("Explore Here", Images.Explore, new KeyGesture(Key.C, ModifierKeys.Control),
-				OnExplore, CanExecuteExplore);
-		}
-		public RelayUICommand CommandPrompt {
-			get => GetCommand("Command Prompt Here", Images.Cmd, new KeyGesture(Key.P, ModifierKeys.Control),
-				OnCommandPrompt, CanExecuteCommandPrompt);
-		}
-		public RelayUICommand PowerShell {
-			get => GetCommand("PowerShell Here", Images.PowerShell, new KeyGesture(Key.P, ModifierKeys.Control | ModifierKeys.Shift),
-				OnPowerShell, CanExecuteIsSelectionSingleFileType);
-		}
-		public RelayUICommand RefreshSelected {
-			get => GetCommand("Refresh Selected", Images.RefreshSelected, new KeyGesture(Key.F5),
-				OnRefreshSelected, CanExecuteRefreshSelected);
-		}
-		public RelayUICommand DeleteRecycle {
-			get => GetCommand("Delete (to Recycle Bin)", Images.RecycleBin, new KeyGesture(Key.Delete),
-				OnDeleteRecycle, CanExecuteDeleteSingle);
-		}
-		public RelayUICommand DeletePermanently {
-			get => GetCommand("Delete (Permanently!)", Images.Delete, new KeyGesture(Key.Delete, ModifierKeys.Shift),
-				OnDeletePermanently, CanExecuteDeleteSingle);
-		}
-		public RelayUICommand Properties {
-			get => GetCommand("Properties", Images.Properties,
-				OnProperties, CanExecuteOpenItem);
-		}
+		public IRelayCommand OpenItem => GetCommand(OnOpenItem, CanExecuteOpenItem);
+		public IRelayCommand CopyPath => GetCommand(OnCopyPath, CanExecuteCopyPath);
+		public IRelayCommand Explore => GetCommand(OnExplore, CanExecuteExplore);
+		public IRelayCommand CommandPrompt => GetCommand(OnCommandPrompt, CanExecuteCommandPrompt);
+		public IRelayCommand PowerShell => GetCommand(OnPowerShell, CanExecuteCommandPrompt);
+		public IRelayCommand RefreshSelected => GetCommand(OnRefreshSelected, CanExecuteRefreshSelected);
+		public IRelayCommand DeleteRecycle => GetCommand(OnDeleteRecycle, CanExecuteDeleteSingle);
+		public IRelayCommand DeletePermanently => GetCommand(OnDeletePermanently, CanExecuteDeleteSingle);
+		public IRelayCommand Properties => GetCommand(OnProperties, CanExecuteOpenItem);
 
 		#endregion
 
 		#region Options Menu
 
-		public RelayUICommand ShowFreeSpace {
-			get => GetCommand("Show Free Space", Images.FreeSpace, new KeyGesture(Key.F6),
-				OnShowFreeSpace);
-		}
-		public RelayUICommand ShowUnknown {
-			get => GetCommand("Show Unknown", Images.UnknownSpace, new KeyGesture(Key.F7),
-				OnShowUnknown);
-		}
-		public RelayUICommand ShowTotalSpace {
-			get => GetCommand("Show Total Space", Images.ShowTotalSpace,
-				OnShowTotalSpace);
-		}
-		public RelayUICommand ShowFileTypes {
-			get => GetCommand("Show File Types", Images.FileCollection, new KeyGesture(Key.F8),
-				OnShowFileTypes);
-		}
-		public RelayUICommand ShowTreemap {
-			get => GetCommand("Show Treemap", Images.ShowTreemap, new KeyGesture(Key.F9),
-				OnShowTreemap);
-		}
-		public RelayUICommand ShowToolBar {
-			get => GetCommand("Show Toolbar", (ImageSource) null, OnShowToolBar);
-		}
-		public RelayUICommand ShowStatusBar {
-			get => GetCommand("Show Statusbar", (ImageSource) null, OnShowStatusBar);
-		}
-		public RelayUICommand Configure {
-			get => GetCommand("Configure WinDirStat...", Images.Settings,
-				OnConfigure);
-		}
+		public IRelayCommand ShowFreeSpace => GetCommand(OnShowFreeSpace);
+		public IRelayCommand ShowUnknown => GetCommand(OnShowUnknown);
+		public IRelayCommand ShowTotalSpace => GetCommand(OnShowTotalSpace);
+		public IRelayCommand ShowFileTypes => GetCommand(OnShowFileTypes);
+		public IRelayCommand ShowTreemap => GetCommand(OnShowTreemap);
+		public IRelayCommand ShowToolBar => GetCommand(OnShowToolBar);
+		public IRelayCommand ShowStatusBar => GetCommand(OnShowStatusBar);
+		public IRelayCommand Configure => GetCommand(OnConfigure);
 
 		#endregion
 
 		#region Other
 
-		public RelayUICommand EmptyRecycleBin {
-			get => GetCommand("Empty Recycle Bins", Images.EmptyRecycleBin,
-				OnEmptyRecycleBin, CanExecuteEmptyRecycleBin);
-		}
+		public IRelayCommand EmptyRecycleBin => GetCommand(OnEmptyRecycleBin, CanExecuteEmptyRecycleBin);
 
 		#endregion
 
@@ -347,7 +268,9 @@ namespace WinDirStat.Net.ViewModel {
 		#region Other
 
 		private void OnEmptyRecycleBin() {
-			OS.EmptyRecycleBin(WindowOwner);
+			if (OS.EmptyRecycleBin(WindowOwner)) {
+				UpdateEmptyRecycleBin(true);
+			}
 		}
 
 		private void OnConfigure() {
