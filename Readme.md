@@ -1,6 +1,6 @@
 # WinDirStat.Net (Name subject to change)
 
-[![Latest Release](https://img.shields.io/github/release/trigger-death/WinDirStat.Net.svg?style=flat&label=version)](https://github.com/trigger-death/WinDirStat.Net/releases/latest)
+[![Latest Release](https://img.shields.io/github/release-pre/trigger-death/WinDirStat.Net.svg?style=flat&label=version)](https://github.com/trigger-death/WinDirStat.Net/releases/latest)
 [![Latest Release Date](https://img.shields.io/github/release-date-pre/trigger-death/WinDirStat.Net.svg?style=flat&label=released)](https://github.com/trigger-death/WinDirStat.Net/releases/latest)
 [![Total Downloads](https://img.shields.io/github/downloads/trigger-death/WinDirStat.Net/total.svg?style=flat)](https://github.com/trigger-death/WinDirStat.Net/releases)
 [![Creation Date](https://img.shields.io/badge/created-august%202018-A642FF.svg?style=flat)](https://github.com/trigger-death/WinDirStat.Net/commit/3aa1fde1cfb165ea8bc119df2944ede41f063179)
