@@ -230,82 +230,92 @@ namespace WinDirStat.Net.Wpf.Controls.FileList {
 		}
 
 		protected override void OnKeyDown(KeyEventArgs e) {
-			FileTreeViewItem container = e.OriginalSource as FileTreeViewItem;
-			switch (e.Key) {
-			case Key.Left:
-				if (container != null && ItemsControl.ItemsControlFromItemContainer(container) == this) {
-					if (container.Node.IsExpanded) {
-						container.Node.IsExpanded = false;
-					}
-					else if (container.Node.Parent != null) {
-						this.FocusNode(container.Node.Parent);
-					}
-					e.Handled = true;
-				}
-				break;
-			case Key.Right:
-				if (container != null && ItemsControl.ItemsControlFromItemContainer(container) == this) {
-					if (!container.Node.IsExpanded && container.Node.ShowExpander) {
-						container.Node.IsExpanded = true;
-					}
-					else if (container.Node.Children.Count > 0) {
-						// jump to first child:
-						container.MoveFocus(new TraversalRequest(FocusNavigationDirection.Down));
-					}
-					e.Handled = true;
-				}
-				break;
-			case Key.Return:
-				if (container != null && Keyboard.Modifiers == ModifierKeys.None && this.SelectedItems.Count == 1 && this.SelectedItem == container.Node) {
-					e.Handled = true;
-					container.Node.ActivateItem();
-				}
-				break;
-			case Key.Space:
-				if (container != null && Keyboard.Modifiers == ModifierKeys.None && this.SelectedItems.Count == 1 && this.SelectedItem == container.Node) {
-					e.Handled = true;
-					/*if (container.Node.IsCheckable) {
-						if (container.Node.IsChecked == null) // If partially selected, we want to select everything
-							container.Node.IsChecked = true;
-						else
-							container.Node.IsChecked = !container.Node.IsChecked;
-					}
-					else {*/
-						container.Node.ActivateItem();
-					//}
-				}
-				break;
-			case Key.Add:
-				if (container != null && ItemsControl.ItemsControlFromItemContainer(container) == this) {
-					if (container.Node.ShowExpander)
-						container.Node.IsExpanded = true;
-					e.Handled = true;
-				}
-				break;
-			case Key.Subtract:
-				if (container != null && ItemsControl.ItemsControlFromItemContainer(container) == this) {
-					container.Node.IsExpanded = false;
-					e.Handled = true;
-				}
-				break;
-			case Key.Multiply:
-				if (container != null && ItemsControl.ItemsControlFromItemContainer(container) == this) {
-					if (container.Node.ShowExpander) {
-						container.Node.IsExpanded = true;
-						ExpandRecursively(container.Node);
-					}
-					e.Handled = true;
-				}
-				break;
-			case Key.Divide:
-				if (container != null && ItemsControl.ItemsControlFromItemContainer(container) == this) {
-					if (container.Node.Parent != null) {
-						FocusNode(container.Node.Parent);
-					}
-					e.Handled = true;
-				}
-				break;
-			}
+            FileItemViewModel selectedItem = null;
+            if (this.SelectedItems.Count == 1)
+            {
+                selectedItem = this.SelectedItem as FileItemViewModel;
+            }
+
+            {
+                FileTreeViewItem container = e.OriginalSource as FileTreeViewItem;
+                if (container != null)
+                {
+                    selectedItem = container.Node;
+                }
+                else
+                {
+                    if (selectedItem != null)
+                    {
+                        FocusNode(selectedItem);
+                    }
+                }
+            }
+
+            if (selectedItem != null)
+            {
+                switch (e.Key)
+                {
+                    case Key.Left:
+                        if (selectedItem.IsExpanded)
+                        {
+                            selectedItem.IsExpanded = false;
+                        }
+                        else if (selectedItem.Parent != null)
+                        {
+                            this.FocusNode(selectedItem.Parent);
+                        }
+                        e.Handled = true;
+                        break;
+                    case Key.Right:
+                        if (!selectedItem.IsExpanded && selectedItem.ShowExpander)
+                        {
+                            selectedItem.IsExpanded = true;
+                        }
+                        else if (selectedItem.Children.Count > 0)
+                        {
+                            // jump to first child:
+                            var firstChild = selectedItem.Children.FirstOrDefault();
+                            if (firstChild != null)
+                            {
+                                FocusNode(firstChild);
+                            }
+                        }
+                        e.Handled = true;
+                        break;
+                    case Key.Return:
+                        e.Handled = true;
+                        selectedItem.ActivateItem();
+                        break;
+                    case Key.Space:
+                        e.Handled = true;
+                        selectedItem.ActivateItem();
+                        break;
+                    case Key.Add:
+                        if (selectedItem.ShowExpander)
+                            selectedItem.IsExpanded = true;
+                        e.Handled = true;
+                        break;
+                    case Key.Subtract:
+                        selectedItem.IsExpanded = false;
+                        e.Handled = true;
+                        break;
+                    case Key.Multiply:
+                        if (selectedItem.ShowExpander)
+                        {
+                            selectedItem.IsExpanded = true;
+                            ExpandRecursively(selectedItem);
+                        }
+                        e.Handled = true;
+                        break;
+                    case Key.Divide:
+                        if (selectedItem.Parent != null)
+                        {
+                            FocusNode(selectedItem.Parent);
+                        }
+                        e.Handled = true;
+                        break;
+                }
+            }
 			if (!e.Handled)
 				base.OnKeyDown(e);
 		}
