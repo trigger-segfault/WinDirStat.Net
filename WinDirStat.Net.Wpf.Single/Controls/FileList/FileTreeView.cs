@@ -230,81 +230,96 @@ namespace WinDirStat.Net.Wpf.Controls.FileList {
 		}
 
 		protected override void OnKeyDown(KeyEventArgs e) {
-			FileTreeViewItem container = e.OriginalSource as FileTreeViewItem;
-			switch (e.Key) {
-			case Key.Left:
-				if (container != null && ItemsControl.ItemsControlFromItemContainer(container) == this) {
-					if (container.Node.IsExpanded) {
-						container.Node.IsExpanded = false;
+			FileItemViewModel selectedItem = null;
+			if (e.OriginalSource is FileTreeViewItem container &&
+				ItemsControl.ItemsControlFromItemContainer(container) == this)
+			{
+				selectedItem = container.Node;
+			}
+			else if (e.OriginalSource == this) {
+				// When the FileTreeFlattener collection is reset, focus will be shifted to the FileTreeView.
+				selectedItem = SelectedItem as FileItemViewModel;
+				if (selectedItem != null)
+					FocusNode(selectedItem);
+			}
+			else {
+				// If we're reaching this, then we may be in some subcontrol of a file item, that control may want
+				// focus. We'll keep this uncommented out for now until we determine handling needs to be changed.
+				selectedItem = SelectedItem as FileItemViewModel;
+				if (selectedItem != null)
+					FocusNode(selectedItem);
+			}
+
+			if (selectedItem != null) {
+				switch (e.Key) {
+				case Key.Left:
+					if (selectedItem.IsExpanded) {
+						selectedItem.IsExpanded = false;
 					}
-					else if (container.Node.Parent != null) {
-						this.FocusNode(container.Node.Parent);
+					else if (selectedItem.Parent != null) {
+						FocusNode(selectedItem.Parent);
 					}
 					e.Handled = true;
-				}
-				break;
-			case Key.Right:
-				if (container != null && ItemsControl.ItemsControlFromItemContainer(container) == this) {
-					if (!container.Node.IsExpanded && container.Node.ShowExpander) {
-						container.Node.IsExpanded = true;
+					break;
+				case Key.Right:
+					if (!selectedItem.IsExpanded && selectedItem.ShowExpander) {
+						selectedItem.IsExpanded = true;
 					}
-					else if (container.Node.Children.Count > 0) {
+					else if (selectedItem.Children.Count > 0) {
 						// jump to first child:
-						container.MoveFocus(new TraversalRequest(FocusNavigationDirection.Down));
+						var firstChild = selectedItem.Children.FirstOrDefault();
+						if (firstChild != null) {
+							FocusNode(firstChild);
+						}
 					}
 					e.Handled = true;
-				}
-				break;
-			case Key.Return:
-				if (container != null && Keyboard.Modifiers == ModifierKeys.None && this.SelectedItems.Count == 1 && this.SelectedItem == container.Node) {
-					e.Handled = true;
-					container.Node.ActivateItem();
-				}
-				break;
-			case Key.Space:
-				if (container != null && Keyboard.Modifiers == ModifierKeys.None && this.SelectedItems.Count == 1 && this.SelectedItem == container.Node) {
-					e.Handled = true;
-					/*if (container.Node.IsCheckable) {
-						if (container.Node.IsChecked == null) // If partially selected, we want to select everything
-							container.Node.IsChecked = true;
-						else
-							container.Node.IsChecked = !container.Node.IsChecked;
+					break;
+				case Key.Return:
+				case Key.Space:
+					if (Keyboard.Modifiers == ModifierKeys.None && SelectedItems.Count == 1) {
+						e.Handled = true;
+						selectedItem.ActivateItem();
 					}
-					else {*/
-						container.Node.ActivateItem();
-					//}
-				}
-				break;
-			case Key.Add:
-				if (container != null && ItemsControl.ItemsControlFromItemContainer(container) == this) {
-					if (container.Node.ShowExpander)
-						container.Node.IsExpanded = true;
+					break;
+				/*case Key.Space:
+					// Normally Space has special functionality, but we don't support checkboxes.
 					e.Handled = true;
-				}
-				break;
-			case Key.Subtract:
-				if (container != null && ItemsControl.ItemsControlFromItemContainer(container) == this) {
-					container.Node.IsExpanded = false;
-					e.Handled = true;
-				}
-				break;
-			case Key.Multiply:
-				if (container != null && ItemsControl.ItemsControlFromItemContainer(container) == this) {
-					if (container.Node.ShowExpander) {
-						container.Node.IsExpanded = true;
-						ExpandRecursively(container.Node);
+					selectedItem.ActivateItem();
+					if (Keyboard.Modifiers == ModifierKeys.None && SelectedItems.Count == 1) {
+						e.Handled = true;
+						if (selectedItem.IsCheckable) {
+							// If partially selected, we want to select everything
+							selectedItem.IsChecked = !(selectedItem.IsChecked ?? false);
+						}
+						else {
+							selectedItem.ActivateItem();
+						}
+					}
+					break;*/
+				case Key.Add:
+					if (selectedItem.ShowExpander) {
+						selectedItem.IsExpanded = true;
 					}
 					e.Handled = true;
-				}
-				break;
-			case Key.Divide:
-				if (container != null && ItemsControl.ItemsControlFromItemContainer(container) == this) {
-					if (container.Node.Parent != null) {
-						FocusNode(container.Node.Parent);
+					break;
+				case Key.Subtract:
+					selectedItem.IsExpanded = false;
+					e.Handled = true;
+					break;
+				case Key.Multiply:
+					if (selectedItem.ShowExpander) {
+						selectedItem.IsExpanded = true;
+						ExpandRecursively(selectedItem);
 					}
 					e.Handled = true;
+					break;
+				case Key.Divide:
+					if (selectedItem.Parent != null) {
+						FocusNode(selectedItem.Parent);
+					}
+					e.Handled = true;
+					break;
 				}
-				break;
 			}
 			if (!e.Handled)
 				base.OnKeyDown(e);
