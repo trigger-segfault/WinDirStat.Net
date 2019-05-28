@@ -231,20 +231,23 @@ namespace WinDirStat.Net.Wpf.Controls.FileList {
 
 		protected override void OnKeyDown(KeyEventArgs e) {
 			FileItemViewModel selectedItem = null;
-			if (this.SelectedItems.Count == 1) {
-				selectedItem = this.SelectedItem as FileItemViewModel;
-			}
-
+			if (e.OriginalSource is FileTreeViewItem container &&
+				ItemsControl.ItemsControlFromItemContainer(container) == this)
 			{
-				FileTreeViewItem container = e.OriginalSource as FileTreeViewItem;
-				if (container != null) {
-					selectedItem = container.Node;
-				}
-				else {
-					if (selectedItem != null) {
-						FocusNode(selectedItem);
-					}
-				}
+				selectedItem = container.Node;
+			}
+			else if (e.OriginalSource == this) {
+				// When the FileTreeFlattener collection is reset, focus will be shifted to the FileTreeView.
+				selectedItem = SelectedItem as FileItemViewModel;
+				if (selectedItem != null)
+					FocusNode(selectedItem);
+			}
+			else {
+				// If we're reaching this, then we may be in some subcontrol of a file item, that control may want
+				// focus. We'll keep this uncommented out for now until we determine handling needs to be changed.
+				selectedItem = SelectedItem as FileItemViewModel;
+				if (selectedItem != null)
+					FocusNode(selectedItem);
 			}
 
 			if (selectedItem != null) {
@@ -254,7 +257,7 @@ namespace WinDirStat.Net.Wpf.Controls.FileList {
 						selectedItem.IsExpanded = false;
 					}
 					else if (selectedItem.Parent != null) {
-						this.FocusNode(selectedItem.Parent);
+						FocusNode(selectedItem.Parent);
 					}
 					e.Handled = true;
 					break;
@@ -272,16 +275,31 @@ namespace WinDirStat.Net.Wpf.Controls.FileList {
 					e.Handled = true;
 					break;
 				case Key.Return:
-					e.Handled = true;
-					selectedItem.ActivateItem();
-					break;
 				case Key.Space:
+					if (Keyboard.Modifiers == ModifierKeys.None && SelectedItems.Count == 1) {
+						e.Handled = true;
+						selectedItem.ActivateItem();
+					}
+					break;
+				/*case Key.Space:
+					// Normally Space has special functionality, but we don't support checkboxes.
 					e.Handled = true;
 					selectedItem.ActivateItem();
-					break;
+					if (Keyboard.Modifiers == ModifierKeys.None && SelectedItems.Count == 1) {
+						e.Handled = true;
+						if (selectedItem.IsCheckable) {
+							// If partially selected, we want to select everything
+							selectedItem.IsChecked = !(selectedItem.IsChecked ?? false);
+						}
+						else {
+							selectedItem.ActivateItem();
+						}
+					}
+					break;*/
 				case Key.Add:
-					if (selectedItem.ShowExpander)
+					if (selectedItem.ShowExpander) {
 						selectedItem.IsExpanded = true;
+					}
 					e.Handled = true;
 					break;
 				case Key.Subtract:
