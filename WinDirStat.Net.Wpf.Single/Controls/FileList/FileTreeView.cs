@@ -230,92 +230,79 @@ namespace WinDirStat.Net.Wpf.Controls.FileList {
 		}
 
 		protected override void OnKeyDown(KeyEventArgs e) {
-            FileItemViewModel selectedItem = null;
-            if (this.SelectedItems.Count == 1)
-            {
-                selectedItem = this.SelectedItem as FileItemViewModel;
-            }
+			FileItemViewModel selectedItem = null;
+			if (this.SelectedItems.Count == 1) {
+				selectedItem = this.SelectedItem as FileItemViewModel;
+			}
 
-            {
-                FileTreeViewItem container = e.OriginalSource as FileTreeViewItem;
-                if (container != null)
-                {
-                    selectedItem = container.Node;
-                }
-                else
-                {
-                    if (selectedItem != null)
-                    {
-                        FocusNode(selectedItem);
-                    }
-                }
-            }
+			{
+				FileTreeViewItem container = e.OriginalSource as FileTreeViewItem;
+				if (container != null) {
+					selectedItem = container.Node;
+				}
+				else {
+					if (selectedItem != null) {
+						FocusNode(selectedItem);
+					}
+				}
+			}
 
-            if (selectedItem != null)
-            {
-                switch (e.Key)
-                {
-                    case Key.Left:
-                        if (selectedItem.IsExpanded)
-                        {
-                            selectedItem.IsExpanded = false;
-                        }
-                        else if (selectedItem.Parent != null)
-                        {
-                            this.FocusNode(selectedItem.Parent);
-                        }
-                        e.Handled = true;
-                        break;
-                    case Key.Right:
-                        if (!selectedItem.IsExpanded && selectedItem.ShowExpander)
-                        {
-                            selectedItem.IsExpanded = true;
-                        }
-                        else if (selectedItem.Children.Count > 0)
-                        {
-                            // jump to first child:
-                            var firstChild = selectedItem.Children.FirstOrDefault();
-                            if (firstChild != null)
-                            {
-                                FocusNode(firstChild);
-                            }
-                        }
-                        e.Handled = true;
-                        break;
-                    case Key.Return:
-                        e.Handled = true;
-                        selectedItem.ActivateItem();
-                        break;
-                    case Key.Space:
-                        e.Handled = true;
-                        selectedItem.ActivateItem();
-                        break;
-                    case Key.Add:
-                        if (selectedItem.ShowExpander)
-                            selectedItem.IsExpanded = true;
-                        e.Handled = true;
-                        break;
-                    case Key.Subtract:
-                        selectedItem.IsExpanded = false;
-                        e.Handled = true;
-                        break;
-                    case Key.Multiply:
-                        if (selectedItem.ShowExpander)
-                        {
-                            selectedItem.IsExpanded = true;
-                            ExpandRecursively(selectedItem);
-                        }
-                        e.Handled = true;
-                        break;
-                    case Key.Divide:
-                        if (selectedItem.Parent != null)
-                        {
-                            FocusNode(selectedItem.Parent);
-                        }
-                        e.Handled = true;
-                        break;
-                }
-            }
+			if (selectedItem != null) {
+				switch (e.Key) {
+				case Key.Left:
+					if (selectedItem.IsExpanded) {
+						selectedItem.IsExpanded = false;
+					}
+					else if (selectedItem.Parent != null) {
+						this.FocusNode(selectedItem.Parent);
+					}
+					e.Handled = true;
+					break;
+				case Key.Right:
+					if (!selectedItem.IsExpanded && selectedItem.ShowExpander) {
+						selectedItem.IsExpanded = true;
+					}
+					else if (selectedItem.Children.Count > 0) {
+						// jump to first child:
+						var firstChild = selectedItem.Children.FirstOrDefault();
+						if (firstChild != null) {
+							FocusNode(firstChild);
+						}
+					}
+					e.Handled = true;
+					break;
+				case Key.Return:
+					e.Handled = true;
+					selectedItem.ActivateItem();
+					break;
+				case Key.Space:
+					e.Handled = true;
+					selectedItem.ActivateItem();
+					break;
+				case Key.Add:
+					if (selectedItem.ShowExpander)
+						selectedItem.IsExpanded = true;
+					e.Handled = true;
+					break;
+				case Key.Subtract:
+					selectedItem.IsExpanded = false;
+					e.Handled = true;
+					break;
+				case Key.Multiply:
+					if (selectedItem.ShowExpander) {
+						selectedItem.IsExpanded = true;
+						ExpandRecursively(selectedItem);
+					}
+					e.Handled = true;
+					break;
+				case Key.Divide:
+					if (selectedItem.Parent != null) {
+						FocusNode(selectedItem.Parent);
+					}
+					e.Handled = true;
+					break;
+				}
+			}
 			if (!e.Handled)
 				base.OnKeyDown(e);
 		}
