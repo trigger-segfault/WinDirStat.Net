@@ -11,8 +11,7 @@
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:ff="clr-namespace:FunctionalFun.UI.Behaviors;assembly=FunctionalFun.UI.Behaviors"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
         DataContext="{Binding Main, Source={StaticResource Locator}}"
         Title="{Binding Title}" Height="450" Width="800" SnapsToDevicePixels="True" UseLayoutRounding="True" Background="#FFF0F0F0"
@@ -306,10 +305,10 @@
   </Window.Resources>
   <i:Interaction.Triggers>
     <i:EventTrigger EventName="Closing">
-      <ei:CallMethodAction TargetObject="{Binding}" MethodName="Dispose"/>
+      <i:CallMethodAction TargetObject="{Binding}" MethodName="Dispose"/>
     </i:EventTrigger>
     <i:EventTrigger EventName="ContentRendered">
-      <ei:CallMethodAction TargetObject="{Binding}" MethodName="WindowShown"/>
+      <i:CallMethodAction TargetObject="{Binding}" MethodName="WindowShown"/>
     </i:EventTrigger>
   </i:Interaction.Triggers>
   <DockPanel>
@@ -328,7 +327,7 @@
       <MenuItem Header="Edit">
         <i:Interaction.Triggers>
           <i:EventTrigger EventName="SubmenuOpened">
-            <ei:CallMethodAction TargetObject="{Binding}" MethodName="UpdateEmptyRecycleBin"/>
+            <i:CallMethodAction TargetObject="{Binding}" MethodName="UpdateEmptyRecycleBin"/>
           </i:EventTrigger>
         </i:Interaction.Triggers>
         <local:CommandMenuItem Command="{Binding CopyPath}"/>
@@ -453,7 +452,7 @@
                                  SelectionChanged="OnFileSelectionChanged" GotFocus="OnFileTreeGotFocus">
           <i:Interaction.Triggers>
             <i:EventTrigger EventName="Sort">
-              <ei:CallMethodAction TargetObject="{Binding}" MethodName="SortFiles"/>
+              <i:CallMethodAction TargetObject="{Binding}" MethodName="SortFiles"/>
             </i:EventTrigger>
           </i:Interaction.Triggers>
           <file:FileTreeView.ItemContainerStyle>
@@ -500,7 +499,7 @@
                                    ItemsSource="{Binding Extensions}" SelectionChanged="OnExtensionSelectionChanged" SelectionMode="Single" GotFocus="OnExtensionListGotFocus">
           <i:Interaction.Triggers>
             <i:EventTrigger EventName="Sort">
-              <ei:CallMethodAction TargetObject="{Binding}" MethodName="SortExtensions"/>
+              <i:CallMethodAction TargetObject="{Binding}" MethodName="SortExtensions"/>
             </i:EventTrigger>
           </i:Interaction.Triggers>
           <sort:SortListView.View>

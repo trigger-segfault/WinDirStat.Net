@@ -7,8 +7,7 @@
         xmlns:sort="clr-namespace:WinDirStat.Net.Wpf.Controls.SortList"
         xmlns:conv="clr-namespace:WinDirStat.Net.Wpf.Converters"
         xmlns:ff="clr-namespace:FunctionalFun.UI.Behaviors;assembly=FunctionalFun.UI.Behaviors"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
         DataContext="{Binding DriveSelect, Source={StaticResource Locator}}"
         Title="{Binding Title}" Height="313" Width="435" SourceInitialized="OnSourceInitialized" Loaded="OnLoaded" Icon="/WinDirStat.Net;component/Resources/App.ico" WindowStartupLocation="CenterOwner"
@@ -31,7 +30,7 @@
   </Window.Resources>
   <i:Interaction.Triggers>
     <i:EventTrigger EventName="Loaded">
-      <ei:CallMethodAction TargetObject="{Binding}" MethodName="Loaded"/>
+      <i:CallMethodAction TargetObject="{Binding}" MethodName="Loaded"/>
     </i:EventTrigger>
   </i:Interaction.Triggers>
   <Grid>
@@ -46,10 +45,10 @@
                            ItemsSource="{Binding Drives}">
       <i:Interaction.Triggers>
         <i:EventTrigger EventName="GotFocus">
-          <ei:CallMethodAction TargetObject="{Binding}" MethodName="ListGotFocus"/>
+          <i:CallMethodAction TargetObject="{Binding}" MethodName="ListGotFocus"/>
         </i:EventTrigger>
         <i:EventTrigger EventName="Sort">
-          <ei:CallMethodAction TargetObject="{Binding}" MethodName="SortDrives"/>
+          <i:CallMethodAction TargetObject="{Binding}" MethodName="SortDrives"/>
         </i:EventTrigger>
       </i:Interaction.Triggers>
       <sort:SortListView.View>

@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Interactivity;
+using Microsoft.Xaml.Behaviors;
 
 namespace WinDirStat.Net.Wpf.Controls {
 	/// <summary>A behavior for binding to readonly focus of the element.</summary>
