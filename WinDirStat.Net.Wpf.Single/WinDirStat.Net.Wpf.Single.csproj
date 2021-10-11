@@ -16,7 +16,6 @@
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -85,8 +84,6 @@
     <Compile Include="Controls\FileList\InsertMarker.cs" />
     <Compile Include="Controls\FileList\LinesRenderer.cs" />
     <Compile Include="Controls\FlashyProgressBar.cs" />
-    <None Include="app.config" />
-    <None Include="Controls\FocusExtension - Copy.cs" />
     <Compile Include="Controls\FocusBehavior.cs" />
     <None Include="Controls\FocusExtension.cs" />
     <Compile Include="Controls\GraphView.xaml.cs">
