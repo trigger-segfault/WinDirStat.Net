@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WinDirStat.Net.Services;
 using WinDirStat.Net.Utils;
 
 namespace WinDirStat.Net.Model.Drives {
-	/// <summary>A collection of see <see cref="DriveItem"/>s.</summary>
-	public class DriveItems : ObservablePropertyCollectionObject, IReadOnlyList<DriveItem> {
+    /// <summary>A collection of see <see cref="DriveItem"/>s.</summary>
+    public class DriveItems : ObservablePropertyCollectionObject, IReadOnlyList<DriveItem> {
 
 		#region Fields
 
@@ -39,7 +34,7 @@ namespace WinDirStat.Net.Model.Drives {
 			if (drives.Count > 0) {
 				List<DriveItem> oldItems = drives.GetFullRange();
 				drives.Clear();
-				RaisePropertyChanged(nameof(Count));
+				OnPropertyChanged(nameof(Count));
 				RaiseCollectionChanged(NotifyCollectionChangedAction.Remove, oldItems, 0);
 			}
 			drives.AddRange(scanning.ScanDrives());
