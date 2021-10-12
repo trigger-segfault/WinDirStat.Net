@@ -4,7 +4,11 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>WinDirStat.Net.Wpf</RootNamespace>
     <AssemblyName>WinDirStat.Net</AssemblyName>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<Title>WinDirStat.Net</Title>
+	<Company>Trigger's Tools &amp; Games</Company>
+	<Product>WinDirStat.Net</Product>
+	<Copyright>Copyright © Robert Jordan {YEAR}</Copyright>
+	<Version>0.0.1.0</Version>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <LangVersion>latest</LangVersion>
@@ -144,10 +148,10 @@
     <PackageReference Include="TriggersTools.Build.BuildTime">
       <Version>2.0.0</Version>
     </PackageReference>
-    <PackageReference Include="TriggersTools.Build.CopyrightYear">
-      <Version>1.0.2</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.246501">
+	  <PackageReference Include="TriggersTools.Build.CopyrightYear">
+		  <Version>1.0.2</Version>
+	  </PackageReference>
+	  <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.246501">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.37" />
