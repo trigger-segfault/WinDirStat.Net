@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using GalaSoft.MvvmLight;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Microsoft.Toolkit.Mvvm.Input;
 using WinDirStat.Net.Services;
-using WinDirStat.Net.ViewModel.Commands;
 
 namespace WinDirStat.Net.ViewModel {
 	/// <summary>An addition to the <see cref="ViewModelBase"/> class with extra helper functions.</summary>
-	public abstract class ViewModelRelayCommand : ViewModelBase {
+	public abstract class ViewModelRelayCommand : ObservableRecipient {
 
 		#region Fields
 		
