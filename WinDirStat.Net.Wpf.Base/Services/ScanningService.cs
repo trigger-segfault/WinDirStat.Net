@@ -3,17 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading;
-using System.Windows;
 using WinDirStat.Net.Model.Drives;
 using WinDirStat.Net.Model.Extensions;
 using WinDirStat.Net.Model.Files;
-using WinDirStat.Net.Utils;
 
 namespace WinDirStat.Net.Services {
-	/// <summary>A service for scanning a path's file tree.</summary>
-	public partial class ScanningService : ObservableVolatileObject {
+    /// <summary>A service for scanning a path's file tree.</summary>
+    public partial class ScanningService : ObservableVolatileObject {
 
 		#region Protected Classes
 
@@ -154,7 +151,7 @@ namespace WinDirStat.Net.Services {
 				bool shouldSet = !IsScanning && !IsRefreshing;
 				if (shouldSet)
 					IsRefreshing = true;
-				RaisePropertyChanged(e.PropertyName);
+				OnPropertyChanged(e.PropertyName);
 				RaiseSpaceChanged();
 				if (shouldSet)
 					IsRefreshing = false;
@@ -349,7 +346,7 @@ namespace WinDirStat.Net.Services {
 					RootItem = null;
 				}
 				validateWatch.Reset();
-				RaisePropertyChanged(nameof(ScanTime));
+				OnPropertyChanged(nameof(ScanTime));
 				scanWatch.Start();
 				cancel = new CancellationTokenSource();
 				StartValidateTimer();
@@ -390,7 +387,7 @@ namespace WinDirStat.Net.Services {
 				scanThread = null;
 
 				if (!disposed) {
-					RaisePropertyChanged(nameof(ScanTime));
+					OnPropertyChanged(nameof(ScanTime));
 					if (scanState == ScanState.Cancelling) {
 						// TODO: Should cancel remove all progress made?
 						//RootItem = null;
@@ -440,13 +437,13 @@ namespace WinDirStat.Net.Services {
 		/*/// <summary>Gets the result of the drive select dialog used for scanning.</summary>
 		public DriveSelectResult DriveSelectResult {
 			get => driveSelectResult;
-			set => Set(ref driveSelectResult, value);
+			set => SetProperty(ref driveSelectResult, value);
 		}*/
 
 		/// <summary>Gets the root paths to scan.</summary>
 		public string[] RootPaths {
 			get => rootPaths;
-			set => Set(ref rootPaths, value);
+			set => SetProperty(ref rootPaths, value);
 		}
 
 		/// <summary>Gets the root item of the scanned/scanning file tree.</summary>
@@ -460,7 +457,7 @@ namespace WinDirStat.Net.Services {
 					rootItem?.Dispose();
 					rootItem = value;
 				}
-				RaisePropertyChanged();
+				OnPropertyChanged();
 			}
 		}
 
@@ -504,12 +501,12 @@ namespace WinDirStat.Net.Services {
 							scanWatch.Start();
 					}
 				}
-				RaisePropertyChanged();
-				RaisePropertyChangedIf(suspendedChanged, nameof(IsSuspended));
-				RaisePropertyChangedIf(scanningChanged, nameof(IsScanning));
-				RaisePropertyChangedIf(scanningNotRefreshingChanged, nameof(IsScanningAndNotRefreshing));
-				RaisePropertyChangedIf(finishedChanged, nameof(IsFinished));
-				RaisePropertyChangedIf(openChanged, nameof(IsOpen));
+				OnPropertyChanged();
+				OnPropertyChangedIf(suspendedChanged, nameof(IsSuspended));
+				OnPropertyChangedIf(scanningChanged, nameof(IsScanning));
+				OnPropertyChangedIf(scanningNotRefreshingChanged, nameof(IsScanningAndNotRefreshing));
+				OnPropertyChangedIf(finishedChanged, nameof(IsFinished));
+				OnPropertyChangedIf(openChanged, nameof(IsOpen));
 			}
 		}
 		/// <summary>Gets the current progress state of the scan.</summary>
@@ -597,7 +594,7 @@ namespace WinDirStat.Net.Services {
 						}
 					}
 				}
-				RaisePropertyChanged();
+				OnPropertyChanged();
 			}
 		}
 		/// <summary>Gets if an asynchronous scan thread is running.</summary>
