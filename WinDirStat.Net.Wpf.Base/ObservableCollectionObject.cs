@@ -1,18 +1,10 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using GalaSoft.MvvmLight;
 
 namespace WinDirStat.Net {
-	/// <summary>A base class for objects of which the collection must be observable.</summary>
-	public abstract class ObservableCollectionObject : INotifyCollectionChanged {
+    /// <summary>A base class for objects of which the collection must be observable.</summary>
+    public abstract class ObservableCollectionObject : INotifyCollectionChanged {
 
 		#region Fields
 

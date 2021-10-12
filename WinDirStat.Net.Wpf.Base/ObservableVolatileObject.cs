@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WinDirStat.Net {
-	/// <summary>An observable object with volatile get and set.</summary>
-	public class ObservableVolatileObject : ObservableObjectEx {
+    /// <summary>An observable object with volatile get and set.</summary>
+    public class ObservableVolatileObject : ObservableObjectEx {
 
 		/// <summary>The lock for volatile properties.</summary>
 		protected readonly object volatileLock = new object();
@@ -37,7 +33,7 @@ namespace WinDirStat.Net {
 					return false;
 				field = newValue;
 			}
-			RaisePropertyChanged(propertyName);
+			OnPropertyChanged(propertyName);
 			return true;
 		}
 
