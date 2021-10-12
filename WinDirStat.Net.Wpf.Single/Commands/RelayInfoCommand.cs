@@ -1,141 +1,101 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Toolkit.Mvvm.Input;
+using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 using System.Windows.Media;
-using Microsoft.Toolkit.Mvvm.ComponentModel.CommandWpf;
-using WinDirStat.Net.ViewModel;
-using WinDirStat.Net.ViewModel.Commands;
 using WinDirStat.Net.Wpf.Input;
 
 namespace WinDirStat.Net.Wpf.Commands {
-	public class RelayInfoCommand : RelayCommand, IRelayInfoCommand, IRelayCommand {
+    public class RelayInfoCommand : IRelayInfoCommand, IRelayCommand {
 
-		#region Fields
+        #region Fields
 
-		/// <summary>The UI specific info for the command.</summary>
-		private RelayInfo info;
+        private readonly RelayCommand command;
 
-		#endregion
+        /// <summary>The UI specific info for the command.</summary>
+        private RelayInfo info;
 
-		#region Constructors
+        #endregion
 
-		/// <summary>Constructs the <see cref="RelayInfoCommand"/>.</summary>
-		/// 
-		/// <param name="execute">
-		/// The execution logic. IMPORTANT: If the action causes a closure, you must set <paramref name=
-		/// "keepTargetAlive"/> to true to avoid side effects.
-		/// </param>
-		/// <param name="keepTargetAlive">
-		/// If true, the target of the Action will be kept as a hard reference, which might cause a memory
-		/// leak. You should only set this parameter to true if the action is causing a closures.<para/>
-		/// See http://galasoft.ch/s/mvvmweakaction.
-		/// </param>
-		/// 
-		/// <exception cref="ArgumentNullException"><paramref name="execute"/> is null.</exception>
-		public RelayInfoCommand(Action execute, bool keepTargetAlive = false)
-			: base(execute, null, keepTargetAlive)
-		{
-		}
+        #region Constructors
 
-		/// <summary>Constructs the <see cref="RelayInfoCommand"/>.</summary>
-		/// 
-		/// <param name="execute">
-		/// The execution logic. IMPORTANT: If the action causes a closure, you must set <paramref name=
-		/// "keepTargetAlive"/> to true to avoid side effects.
-		/// </param>
-		/// <param name="canExecute">
-		/// The execution status logic. IMPORTANT: If the func causes a closure, you must set <paramref name=
-		/// "keepTargetAlive"/> to true to avoid side effects.
-		/// </param>
-		/// <param name="keepTargetAlive">
-		/// If true, the target of the Action will be kept as a hard reference, which might cause a memory
-		/// leak. You should only set this parameter to true if the action is causing a closures.<para/>
-		/// See http://galasoft.ch/s/mvvmweakaction.
-		/// </param>
-		/// 
-		/// <exception cref="ArgumentNullException"><paramref name="execute"/> is null.</exception>
-		public RelayInfoCommand(Action execute, Func<bool> canExecute, bool keepTargetAlive = false)
-			: base(execute, canExecute, keepTargetAlive)
-		{
-		}
+        public RelayInfoCommand(Action execute) {
+            command = new(execute);
+        }
 
-		#endregion
+        public RelayInfoCommand(Action execute, Func<bool> canExecute) {
+            command = new(execute, canExecute);
+        }
 
-		#region Properties
+        #endregion
 
-		/// <summary>Gets or sets the UI specific info for the command.</summary>
-		public RelayInfo Info {
-			get => info;
-			set {
-				if (info != value) {
-					if (info != null)
-						info.PropertyChanged -= OnInfoPropertyChanged;
-					info = value;
-					if (info != null)
-						info.PropertyChanged += OnInfoPropertyChanged;
-					RaisePropertyChanged();
-				}
-			}
-		}
+        #region Properties
 
-		/// <summary>Gets the display text for the command.</summary>
-		public string Text => info?.Text;
-		/// <summary>Gets the display icon for the command.</summary>
-		public ImageSource Icon => info?.Icon;
-		/// <summary>Gets the input gesture for the command.</summary>
-		public AnyKeyGesture InputGesture => info?.InputGesture;
+        /// <summary>Gets or sets the UI specific info for the command.</summary>
+        public RelayInfo Info {
+            get => info;
+            set {
+                if (info != value) {
+                    if (info != null)
+                        info.PropertyChanged -= OnInfoPropertyChanged;
+                    info = value;
+                    if (info != null)
+                        info.PropertyChanged += OnInfoPropertyChanged;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
-		#endregion
+        /// <summary>Gets the display text for the command.</summary>
+        public string Text => info?.Text;
+        /// <summary>Gets the display icon for the command.</summary>
+        public ImageSource Icon => info?.Icon;
+        /// <summary>Gets the input gesture for the command.</summary>
+        public AnyKeyGesture InputGesture => info?.InputGesture;
 
-		#region Events
+        #endregion
 
-		/// <summary>Called when a property has changed.</summary>
-		public event PropertyChangedEventHandler PropertyChanged;
+        #region Events
 
-		#endregion
+        /// <summary>Called when a property has changed.</summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+        public event EventHandler CanExecuteChanged {
+            add => command.CanExecuteChanged += value;
+            remove => command.CanExecuteChanged -= value;
+        }
 
-		#region Execute
-		
-		/// <summary>Executes the method without a parameter.</summary>
-		public void Execute() => Execute(null);
+        #endregion
 
-		#endregion
+        #region Execute
 
-		#region Private PropertyChanged
+        public void NotifyCanExecuteChanged() => command.NotifyCanExecuteChanged();
 
-		private void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-		}
+        public bool CanExecute(object parameter) => command.CanExecute(parameter);
 
-		private bool Set<T>(ref T field, T newValue, [CallerMemberName] string propertyName = null) {
-			if (EqualityComparer<T>.Default.Equals(field, newValue)) {
-				return false;
-			}
+        public void Execute(object parameter = null) => command.Execute(parameter);
 
-			field = newValue;
-			RaisePropertyChanged(propertyName);
-			return true;
-		}
+        #endregion
 
-		#endregion
+        #region Private PropertyChanged
 
-		#region Event Handlers
-		
-		private void OnInfoPropertyChanged(object sender, PropertyChangedEventArgs e) {
-			switch (e.PropertyName) {
-			case nameof(RelayInfo.Text):
-			case nameof(RelayInfo.Icon):
-			case nameof(RelayInfo.InputGesture):
-				RaisePropertyChanged(e.PropertyName);
-				break;
-			}
-		}
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
-		#endregion
-	}
+        #endregion
+
+        #region Event Handlers
+
+        private void OnInfoPropertyChanged(object sender, PropertyChangedEventArgs e) {
+            switch (e.PropertyName) {
+                case nameof(RelayInfo.Text):
+                case nameof(RelayInfo.Icon):
+                case nameof(RelayInfo.InputGesture):
+                    OnPropertyChanged(e.PropertyName);
+                    break;
+            }
+        }
+
+        #endregion
+    }
 }
