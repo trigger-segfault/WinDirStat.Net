@@ -12,8 +12,8 @@
   See http://www.galasoft.ch/mvvm
 */
 
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Ioc;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Microsoft.Toolkit.Mvvm.ComponentModel.Ioc;
 using CommonServiceLocator;
 using WinDirStat.Net.ViewModel;
 using WinDirStat.Net.Rendering;
