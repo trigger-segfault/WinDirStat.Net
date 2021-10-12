@@ -1,22 +1,18 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WinDirStat.Net.Services;
 using WinDirStat.Net.Utils;
 using static WinDirStat.Net.Model.Extensions.ExtensionItem;
 
 namespace WinDirStat.Net.Model.Extensions {
-	/// <summary>
-	/// A collection that maintains information about all extensions encountered while scanning the file
-	/// tree.
-	/// </summary>
-	public class ExtensionItems : ObservablePropertyCollectionObject, IReadOnlyList<ExtensionItem> {
+    /// <summary>
+    /// A collection that maintains information about all extensions encountered while scanning the file
+    /// tree.
+    /// </summary>
+    public class ExtensionItems : ObservablePropertyCollectionObject, IReadOnlyList<ExtensionItem> {
 
 		#region Fields
 
@@ -87,12 +83,12 @@ namespace WinDirStat.Net.Model.Extensions {
 		/// <summary>Gets the total size of all files in the file tree.</summary>
 		public long TotalSize {
 			get => totalSize;
-			internal set => Set(ref totalSize, value);
+			internal set => SetProperty(ref totalSize, value);
 		}
 		/// <summary>Gets the total number of files in the file tree.</summary>
 		public long TotalFileCount {
 			get => totalFileCount;
-			internal set => Set(ref totalFileCount, value);
+			internal set => SetProperty(ref totalFileCount, value);
 		}
 
 		/// <summary>Gets the number of extensions in the file tree.</summary>
@@ -125,8 +121,8 @@ namespace WinDirStat.Net.Model.Extensions {
 				extensions.Add(extension, item);
 				sortedExtensions.Add(item);
 				if (unusedFound)
-					RaisePropertyChanged(nameof(UnusedCount));
-				RaisePropertyChanged(nameof(Count));
+					OnPropertyChanged(nameof(UnusedCount));
+				OnPropertyChanged(nameof(Count));
 				RaiseCollectionChanged(NotifyCollectionChangedAction.Add, item, sortedExtensions.Count - 1);
 			}
 			return item;
@@ -149,8 +145,8 @@ namespace WinDirStat.Net.Model.Extensions {
 				int index = sortedExtensions.IndexOf(item);
 				sortedExtensions.RemoveAt(index);
 				unusedExtensions.Add(item.Extension, item);
-				RaisePropertyChanged(nameof(Count));
-				RaisePropertyChanged(nameof(UnusedCount));
+				OnPropertyChanged(nameof(Count));
+				OnPropertyChanged(nameof(UnusedCount));
 				RaiseCollectionChanged(NotifyCollectionChangedAction.Remove, item, index);
 				return true;
 			}
@@ -168,8 +164,8 @@ namespace WinDirStat.Net.Model.Extensions {
 				extensions.Remove(extension);
 				int index = sortedExtensions.IndexOf(item);
 				sortedExtensions.RemoveAt(index);
-				RaisePropertyChanged(nameof(Count));
-				RaisePropertyChanged(nameof(UnusedCount));
+				OnPropertyChanged(nameof(Count));
+				OnPropertyChanged(nameof(UnusedCount));
 				RaiseCollectionChanged(NotifyCollectionChangedAction.Remove, item, index);
 				return true;
 			}
@@ -187,8 +183,8 @@ namespace WinDirStat.Net.Model.Extensions {
 			extensions.Clear();
 			TotalSize = 0;
 			TotalFileCount = 0;
-			RaisePropertyChanged(nameof(Count));
-			RaisePropertyChanged(nameof(UnusedCount));
+			OnPropertyChanged(nameof(Count));
+			OnPropertyChanged(nameof(UnusedCount));
 			RaiseCollectionChanged(NotifyCollectionChangedAction.Remove, oldItems, 0);
 		}
 
