@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using TriggersTools.SharpUtils.Collections;
@@ -17,161 +13,161 @@ using Number = System.Single;
 #endif
 
 namespace WinDirStat.Net.Rendering {
-	/// <summary>A service for rendering WinDirStat treemaps.</summary>
-	public unsafe partial class TreemapRenderer {
+    /// <summary>A service for rendering WinDirStat treemaps.</summary>
+    public unsafe partial class TreemapRenderer {
 
-		#region Fields
+        #region Fields
 
-		/// <summary>The UI service.</summary>
-		private readonly UIService ui;
+        /// <summary>The UI service.</summary>
+        private readonly UIService ui;
 
-		/// <summary>The last pixel array used for drawing.</summary>
-		private Rgba32Color[] pixels;
+        /// <summary>The last pixel array used for drawing.</summary>
+        private Rgba32Color[] pixels;
 
-		/// <summary>The render options for the treemap.</summary>
-		private TreemapOptions options;
-		/// <summary>Calculated light position for the treemap.</summary>
-		private Number lx;
-		/// <summary>Calculated light position for the treemap.</summary>
-		private Number ly;
-		/// <summary>Calculated light position for the treemap.</summary>
-		private Number lz;
-		/// <summary>The render area for the current operation.</summary>
-		private Rectangle2I renderArea;
+        /// <summary>The render options for the treemap.</summary>
+        private TreemapOptions options;
+        /// <summary>Calculated light position for the treemap.</summary>
+        private Number lx;
+        /// <summary>Calculated light position for the treemap.</summary>
+        private Number ly;
+        /// <summary>Calculated light position for the treemap.</summary>
+        private Number lz;
+        /// <summary>The render area for the current operation.</summary>
+        private Rectangle2I renderArea;
 
-		#endregion
+        #endregion
 
-		#region Constructors
+        #region Constructors
 
-		/// <summary>Constructs the <see cref="TreemapRenderer"/>.</summary>
-		public TreemapRenderer(UIService ui) {
-			this.ui = ui;
-			Options = TreemapOptions.Default;
-		}
+        /// <summary>Constructs the <see cref="TreemapRenderer"/>.</summary>
+        public TreemapRenderer(UIService ui) {
+            this.ui = ui;
+            Options = TreemapOptions.Default;
+        }
 
-		#endregion
+        #endregion
 
-		#region Properties
+        #region Properties
 
-		/// <summary>Gets or sets the treemap options.</summary>
-		public TreemapOptions Options {
-			get => options;
-			set {
-				options = value;
+        /// <summary>Gets or sets the treemap options.</summary>
+        public TreemapOptions Options {
+            get => options;
+            set {
+                options = value;
 
-				Number lx = options.LightSourceX;
-				Number ly = options.LightSourceY;
-				const Number lz = 10f;
+                Number lx = options.LightSourceX;
+                Number ly = options.LightSourceY;
+                const Number lz = 10f;
 
-				Number lenght = (Number) Math.Sqrt(lx*lx + ly*ly + lz*lz);
-				this.lx = lx / lenght;
-				this.ly = ly / lenght;
-				this.lz = lz / lenght;
-			}
-		}
+                Number length = (Number) Math.Sqrt(lx * lx + ly * ly + lz * lz);
+                this.lx = lx / length;
+                this.ly = ly / length;
+                this.lz = lz / length;
+            }
+        }
 
-		#endregion
+        #endregion
 
-		private void InitPixels(Rectangle2I rc, Rgba32Color? background = null) {
-			int pixelCount = rc.Width * rc.Height;
-			if (pixels == null || pixels.Length != pixelCount)
-				pixels = new Rgba32Color[rc.Width * rc.Height];
-			if (background.HasValue)
-				pixels.Memset(background.Value);
-		}
+        private void InitPixels(Rectangle2I rc, Rgba32Color? background = null) {
+            int pixelCount = rc.Width * rc.Height;
+            if (pixels == null || pixels.Length != pixelCount)
+                pixels = new Rgba32Color[rc.Width * rc.Height];
+            if (background.HasValue)
+                pixels.Memset(background.Value);
+        }
 
-		[Conditional("DEBUG")]
-		private void RecurseCheckTree(ITreemapItem item) {
-			if (item.IsLeaf) {
-				Debug.Assert(item.ChildCount == 0);
-			}
-			else {
-				// TODO: check that children are sorted by size.
-				long sum = 0;
-				for (int i = 0; i < item.ChildCount; i++) {
-					ITreemapItem child = item[i];
-					sum += child.Size;
-					RecurseCheckTree(child);
-				}
-				Debug.Assert(sum == item.Size);
-			}
-		}
-		
-		public void DrawTreemap(WriteableBitmap bitmap, Rectangle2I rc, ITreemapItem root) {
-			RecurseCheckTree(root);
+        [Conditional("DEBUG")]
+        private void RecurseCheckTree(ITreemapItem item) {
+            if (item.IsLeaf) {
+                Debug.Assert(item.ChildCount == 0);
+            }
+            else {
+                // TODO: check that children are sorted by size.
+                long sum = 0;
+                for (int i = 0; i < item.ChildCount; i++) {
+                    ITreemapItem child = item[i];
+                    sum += child.Size;
+                    RecurseCheckTree(child);
+                }
+                Debug.Assert(sum == item.Size);
+            }
+        }
 
-			Rectangle2I fullRc = rc;
-			
-			rc.Width--;
-			rc.Height--;
+        public void DrawTreemap(WriteableBitmap bitmap, Rectangle2I rc, ITreemapItem root) {
+            RecurseCheckTree(root);
 
-			if (rc.Width <= 0 || rc.Height <= 0)
-				return;
+            Rectangle2I fullRc = rc;
 
-			renderArea = fullRc;
-			
-			if (root.Size == 0)
-				InitPixels(fullRc, Rgba32Color.Black);
-			else if (options.Grid)
-				InitPixels(fullRc, options.GridColor);
-			else
-				InitPixels(fullRc, new Rgba32Color(160, 160, 160));
+            rc.Width--;
+            rc.Height--;
 
-			fixed (Rgba32Color* pBitmapBits = pixels) {
+            if (rc.Width <= 0 || rc.Height <= 0)
+                return;
 
-				// Recursively draw the tree graph
-				if (root.Size > 0) {
-					Number[] surface = { 0, 0, 0, 0 };
-					RecurseDrawGraph(pBitmapBits, root, rc, true, surface, options.Height, 0);
-				}
+            renderArea = fullRc;
 
-				IntPtr bitmapBitsPtr = (IntPtr) pBitmapBits;
+            if (root.Size == 0)
+                InitPixels(fullRc, Rgba32Color.Black);
+            else if (options.Grid)
+                InitPixels(fullRc, options.GridColor);
+            else
+                InitPixels(fullRc, new Rgba32Color(160, 160, 160));
 
-				ui.Invoke(() => {
-					bitmap.WritePixels((Int32Rect) fullRc, bitmapBitsPtr, fullRc.Width * fullRc.Height * 4, bitmap.BackBufferStride);
-				});
-			}
-		}
-		
-		public void DrawColorPreview(WriteableBitmap bitmap, Rectangle2I rc, Rgb24Color color) {
-			if (rc.Width <= 0 || rc.Height <= 0)
-				return;
+            fixed (Rgba32Color* pBitmapBits = pixels) {
 
-			renderArea = rc;
+                // Recursively draw the tree graph
+                if (root.Size > 0) {
+                    Number[] surface = { 0, 0, 0, 0 };
+                    RecurseDrawGraph(pBitmapBits, root, rc, true, surface, options.Height, 0);
+                }
 
-			// That bitmap in turn will be created from this array
-			InitPixels(rc);
+                IntPtr bitmapBitsPtr = (IntPtr) pBitmapBits;
 
-			fixed (Rgba32Color* pBitmapBits = pixels) {
+                ui.Invoke(() => {
+                    bitmap.WritePixels((Int32Rect) fullRc, bitmapBitsPtr, fullRc.Width * fullRc.Height * 4, bitmap.BackBufferStride);
+                });
+            }
+        }
 
-				Number[] surface = { 0, 0, 0, 0 };
+        public void DrawColorPreview(WriteableBitmap bitmap, Rectangle2I rc, Rgb24Color color) {
+            if (rc.Width <= 0 || rc.Height <= 0)
+                return;
 
-				AddRidge(rc, surface, options.Height * options.ScaleFactor);
-				RenderRectangle(pBitmapBits, rc, surface, color);
+            renderArea = rc;
 
-				IntPtr bitmapBitsPtr = (IntPtr) pBitmapBits;
+            // That bitmap in turn will be created from this array
+            InitPixels(rc);
 
-				ui.Invoke(() => {
-					bitmap.WritePixels((Int32Rect) rc, bitmapBitsPtr, rc.Width * rc.Height * 4, bitmap.BackBufferStride);
-				});
-			}
-		}
+            fixed (Rgba32Color* pBitmapBits = pixels) {
 
-		public static ITreemapItem FindItemAtPoint(ITreemapItem item, Point2I p) {
-			if (item.IsLeaf) {
-				return item;
-			}
-			else {
-				for (int i = 0; i < item.ChildCount; i++) {
-					ITreemapItem child = item[i];
-					Rectangle2I rcChild = child.Rectangle;
+                Number[] surface = { 0, 0, 0, 0 };
 
-					if (rcChild.Contains(p))
-						return FindItemAtPoint(child, p);
-				}
-			}
+                AddRidge(rc, surface, options.Height * options.ScaleFactor);
+                RenderRectangle(pBitmapBits, rc, surface, color);
 
-			return null;
-		}
-	}
+                IntPtr bitmapBitsPtr = (IntPtr) pBitmapBits;
+
+                ui.Invoke(() => {
+                    bitmap.WritePixels((Int32Rect) rc, bitmapBitsPtr, rc.Width * rc.Height * 4, bitmap.BackBufferStride);
+                });
+            }
+        }
+
+        public static ITreemapItem FindItemAtPoint(ITreemapItem item, Point2I p) {
+            if (item.IsLeaf) {
+                return item;
+            }
+            else {
+                for (int i = 0; i < item.ChildCount; i++) {
+                    ITreemapItem child = item[i];
+                    Rectangle2I rcChild = child.Rectangle;
+
+                    if (rcChild.Contains(p))
+                        return FindItemAtPoint(child, p);
+                }
+            }
+
+            return null;
+        }
+    }
 }
