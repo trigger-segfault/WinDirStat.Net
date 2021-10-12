@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WinDirStat.Net.ViewModel.Commands;
+﻿using Microsoft.Toolkit.Mvvm.Input;
+using System;
 
 namespace WinDirStat.Net.Services {
-	/// <summary>A service for creating relay commands to be loaded by the view model.</summary>
-	public abstract class RelayCommandFactory {
+    /// <summary>A service for creating relay commands to be loaded by the view model.</summary>
+    public abstract class RelayCommandFactory {
 
 		#region Create
 
