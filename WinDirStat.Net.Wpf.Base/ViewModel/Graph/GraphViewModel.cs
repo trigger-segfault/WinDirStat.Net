@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using GalaSoft.MvvmLight;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using WinDirStat.Net.Model.Files;
 using WinDirStat.Net.Rendering;
 using WinDirStat.Net.Services;
@@ -152,7 +152,7 @@ namespace WinDirStat.Net.ViewModel.Graph {
 		/// <summary>Gets or sets the treemap highlight color.</summary>
 		public Rgba32Color HighlightColor {
 			get => highlightColor;
-			set => Set(ref highlightColor, value);
+			set => SetProperty(ref highlightColor, value);
 		}
 
 		#endregion
@@ -171,7 +171,7 @@ namespace WinDirStat.Net.ViewModel.Graph {
 					else if (isMouseOver)
 						UpdateHover();
 
-					RaisePropertyChanged();
+					OnPropertyChanged();
 				}
 			}
 		}
@@ -193,11 +193,11 @@ namespace WinDirStat.Net.ViewModel.Graph {
 					else {
 						disabledTreemapImage = null;
 						disabledHighlightImage = null;
-						RaisePropertyChanged(nameof(TreemapImage));
+						OnPropertyChanged(nameof(TreemapImage));
 						// GraphView will render if (!IsEnabled and RootItem != null)
 						Render();
 					}
-					RaisePropertyChanged();
+					OnPropertyChanged();
 				}
 			}
 		}
@@ -205,36 +205,36 @@ namespace WinDirStat.Net.ViewModel.Graph {
 		/// <summary>Gets or sets the dimensions of the graph view.</summary>
 		public Point2I Dimensions {
 			get => dimensions;
-			set => Set(ref dimensions, value);
+			set => SetProperty(ref dimensions, value);
 		}
 
 		/// <summary>Gets or sets the current mouse position inside the graph.</summary>
 		public Point2I MousePosition {
 			get => mousePosition;
-			set => Set(ref mousePosition, value);
+			set => SetProperty(ref mousePosition, value);
 		}
 
 		/// <summary>ets or sets if the mouse is inside the graph.</summary>
 		public bool IsMouseOver {
 			get => isMouseOver;
-			set => Set(ref isMouseOver, value);
+			set => SetProperty(ref isMouseOver, value);
 		}
 
 		/// <summary>Gets the image to display the treemap.</summary>
 		public ImageSource TreemapImage {
 			get => treemapDisplayImage;
-			private set => Set(ref treemapDisplayImage, value);
+			private set => SetProperty(ref treemapDisplayImage, value);
 		}
 
 		/// <summary>Gets the image to display the highlight.</summary>
 		public ImageSource HighlightImage {
 			get => highlightDisplayImage;
-			private set => Set(ref highlightDisplayImage, value);
+			private set => SetProperty(ref highlightDisplayImage, value);
 		}
 
 		public ITreemapItem HoverItem {
 			get => hoverItem;
-			set => Set(ref hoverItem, value);
+			set => SetProperty(ref hoverItem, value);
 		}
 
 		public ITreemapItem RootItem {
@@ -254,7 +254,7 @@ namespace WinDirStat.Net.ViewModel.Graph {
 					else
 						Clear();
 
-					RaisePropertyChanged();
+					OnPropertyChanged();
 				}
 			}
 		}
