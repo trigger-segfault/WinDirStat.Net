@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GalaSoft.MvvmLight;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using WinDirStat.Net.Model.Drives;
 using WinDirStat.Net.Services;
 using WinDirStat.Net.ViewModel;
@@ -95,7 +95,7 @@ namespace WinDirStat.Net.ViewModel {
 				if (mode != value) {
 					mode = value;
 					ValidateSelection();
-					RaisePropertyChanged();
+					OnPropertyChanged();
 				}
 			}
 		}
@@ -108,7 +108,7 @@ namespace WinDirStat.Net.ViewModel {
 					folderPath = value;
 					if (mode == DriveSelectMode.Folder)
 						ValidateSelection();
-					RaisePropertyChanged();
+					OnPropertyChanged();
 				}
 			}
 		}
@@ -119,7 +119,7 @@ namespace WinDirStat.Net.ViewModel {
 			private set {
 				if (validSelection != value) {
 					validSelection = value;
-					RaisePropertyChanged();
+					OnPropertyChanged();
 				}
 			}
 		}
@@ -127,7 +127,7 @@ namespace WinDirStat.Net.ViewModel {
 		/// <summary>Gets the result root paths.</summary>
 		public DriveSelectResult Result {
 			get => result;
-			private set => Set(ref result, value);
+			private set => SetProperty(ref result, value);
 		}
 
 		#endregion
