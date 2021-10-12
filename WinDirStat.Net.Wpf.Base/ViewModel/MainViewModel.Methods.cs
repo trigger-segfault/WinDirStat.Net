@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 using WinDirStat.Net.Services;
 using WinDirStat.Net.Utils;
 
 namespace WinDirStat.Net.ViewModel {
-	partial class MainViewModel {
+    partial class MainViewModel {
 
 		public void Loaded() {
 		}
@@ -64,7 +59,7 @@ namespace WinDirStat.Net.ViewModel {
 			}
 			EmptyRecycleBinLabel = label;
 			allRecycleBinInfo = info;
-			EmptyRecycleBin.RaiseCanExecuteChanged();
+			EmptyRecycleBin.NotifyCanExecuteChanged();
 			if (lastRecycleWatch == null)
 				lastRecycleWatch = Stopwatch.StartNew();
 			else
