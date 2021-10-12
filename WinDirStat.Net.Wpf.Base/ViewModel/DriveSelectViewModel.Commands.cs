@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Toolkit.Mvvm.Input;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WinDirStat.Net.Model.Drives;
-using WinDirStat.Net.ViewModel.Commands;
 
 namespace WinDirStat.Net.ViewModel {
-	partial class DriveSelectViewModel {
+    partial class DriveSelectViewModel {
 		
 		public IRelayCommand OK => GetCommand(OnOK);
 
