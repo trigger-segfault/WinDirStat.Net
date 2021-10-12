@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
-using GalaSoft.MvvmLight;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using WinDirStat.Net.Model.Extensions;
 using WinDirStat.Net.Services;
 
@@ -131,25 +131,25 @@ namespace WinDirStat.Net.ViewModel.Extensions {
 		/// <summary>Gets the icon of the associated file type.</summary>
 		public ImageSource Icon {
 			get => icon;
-			private set => Set(ref icon, value);
+			private set => SetProperty(ref icon, value);
 		}
 
 		/// <summary>Gets the type name of the associated file type.</summary>
 		public string TypeName {
 			get => typeName;
-			private set => Set(ref typeName, value);
+			private set => SetProperty(ref typeName, value);
 		}
 
 		/// <summary>Gets the preview image for the file palette color.</summary>
 		public ImageSource Preview {
 			get => preview;
-			internal set => Set(ref preview, value);
+			internal set => SetProperty(ref preview, value);
 		}
 
 		/// <summary>Gets the cache state for the icon.</summary>
 		public IconCacheState CacheState {
 			get => cacheState;
-			private set => Set(ref cacheState, value);
+			private set => SetProperty(ref cacheState, value);
 		}
 
 		/// <summary>Gets the icon cache service.</summary>
