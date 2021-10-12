@@ -5,19 +5,16 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
-using WinDirStat.Net.ViewModel.Commands;
 
 namespace WinDirStat.Net.Wpf.Commands {
-	/// <summary>
-	/// A collection for defining relay command infos in XAML.
-	/// </summary>
-	/// <remarks>
-	/// Why is this not using the correct generic type you ask? Becaues the designer is shit.
-	/// </remarks>
-	public class RelayInfoCollection : ObservableCollection<object> {
+    /// <summary>
+    /// A collection for defining relay command infos in XAML.
+    /// </summary>
+    /// <remarks>
+    /// Why is this not using the correct generic type you ask? Becaues the designer is shit.
+    /// </remarks>
+    public class RelayInfoCollection : ObservableCollection<object> {
 
 		#region Fields
 
