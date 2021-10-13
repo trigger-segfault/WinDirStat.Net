@@ -4,13 +4,14 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using WinDirStat.Net.Model.Drives;
 using WinDirStat.Net.Model.Extensions;
 using WinDirStat.Net.Model.Files;
 
 namespace WinDirStat.Net.Services {
     /// <summary>A service for scanning a path's file tree.</summary>
-    public partial class ScanningService : ObservableVolatileObject, IDisposable {
+    public partial class ScanningService : ObservableVolatileObject, IAsyncDisposable {
 
         #region Protected Classes
 
@@ -49,7 +50,7 @@ namespace WinDirStat.Net.Services {
         /// <summary>The cancellation token source for the asynchronous scan thread.</summary>
         private CancellationTokenSource cancel;
         /// <summary>The current asynchronous scan thread.</summary>
-        private Thread scanThread;
+        private Task scanTask;
         /// <summary>The lock object for scan thread setup.</summary>
         private readonly object threadLock = new object();
         /// <summary>The lock object exclusively for accessing the resume event.</summary>
@@ -158,7 +159,7 @@ namespace WinDirStat.Net.Services {
                 case nameof(SettingsService.ScanPriority):
                     lock (volatileLock) {
                         if (IsAsync)
-                            scanThread.Priority = settings.ScanPriority;
+                            throw new NotImplementedException();
                     }
                     break;
                 case nameof(SettingsService.ValidateInterval):
@@ -227,11 +228,8 @@ namespace WinDirStat.Net.Services {
                 RootPaths = result.GetResultPaths();
                 driveSelectResult = result;
                 ScanPrepare(false);
-                scanThread = new Thread(() => ScanThread(false, cancel.Token)) {
-                    Priority = settings.ScanPriority,
-                    Name = "File Scan",
-                };
-                scanThread.Start();
+                Debug.Assert(scanTask == null || scanTask.IsCompleted);
+                scanTask = Task.Run(() => ScanThread(false, cancel.Token)); //{
             }
         }
 
@@ -380,10 +378,7 @@ namespace WinDirStat.Net.Services {
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
                 ProgressState = ScanProgressState.Ending;
-                cancel?.Dispose();
-                cancel = null;
                 scanWatch?.Stop();
-                scanThread = null;
 
                 if (!disposed) {
                     OnPropertyChanged(nameof(ScanTime));
@@ -600,7 +595,7 @@ namespace WinDirStat.Net.Services {
         public bool IsAsync {
             get {
                 lock (volatileLock)
-                    return scanThread != null && scanThread.IsAlive;
+                    return scanTask != null && !scanTask.IsCompleted;
             }
         }
         /// <summary>Gets if an asynchronous scan thread is running.</summary>
@@ -620,15 +615,16 @@ namespace WinDirStat.Net.Services {
         #region IDisposable Implementation
 
         /// <summary>Disposes of the scanning service.</summary>
-        public void Dispose() {
+        public async ValueTask DisposeAsync() {
             if (!disposed) {
                 disposed = true;
 
+                using (scanTask)
                 using (cancel)
                 using (validateTimer)
                 using (resumeEvent) {
                     cancel?.Cancel();
-                    scanThread?.Join();
+                    await (scanTask ?? Task.CompletedTask);
                 }
             }
         }
@@ -692,7 +688,7 @@ namespace WinDirStat.Net.Services {
                     RootItem.BasicValidate();
                     SuppressFileTreeRefresh = false;
                     TimeSpan validateTime = validateWatch.Elapsed;
-                    Console.WriteLine($"Took {validateTime.TotalMilliseconds}ms to validate");
+                    Debug.WriteLine($"Took {validateTime.TotalMilliseconds}ms to validate");
                 });
             }
         }
@@ -809,15 +805,8 @@ namespace WinDirStat.Net.Services {
             ThrowIfScanning();
             lock (threadLock) {
                 ScanPrepare(true);
-                scanThread = new Thread(() => RefreshThread(selectedFiles, cancel.Token)) {
-                    Priority = settings.ScanPriority,
-                    Name = "File Refresh",
-                };
-
-                // Measures to ensure garbage collection
-                //selectedFiles = null;
-
-                scanThread.Start();
+                Debug.Assert(scanTask == null);
+                scanTask = Task.Run(() => RefreshThread(selectedFiles, cancel.Token));
             }
         }
 
@@ -879,11 +868,8 @@ namespace WinDirStat.Net.Services {
             lock (threadLock) {
                 ScanPrepare(true);
                 rootPaths = driveSelectResult.GetResultPaths();
-                scanThread = new Thread(() => ScanThread(false, cancel.Token)) {
-                    Priority = settings.ScanPriority,
-                    Name = "File Reload",
-                };
-                scanThread.Start();
+                Debug.Assert(scanTask == null);
+                scanTask = Task.Run(() => ScanThread(false, cancel.Token));
             }
         }
 
