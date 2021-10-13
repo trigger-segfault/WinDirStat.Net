@@ -1,6 +1,7 @@
 ﻿using Microsoft.Toolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using WinDirStat.Net.Model.Drives;
 using WinDirStat.Net.Model.Files;
@@ -137,7 +138,7 @@ namespace WinDirStat.Net.ViewModel {
 		private void OnCancel() {
 			Scanning.Cancel(false);
 		}
-		private void OnElevate() {
+		private async void OnElevate() {
 			// Dialog warn progress will be lost.
 			// If yes, close then start new process.
 			MessageBoxResult result = MessageBoxResult.Yes;
@@ -150,16 +151,16 @@ namespace WinDirStat.Net.ViewModel {
 				try {
 					OS.StartNewElevated();
 					UI.Shutdown();
-					Dispose();
+					await DisposeAsync();
 				}
 				catch {
 					Dialogs.ShowError(WindowOwner, "Failed to start elevated process!", "Error");
 				}
 			}
 		}
-		private void OnExit() {
+		private async void OnExit() {
 			UI.Shutdown();
-			Dispose();
+			await DisposeAsync();
 		}
 
 		#endregion
