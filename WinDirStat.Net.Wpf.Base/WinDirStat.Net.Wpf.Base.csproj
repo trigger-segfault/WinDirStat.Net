@@ -27,8 +27,6 @@
 		<Compile Remove="Utils\DelayedAction.cs" />
 		<Compile Remove="Utils\DelayedGC.cs" />
 		<Compile Remove="Utils\Volatiles\VolatileCompound.cs" />
-		<Compile Remove="ViewModel\Graph\FileGraphViewModel.cs" />
-		<Compile Remove="ViewModel\Graph\GraphViewModel.cs" />
 	</ItemGroup>
 	<!-- NuGet References -->
 	<ItemGroup>
@@ -82,7 +80,8 @@
 		<None Include="Utils\DelayedAction.cs" />
 		<None Include="Utils\DelayedGC.cs" />
 		<None Include="Utils\Volatiles\VolatileCompound.cs" />
-		<None Include="ViewModel\Graph\FileGraphViewModel.cs" />
-		<None Include="ViewModel\Graph\GraphViewModel.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="ViewModel\Graph\" />
 	</ItemGroup>
 </Project>
