@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Microsoft.Toolkit.HighPerformance.Buffers;
+using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using WinDirStat.Net.Model.Files;
@@ -14,8 +14,8 @@ using Number = System.Single;
 
 namespace WinDirStat.Net.Rendering {
     partial class TreemapRenderer {
-        unsafe void WritePixelSpan(WriteableBitmap bitmap, Rectangle2I rc) {
-            fixed (Rgba32Color* pBuffer = pixels) {
+        unsafe void WritePixelSpan(MemoryOwner<Rgba32Color> pixels, WriteableBitmap bitmap, Rectangle2I rc) {
+            fixed (Rgba32Color* pBuffer = pixels.Span) {
                 bitmap.WritePixels((Int32Rect) rc, (IntPtr) pBuffer, rc.Width * rc.Height * sizeof(Rgba32Color), bitmap.BackBufferStride);
             }
         }
@@ -26,14 +26,14 @@ namespace WinDirStat.Net.Rendering {
 
             renderArea = rc;
 
-            InitPixels(rc, Rgba32Color.Transparent);
+            using var pixels = InitPixels(rc, Rgba32Color.Transparent);
 
-            Span<Rgba32Color> span = pixels;
+            var span = pixels.Span;
             foreach (FileItemBase item in items) {
                 HighlightRectangle(span, item.Rectangle, color);
             }
 
-            ui.Invoke(() => WritePixelSpan(bitmap, rc));
+            ui.Invoke(() => WritePixelSpan(pixels, bitmap, rc));
         }
 
         public void HighlightExtensions(WriteableBitmap bitmap, Rectangle2I rc, FileItemBase root, Rgba32Color color, string extension) {
@@ -42,12 +42,10 @@ namespace WinDirStat.Net.Rendering {
 
             renderArea = rc;
 
-            InitPixels(rc, Rgba32Color.Transparent);
+            using var pixels = InitPixels(rc, Rgba32Color.Transparent);
+            RecurseHighlightExtensions(pixels.Span, root, color, extension);
 
-            Span<Rgba32Color> span = pixels;
-            RecurseHighlightExtensions(span, root, color, extension);
-
-            ui.Invoke(() => WritePixelSpan(bitmap, rc));
+            ui.Invoke(() => WritePixelSpan(pixels, bitmap, rc));
         }
 
         private void RecurseHighlightExtensions(Span<Rgba32Color> bitmap, FileItemBase parent, Rgba32Color color, string extension) {
