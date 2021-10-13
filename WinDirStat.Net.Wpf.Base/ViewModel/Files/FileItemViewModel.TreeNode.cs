@@ -168,7 +168,7 @@ namespace WinDirStat.Net.ViewModel.Files {
 		internal protected void RaiseChildrenReset() {
 			Stopwatch watch = Stopwatch.StartNew();
 			GetListRoot().treeFlattener.NodesReset();
-			Console.WriteLine($"Took {watch.ElapsedMilliseconds}ms to reset");
+			Debug.WriteLine($"Took {watch.ElapsedMilliseconds}ms to reset");
 		}
 
 		internal protected void OnChildrenReset(List<FileItemViewModel> newList, List<FileItemViewModel> oldList) {
@@ -236,7 +236,6 @@ namespace WinDirStat.Net.ViewModel.Files {
 			//RaiseIsLastChangedIfNeeded(e);
 		}
 		internal protected void OnChildrenChanged(NotifyCollectionChangedEventArgs e) {
-			Debug.WriteLine(e.Action);
 			if (e.OldItems != null) {
 				foreach (FileItemViewModel node in e.OldItems) {
 					Debug.Assert(node.parent == this);
