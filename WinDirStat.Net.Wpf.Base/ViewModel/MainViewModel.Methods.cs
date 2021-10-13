@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using WinDirStat.Net.Services;
 using WinDirStat.Net.Utils;
@@ -28,16 +28,17 @@ namespace WinDirStat.Net.ViewModel {
         public void UpdateEmptyRecycleBin() {
             UpdateEmptyRecycleBin(false);
         }
+
         public void UpdateEmptyRecycleBin(bool force) {
-            lock (recycleLock) {
-                if ((recycleInfoThread == null || !recycleInfoThread.IsAlive) &&
-                    (lastRecycleWatch == null || lastRecycleWatch.Elapsed > TimeSpan.FromSeconds(1)) || force) {
-                    recycleInfoThread = new Thread(UpdateEmptyRecycleBinThread) {
-                        Name = "Update Recycle Bin Info",
-                    };
-                    recycleInfoThread.Start();
-                }
-            }
+            if (!ReadyForUpdate())
+                return;
+
+            recycleInfoTask = Task.Run(UpdateEmptyRecycleBinThread);
+            return;
+
+            bool NotAlreadyRunning() => recycleInfoTask?.IsCompleted ?? true;
+            bool TimerIsReady() => lastRecycleWatch == null || lastRecycleWatch.Elapsed > TimeSpan.FromSeconds(1);
+            bool ReadyForUpdate() => force || (NotAlreadyRunning() && TimerIsReady());
         }
         private void UpdateEmptyRecycleBinThread() {
             Debug.WriteLine("UpdateEmptyRecycleBin");
