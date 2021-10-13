@@ -1,22 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using WinDirStat.Net.Services;
 using WinDirStat.Net.Structures;
 using WinDirStat.Net.Utils;
-using WinDirStat.Net.Native;
 
 namespace WinDirStat.Net.Services {
-	/// <summary>An service for creating and loading bitmaps.</summary>
-	public class BitmapFactory {
+    /// <summary>An service for creating and loading bitmaps.</summary>
+    public class BitmapFactory {
 
 		#region Fields
 
@@ -103,12 +97,9 @@ namespace WinDirStat.Net.Services {
 		/// <param name="handle">The handle of the icon to load.</param>
 		/// <returns>The loaded bitmap.</returns>
 		public BitmapSource FromHIcon(IntPtr hIcon) {
-			return ui.Invoke(() => {
-				return Imaging.CreateBitmapSourceFromHIcon(
-					hIcon,
-					Int32Rect.Empty,
-					BitmapSizeOptions.FromEmptyOptions());
-			});
+			var bmpSource = Imaging.CreateBitmapSourceFromHIcon(hIcon, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            bmpSource.Freeze();
+            return bmpSource;
 		}
 
 		#endregion
