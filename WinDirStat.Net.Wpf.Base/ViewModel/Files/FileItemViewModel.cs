@@ -232,8 +232,11 @@ namespace WinDirStat.Net.ViewModel.Files {
 				if (cacheMode >= IconCacheMode.FileType) {
 					SetIcon(ExtensionItem.Icon);
 					if (cacheMode >= IconCacheMode.Individual) {
-						IconCache.CacheIconAsync(FullName, OnCacheFileIcon);
-					}
+                        UI.BeginInvoke(() => {
+                            var namedIcon = IconCache.CacheIconAndDisplayName(FullName);
+                            OnCacheFileIcon(namedIcon.Icon);
+                        }, false);
+                    }
 					else if (ExtensionItem.CacheState != IconCacheState.Cached) {
 						// Hook an event to wait for the cache state to change
 						isWaitingForExtensionIcon = true;
@@ -246,8 +249,12 @@ namespace WinDirStat.Net.ViewModel.Files {
 				break;
 			case FileItemType.Directory:
 				SetIcon(IconCache.FolderIcon);
-				if (cacheMode >= IconCacheMode.Individual)
-					IconCache.CacheIconAsync(FullName, OnCacheFolderIcon);
+                    if (cacheMode >= IconCacheMode.Individual) {
+                        UI.BeginInvoke(() => {
+                            var namedIcon = IconCache.CacheIconAndDisplayName(FullName);
+                            OnCacheFolderIcon(namedIcon.Icon);
+                        }, false);
+                    }
 				break;
 			case FileItemType.Volume:
 				if (cacheMode >= IconCacheMode.Individual) {
