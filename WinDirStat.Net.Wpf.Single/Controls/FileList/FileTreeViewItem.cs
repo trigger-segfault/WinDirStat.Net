@@ -34,11 +34,9 @@ namespace WinDirStat.Net.Wpf.Controls.FileList {
 													 new FrameworkPropertyMetadata(typeof(FileTreeViewItem)));
 		}
 
-		public FileItemViewModel Node {
-			get { return DataContext as FileItemViewModel; }
-		}
+        public FileItemViewModel Node => DataContext as FileItemViewModel;
 
-		public FileTreeNodeView NodeView { get; internal set; }
+        public FileTreeNodeView NodeView { get; internal set; }
 		public FileTreeView ParentTreeView { get; internal set; }
 
 		protected override void OnKeyDown(KeyEventArgs e) {
@@ -93,6 +91,11 @@ namespace WinDirStat.Net.Wpf.Controls.FileList {
 		}*/
 
 		protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e) {
+            //this can happen when Node is a DisconnectedItem
+            if(Node == null) {
+                return;
+            }
+
 			if (wasDoubleClick) {
 				wasDoubleClick = false;
 				Node.ActivateItem();
