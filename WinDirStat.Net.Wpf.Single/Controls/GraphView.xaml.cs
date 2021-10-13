@@ -2,9 +2,9 @@
 using System.Collections;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -47,24 +47,27 @@ namespace WinDirStat.Net.Wpf.Controls {
             DependencyProperty.Register("Root", typeof(FileItemBase), typeof(GraphView),
                 new FrameworkPropertyMetadata(null, OnRootChanged));
 
-        private static void OnRootChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
-            if (d is GraphView graphView) {
-                FileItemBase root = graphView.Root;
-                if (root == null) {
-                    graphView.AbortRender();
-                }
+        private static async void OnRootChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+            if (d is not GraphView graphView)
+                return;
 
-                graphView.root = root;
-                graphView.HighlightNone();
-                graphView.Hover = null;
-                if (root != null) {
-                    //lock (graphView.drawBitmapLock)
-                    graphView.RenderAsync();
-                }
-                else {
-                    graphView.Clear();
-                }
+            FileItemBase root = graphView.Root;
+            //if (root == null) {
+            //    await graphView.AbortRenderAsync();
+            //}
 
+            graphView.root = root;
+            graphView.HighlightNone();
+            graphView.Hover = null;
+            if (root != null) {
+                await graphView.RenderAsync();
+            }
+            else {
+                var render = graphView.renderTask;
+                if (render != null) {
+                    await render;
+                }
+                graphView.Clear();
             }
         }
 
@@ -150,28 +153,18 @@ namespace WinDirStat.Net.Wpf.Controls {
 			}
 		}*/
 
-        private static void OnIsEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
-            if (d is GraphView graphView) {
-                graphView.UpdateDimmed();
-                if (!graphView.IsEnabled) {
-                    graphView.AbortRender();
-                    graphView.disabledTreemap = graphView.treemap;
-                    graphView.disabledHighlight = graphView.highlight;
-                    graphView.imageTreemap.Source = graphView.disabledTreemap;
-                    graphView.imageHighlight.Source = graphView.disabledHighlight;
-                }
-                else {
-                    graphView.disabledTreemap = null;
-                    graphView.disabledHighlight = null;
-                    // GraphView will render if (!IsEnabled and Root != null)
-                    graphView.RenderAsync();
-                }
+        private static async void OnIsEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+            if (d is not GraphView graphView)
+                return;
+
+            graphView.UpdateDimmed();
+            if (graphView.IsEnabled) {
+                // GraphView will render if (!IsEnabled and Root != null)
+                await graphView.RenderAsync();
             }
         }
 
-        private void UpdateDimmed() {
-            IsDimmed = IsRenderingTreemap || resizing || !IsEnabled;
-        }
+        private void UpdateDimmed() => IsDimmed = IsRenderingTreemap || resizing || !IsEnabled;
 
         private static readonly DependencyPropertyKey IsDimmedPropertyKey =
             DependencyProperty.RegisterReadOnly("IsDimmed", typeof(bool), typeof(GraphView),
@@ -206,11 +199,11 @@ namespace WinDirStat.Net.Wpf.Controls {
             graphView.ViewModel = newViewModel;
         }
 
-        private void OnSettingsChanged(object sender, PropertyChangedEventArgs e) {
+        private async void OnSettingsChanged(object sender, PropertyChangedEventArgs e) {
             switch (e.PropertyName) {
                 case nameof(SettingsService.TreemapOptions):
                 case nameof(SettingsService.FilePalette):
-                    RenderAsync();
+                    await RenderAsync();
                     break;
                 case nameof(SettingsService.HighlightColor):
                     if (highlightMode != HighlightMode.None)
@@ -218,16 +211,15 @@ namespace WinDirStat.Net.Wpf.Controls {
                     break;
             }
         }
-
         private Point2I treemapSize;
         private WriteableBitmap treemap;
         private Point2I highlightSize;
         private WriteableBitmap highlight;
-        private Bitmap highlightGdi;
-        private WriteableBitmap disabledTreemap;
-        private WriteableBitmap disabledHighlight;
         private readonly DispatcherTimer resizeTimer;
-        private Thread renderThread;
+
+        private Task renderTask;
+        private AutoResetEvent renderGate;
+
         private FileItemBase root;
         private bool resizing;
         /// <summary>Check if the running render thread has finished rendering the treemap.</summary>
@@ -235,8 +227,6 @@ namespace WinDirStat.Net.Wpf.Controls {
         private volatile bool fullRender;
         //private TreemapOptions options;
 
-        private readonly object renderLock = new object();
-        private readonly object drawBitmapLock = new object();
         private FileItemBase[] selection;
         private string extension;
         private HighlightMode highlightMode;
@@ -252,6 +242,7 @@ namespace WinDirStat.Net.Wpf.Controls {
             if (!this.DesignerInitializeComponent("Controls"))
                 InitializeComponent();
 
+            renderGate = new(true);
             resizeTimer = new DispatcherTimer(
                 TimeSpan.FromMilliseconds(50),
                 DispatcherPriority.Normal,
@@ -271,7 +262,7 @@ namespace WinDirStat.Net.Wpf.Controls {
             imageHighlight.Source = null;
         }
 
-        public void HighlightExtension(string extension) {
+        public async void HighlightExtension(string extension) {
             if (this.extension == extension)
                 return;
 
@@ -279,7 +270,7 @@ namespace WinDirStat.Net.Wpf.Controls {
             this.extension = extension;
             selection = null;
             if (IsRendering) {
-                RenderHighlightAsync();
+                await RenderHighlightAsync();
             }
             else if (!IsDimmed && Root != null) {
                 RenderHighlight(treemapSize);
@@ -290,7 +281,7 @@ namespace WinDirStat.Net.Wpf.Controls {
             //Render(true);
         }
 
-        public void HighlightSelection(IEnumerable selection) {
+        public async void HighlightSelection(IEnumerable selection) {
             if (this.selection != null && this.selection.Intersect(selection.Cast<FileItemBase>()).Count() == this.selection.Length)
                 return;
 
@@ -298,7 +289,7 @@ namespace WinDirStat.Net.Wpf.Controls {
             this.selection = selection.Cast<FileItemBase>().ToArray();
             extension = null;
             if (IsRendering) {
-                RenderHighlightAsync();
+                await RenderHighlightAsync();
             }
             else if (!IsDimmed && Root != null) {
                 RenderHighlight(treemapSize);
@@ -315,7 +306,7 @@ namespace WinDirStat.Net.Wpf.Controls {
 
         private void OnUnloaded(object sender, RoutedEventArgs e) {
             resizeTimer.Stop();
-            AbortRender();
+            //await AbortRenderAsync();
         }
 
         private void OnSizeChanged(object sender, SizeChangedEventArgs e) {
@@ -326,20 +317,19 @@ namespace WinDirStat.Net.Wpf.Controls {
             resizeTimer.Start();
         }
 
-        private void OnResizeTimerTick(object sender, EventArgs e) {
+        private async void OnResizeTimerTick(object sender, EventArgs e) {
             resizing = false;
-            UpdateDimmed();
             resizeTimer.Stop();
-            RenderAsync();
+            await RenderAsync();
         }
 
 
 
         /// <summary>Gets if anything is in the process of being rendered.</summary>
-        private bool IsRendering => renderThread?.IsAlive ?? false;
+        private bool IsRendering => !renderTask?.IsCompleted ?? false;
 
         /// <summary>Gets if the treemap is in the process of being rendered.</summary>
-        private bool IsRenderingTreemap => renderThread?.IsAlive ?? false && fullRender;
+        private bool IsRenderingTreemap => fullRender && IsRendering;
 
         /// <summary>A link to the view model that can be accessed outside of the UI thread.</summary>
         private MainViewModel ViewModel { get; set; }
@@ -354,103 +344,101 @@ namespace WinDirStat.Net.Wpf.Controls {
         }
 
         private void Clear() {
-            AbortRender();
+            //await AbortRenderAsync();
             treemap = null;
             highlight = null;
             treemapSize = Point2I.Zero;
             highlightSize = Point2I.Zero;
         }
 
-        public void AbortRender(bool waitForExit = true) {
-            //FIXME: waitForExit was never observed anyway
-            if (waitForExit) {
-                //renderThread?.Join();
-            }
-            renderThread = null;
-            UpdateDimmed();
-        }
+        //public async Task AbortRenderAsync(bool waitForExit = true) {
+        //    //FIXME: waitForExit was never observed anyway
+        //    if (waitForExit && IsRendering) {
+        //        await renderTask;
+        //    }
+        //    UpdateDimmed();
+        //}
 
-        public void RenderHighlightAsync(ThreadPriority? priority = null) {
+        public Task RenderHighlightAsync(ThreadPriority? priority = null) {
             fullRender = !treemapRendered;
-            RenderAsyncFinal(priority);
+            return RenderCoreAsync(priority);
         }
 
-        public void RenderAsync(ThreadPriority? priority = null) {
+        public Task RenderAsync(ThreadPriority? priority = null) {
             fullRender = true;
-            RenderAsyncFinal(priority);
+            return RenderCoreAsync(priority);
         }
 
-        private void RenderAsyncFinal(ThreadPriority? priority = null) {
-            if (IsEnabled && Root != null) {
-                AbortRender();
-                treemapRendered = false;
-                //IsDimmed = true;
-                Point2I size = new Point2I((int) ActualWidth, (int) ActualHeight);
-                renderThread = new Thread(() => RenderThread(size)) {
-                    Priority = priority ?? RenderPriority,
-                    Name = "GraphView Render",
-                };
-                renderThread.Start();
-                UpdateDimmed();
-            }
+        private async Task RenderCoreAsync(ThreadPriority? priority = null) {
+            if (!IsEnabled)
+                return;
+
+            if (Root == null)
+                return;
+
+            var acquired = renderGate.WaitOne(0);
+            if (!acquired)
+                return;
+
+            //await AbortRenderAsync();
+            treemapRendered = false;
+
+            var size = new Point2I((int) ActualWidth, (int) ActualHeight);
+
+            Debug.Assert(renderTask == null || renderTask.IsCompleted);
+            renderTask = Task.Run(() => RenderWorker(size));
+            UpdateDimmed();
+            await renderTask;
+
+            Dispatcher.Invoke(RenderFinished);
         }
 
-        private void RenderThread(Point2I size) {
-            try {
-                if (size.X != 0 && size.Y != 0) {
-                    if (fullRender) {
-                        RenderTreemap(size);
-                    }
-                    treemapRendered = true;
-                    if (highlightMode != HighlightMode.None) {
-                        RenderHighlight(size);
-                    }
+        private void RenderWorker(Point2I size) {
+            if (size.X != 0 && size.Y != 0) {
+                if (fullRender) {
+                    RenderTreemap(size);
                 }
-                Dispatcher.Invoke(() => {
-                    // Let the control know we're not rendering anymore
-                    renderThread = null;
-                    imageTreemap.Source = treemap;
-                    if (highlightMode != HighlightMode.None)
-                        imageHighlight.Source = highlight;
-                    UpdateDimmed();
-                });
+                treemapRendered = true;
+
+                if (highlightMode != HighlightMode.None) {
+                    RenderHighlight(size);
+                }
             }
-            catch (ThreadAbortException) { }
-            catch (Exception ex) {
-                Stopwatch sw = Stopwatch.StartNew();
-                Dispatcher.Invoke(() => {
-                    Console.WriteLine(ex.ToString());
-                    renderThread = null;
-                    UpdateDimmed();
-                    UpdateHover();
-                });
-                Console.WriteLine($"Took {sw.ElapsedMilliseconds}ms to invoke EXCEPTION Dispatcher");
+        }
+
+        private void RenderFinished() {
+            // Let the control know we're not rendering anymore
+            imageTreemap.Source = treemap;
+            if (highlightMode != HighlightMode.None) {
+                imageHighlight.Source = highlight;
             }
+            UpdateDimmed();
+
+            renderGate.Set();
         }
 
         private void RenderTreemap(Point2I size) {
             Stopwatch sw = Stopwatch.StartNew();
-            if (treemap == null || treemapSize.X != size.X || treemapSize.Y != size.Y) {
+            if (treemap == null || treemapSize != size) {
                 treemapSize = size;
-                Application.Current.Dispatcher.Invoke(() => {
-                    treemap = new WriteableBitmap(size.X, size.Y, 96, 96, PixelFormats.Bgra32, null);
-                });
+                //treemap = new WriteableBitmap(size.X, size.Y, 96, 96, PixelFormats.Bgra32, null);
+                Dispatcher.Invoke(() => treemap = new WriteableBitmap(size.X, size.Y, 96, 96, PixelFormats.Bgra32, null));
             }
             Treemap.DrawTreemap(treemap, new Rectangle2I(size), root);
-            //Treemap.DrawTreemap(treemap, new Rectangle2I(size), fileRoot, options);
-            Console.WriteLine($"Took {sw.ElapsedMilliseconds}ms to render treemap");
+            sw.Stop();
+
+            Debug.WriteLine($"Took {sw.ElapsedMilliseconds}ms to render treemap");
         }
         private void RenderHighlight(Point2I size) {
             Stopwatch sw = Stopwatch.StartNew();
-            if (highlight == null || highlightSize.X != size.X || highlightSize.Y != size.Y) {
+            if (highlight == null || highlightSize != size) {
                 highlightSize = size;
-                Application.Current.Dispatcher.Invoke(() => {
-                    highlight = new WriteableBitmap(size.X, size.Y, 96, 96, PixelFormats.Bgra32, null);
-                });
-                highlightGdi?.Dispose();
-                highlightGdi = new Bitmap(size.X, size.Y, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                Trace.WriteLine($"Took {sw.ElapsedMilliseconds}ms to setup highlight bitmap");
+                //highlight = new WriteableBitmap(size.X, size.Y, 96, 96, PixelFormats.Bgra32, null);
+                Dispatcher.Invoke(() => highlight = new WriteableBitmap(size.X, size.Y, 96, 96, PixelFormats.Bgra32, null));
             }
+            sw.Stop();
+            Debug.WriteLine($"Took {sw.ElapsedMilliseconds}ms to setup highlight bitmap");
+
             sw.Restart();
             if (highlightMode == HighlightMode.Extension) {
                 Treemap.HighlightExtensions(highlight, new Rectangle2I(size), root, Settings.HighlightColor, extension);
@@ -458,8 +446,8 @@ namespace WinDirStat.Net.Wpf.Controls {
             else if (highlightMode == HighlightMode.Selection) {
                 Treemap.HighlightItems(highlight, new Rectangle2I(size), Settings.HighlightColor, selection);
             }
-            Trace.WriteLine($"Took {sw.ElapsedMilliseconds}ms to render highlight");
-            Trace.WriteLine("");
+            sw.Stop();
+            Debug.WriteLine($"Took {sw.ElapsedMilliseconds}ms to render highlight");
         }
 
         private void OnMouseMove(object sender, MouseEventArgs e) {
