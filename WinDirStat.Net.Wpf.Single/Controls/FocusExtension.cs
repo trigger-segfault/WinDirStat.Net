@@ -88,25 +88,19 @@ namespace WinDirStat.Net.Wpf.Controls {
 
 		private static void OnGotFocus(object sender, RoutedEventArgs e) {
 			FrameworkElement element = (FrameworkElement) sender;
-			Console.WriteLine("GotFocus");
 			SetIsFocused(element, true);
 		}
 		private static void OnLostFocus(object sender, RoutedEventArgs e) {
 			FrameworkElement element = (FrameworkElement) sender;
-			Console.WriteLine("LostFocus");
 			SetIsFocused(element, false);
 		}
 
 		private static void OnGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e) {
 			FrameworkElement element = (FrameworkElement) sender;
-			//SetIsFocused(element, true);
-			Console.WriteLine("LostKeyboardFocus");
 		}
 
 		private static void OnLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e) {
 			FrameworkElement element = (FrameworkElement) sender;
-			//SetIsFocused(element, false);
-			Console.WriteLine("GotKeyboardFocus");
 		}
 	}
 }
