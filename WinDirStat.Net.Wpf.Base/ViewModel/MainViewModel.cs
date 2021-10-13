@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using WinDirStat.Net.Model.Files;
 using WinDirStat.Net.Rendering;
 using WinDirStat.Net.Services;
@@ -15,7 +16,7 @@ using WinDirStat.Net.ViewModel.Files;
 
 namespace WinDirStat.Net.ViewModel {
     /// <summary>The main view model for the program.</summary>
-    public partial class MainViewModel : ViewModelWindow {
+    public partial class MainViewModel : ViewModelWindow, IAsyncDisposable {
 
         #region Fields
 
@@ -51,11 +52,11 @@ namespace WinDirStat.Net.ViewModel {
 
         private bool suppressRefresh;
 
-        private Thread recycleInfoThread;
-
-        private readonly object recycleLock = new object();
+        private Task recycleInfoTask;
 
         private Stopwatch lastRecycleWatch;
+
+        private bool disposed;
 
         #endregion
 
@@ -367,14 +368,22 @@ namespace WinDirStat.Net.ViewModel {
 
         #endregion
 
-        #region IDisposable Implementation
+        #region IAsyncDisposable Implementation
 
-        public void Dispose() {
-            using (Scanning) {
+        public async ValueTask DisposeAsync() {
+            if (disposed)
+                return;
+
+            disposed = true;
+            await using (Scanning) {
                 statusTimer.Stop();
                 ramTimer.Stop();
             }
+
+            GC.SuppressFinalize(this);
         }
+
+        public async void Dispose() => await DisposeAsync();
 
         #endregion
 
