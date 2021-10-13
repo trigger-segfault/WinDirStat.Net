@@ -81,7 +81,4 @@
 		<None Include="Utils\DelayedGC.cs" />
 		<None Include="Utils\Volatiles\VolatileCompound.cs" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="ViewModel\Graph\" />
-	</ItemGroup>
 </Project>
