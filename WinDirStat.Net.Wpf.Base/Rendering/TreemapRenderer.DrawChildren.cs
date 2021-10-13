@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WinDirStat.Net.Structures;
 
 #if DOUBLE
@@ -13,10 +9,9 @@ using Number = System.Single;
 #endif
 
 namespace WinDirStat.Net.Rendering {
-	unsafe partial class TreemapRenderer {
+    partial class TreemapRenderer {
 		
-		private void RecurseDrawGraph(Rgba32Color* bitmap, ITreemapItem item, Rectangle2I rc,
-			bool isroot, Number[] pSurface, Number h, uint flags)
+		private void RecurseDrawGraph(Span<Rgba32Color> bitmap, ITreemapItem item, Rectangle2I rc, bool isroot, Number[] pSurface, Number h, uint flags)
 		{
 			Debug.Assert(rc.Width >= 0);
 			Debug.Assert(rc.Height >= 0);
@@ -48,7 +43,7 @@ namespace WinDirStat.Net.Rendering {
 			}
 		}
 
-		private void DrawChildren(Rgba32Color* bitmap, ITreemapItem parent, Number[] surface, Number h, uint flags) {
+		private void DrawChildren(Span<Rgba32Color> bitmap, ITreemapItem parent, Number[] surface, Number h, uint flags) {
 			switch (options.Style) {
 			case TreemapStyle.KDirStatStyle:
 				KDirStat_DrawChildren(bitmap, parent, surface, h, flags);
@@ -69,7 +64,7 @@ namespace WinDirStat.Net.Rendering {
 			get => options.AmbientLight < 1 && options.Height > 0 && options.ScaleFactor > 0;
 		}
 
-		private void RenderLeaf(Rgba32Color* bitmap, ITreemapItem item, Number[] surface) {
+		private void RenderLeaf(Span<Rgba32Color> bitmap, ITreemapItem item, Number[] surface) {
 			Rectangle2I rc = item.Rectangle;
 
 			if (options.Grid) {
@@ -84,7 +79,7 @@ namespace WinDirStat.Net.Rendering {
 			RenderRectangle(bitmap, rc, surface, item.Color);
 		}
 
-		private void RenderRectangle(Rgba32Color* bitmap, Rectangle2I rc, Number[] surface, Rgba32Color color) {
+		private void RenderRectangle(Span<Rgba32Color> bitmap, Rectangle2I rc, Number[] surface, Rgba32Color color) {
 			Number brightness = options.Brightness;
 
 			//color = ColorSpace.SetBrightness(color, PaletteBrightness);
@@ -98,7 +93,7 @@ namespace WinDirStat.Net.Rendering {
 			}
 		}
 
-		private void DrawSolidRect(Rgba32Color* bitmap, Rectangle2I rc, Rgba32Color color, Number brightness) {
+		private void DrawSolidRect(Span<Rgba32Color> bitmap, Rectangle2I rc, Rgba32Color color, Number brightness) {
 			Number factor = brightness / ColorSpace.PaletteBrightness;
 
 			int red		= (int) (color.R * factor);
@@ -114,7 +109,7 @@ namespace WinDirStat.Net.Rendering {
 				}
 			}
 		}
-		private void DrawCushion(Rgba32Color* bitmap, Rectangle2I rc, Number[] surface, Rgba32Color color, Number brightness) {
+		private void DrawCushion(Span<Rgba32Color> bitmap, Rectangle2I rc, Number[] surface, Rgba32Color color, Number brightness) {
 			Number Ia = options.AmbientLight;
 
 			Number Is = 1 - Ia;
