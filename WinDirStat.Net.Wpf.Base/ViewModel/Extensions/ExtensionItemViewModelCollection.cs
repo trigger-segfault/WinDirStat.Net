@@ -3,17 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WinDirStat.Net.Model.Extensions;
 using WinDirStat.Net.Services;
 using WinDirStat.Net.Utils;
 using static WinDirStat.Net.Model.Extensions.ExtensionItem;
 
 namespace WinDirStat.Net.ViewModel.Extensions {
-	/// <summary>A collection manager for <see cref="ExtensionItemViewModel"/>s.</summary>
-	public class ExtensionItemViewModelCollection
+    /// <summary>A collection manager for <see cref="ExtensionItemViewModel"/>s.</summary>
+    public class ExtensionItemViewModelCollection
 		: ObservablePropertyCollectionObject, IReadOnlyList<ExtensionItemViewModel>
 	{
 		#region Fields
