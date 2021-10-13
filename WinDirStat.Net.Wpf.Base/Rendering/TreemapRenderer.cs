@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Buffers;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media.Imaging;
-using TriggersTools.SharpUtils.Collections;
 using WinDirStat.Net.Services;
 using WinDirStat.Net.Structures;
 
@@ -70,10 +70,16 @@ namespace WinDirStat.Net.Rendering {
 
         private void InitPixels(Rectangle2I rc, Rgba32Color? background = null) {
             int pixelCount = rc.Width * rc.Height;
-            if (pixels == null || pixels.Length != pixelCount)
-                pixels = new Rgba32Color[rc.Width * rc.Height];
-            if (background.HasValue)
-                pixels.Memset(background.Value);
+            if (pixels == null || pixels.Length != pixelCount) {
+                if (pixels != null) {
+                    ArrayPool<Rgba32Color>.Shared.Return(pixels);
+                }
+                pixels = ArrayPool<Rgba32Color>.Shared.Rent(pixelCount);
+            }
+
+            if (background.HasValue) {
+                pixels.AsSpan(..pixelCount).Fill(background.Value);
+            }
         }
 
         [Conditional("DEBUG")]
@@ -113,20 +119,18 @@ namespace WinDirStat.Net.Rendering {
             else
                 InitPixels(fullRc, new Rgba32Color(160, 160, 160));
 
-            fixed (Rgba32Color* pBitmapBits = pixels) {
-
-                // Recursively draw the tree graph
-                if (root.Size > 0) {
-                    Number[] surface = { 0, 0, 0, 0 };
-                    RecurseDrawGraph(pBitmapBits, root, rc, true, surface, options.Height, 0);
-                }
-
-                IntPtr bitmapBitsPtr = (IntPtr) pBitmapBits;
-
-                ui.Invoke(() => {
-                    bitmap.WritePixels((Int32Rect) fullRc, bitmapBitsPtr, fullRc.Width * fullRc.Height * 4, bitmap.BackBufferStride);
-                });
+            // Recursively draw the tree graph
+            if (root.Size > 0) {
+                Number[] surface = { 0, 0, 0, 0 };
+                Span<Rgba32Color> span = pixels;
+                RecurseDrawGraph(span, root, rc, true, surface, options.Height, 0);
             }
+
+            ui.Invoke(() => {
+                fixed (Rgba32Color* pBitmapBits = pixels) {
+                    bitmap.WritePixels((Int32Rect) fullRc, (IntPtr) pBitmapBits, fullRc.Width * fullRc.Height * sizeof(Rgba32Color), bitmap.BackBufferStride);
+                }
+            });
         }
 
         public void DrawColorPreview(WriteableBitmap bitmap, Rectangle2I rc, Rgb24Color color) {
@@ -138,19 +142,18 @@ namespace WinDirStat.Net.Rendering {
             // That bitmap in turn will be created from this array
             InitPixels(rc);
 
-            fixed (Rgba32Color* pBitmapBits = pixels) {
+            Number[] surface = { 0, 0, 0, 0 };
 
-                Number[] surface = { 0, 0, 0, 0 };
+            AddRidge(rc, surface, options.Height * options.ScaleFactor);
 
-                AddRidge(rc, surface, options.Height * options.ScaleFactor);
-                RenderRectangle(pBitmapBits, rc, surface, color);
+            Span<Rgba32Color> span = pixels;
+            RenderRectangle(span, rc, surface, color);
 
-                IntPtr bitmapBitsPtr = (IntPtr) pBitmapBits;
-
-                ui.Invoke(() => {
-                    bitmap.WritePixels((Int32Rect) rc, bitmapBitsPtr, rc.Width * rc.Height * 4, bitmap.BackBufferStride);
-                });
-            }
+            ui.Invoke(() => {
+                fixed (Rgba32Color* pBitmapBits = pixels) {
+                    bitmap.WritePixels((Int32Rect) rc, (IntPtr) pBitmapBits, rc.Width * rc.Height * sizeof(Rgba32Color), bitmap.BackBufferStride);
+                }
+            });
         }
 
         public static ITreemapItem FindItemAtPoint(ITreemapItem item, Point2I p) {
