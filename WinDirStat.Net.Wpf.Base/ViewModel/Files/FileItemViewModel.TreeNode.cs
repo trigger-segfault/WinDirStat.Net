@@ -139,9 +139,9 @@ namespace WinDirStat.Net.ViewModel.Files {
 					isHidden = value;
 					if (parent != null)
 						UpdateIsVisible(parent.isVisible && parent.isExpanded, true);
-					RaisePropertyChanged();
+					OnPropertyChanged();
 					if (Parent != null)
-						Parent.RaisePropertyChanged(nameof(ShowExpander));
+						Parent.OnPropertyChanged(nameof(ShowExpander));
 				}
 			}
 		}
@@ -156,7 +156,7 @@ namespace WinDirStat.Net.ViewModel.Files {
 			set {
 				if (isSelected != value) {
 					isSelected = value;
-					RaisePropertyChanged();
+					OnPropertyChanged();
 				}
 			}
 		}
@@ -218,20 +218,20 @@ namespace WinDirStat.Net.ViewModel.Files {
 				}
 			}
 
-			RaisePropertyChanged(nameof(ShowExpander));
+			OnPropertyChanged(nameof(ShowExpander));
 			if (newList.Count > 0) {
 				if (oldList.Count > 0) {
 					if (newList[newList.Count - 1] != oldList[oldList.Count - 1]) {
-						oldList[oldList.Count - 1].RaisePropertyChanged(nameof(IsLast));
-						newList[newList.Count - 1].RaisePropertyChanged(nameof(IsLast));
+						oldList[oldList.Count - 1].OnPropertyChanged(nameof(IsLast));
+						newList[newList.Count - 1].OnPropertyChanged(nameof(IsLast));
 					}
 				}
 				else {
-					newList[newList.Count - 1].RaisePropertyChanged(nameof(IsLast));
+					newList[newList.Count - 1].OnPropertyChanged(nameof(IsLast));
 				}
 			}
 			else if (oldList.Count > 0) {
-				oldList[oldList.Count - 1].RaisePropertyChanged(nameof(IsLast));
+				oldList[oldList.Count - 1].OnPropertyChanged(nameof(IsLast));
 			}
 			//RaiseIsLastChangedIfNeeded(e);
 		}
@@ -296,7 +296,7 @@ namespace WinDirStat.Net.ViewModel.Files {
 				}
 			}
 
-			RaisePropertyChanged(nameof(ShowExpander));
+			OnPropertyChanged(nameof(ShowExpander));
 			RaiseIsLastChangedIfNeeded(e);
 		}
 		#endregion
@@ -319,7 +319,7 @@ namespace WinDirStat.Net.ViewModel.Files {
 						OnCollapsing();
 					}
 					UpdateChildIsVisible(true);
-					RaisePropertyChanged();
+					OnPropertyChanged();
 				}
 			}
 		}
@@ -335,11 +335,11 @@ namespace WinDirStat.Net.ViewModel.Files {
 					IsExpanded = false;
 					if (canExpandRecursively) {
 						canExpandRecursively = false;
-						RaisePropertyChanged("CanExpandRecursively");
+						OnPropertyChanged("CanExpandRecursively");
 					}
 				}
-				RaisePropertyChanged("LazyLoading");
-				RaisePropertyChanged("ShowExpander");
+				OnPropertyChanged("LazyLoading");
+				OnPropertyChanged("ShowExpander");
 			}
 		}*/
 
@@ -416,7 +416,7 @@ namespace WinDirStat.Net.ViewModel.Files {
 			set { 
 				if (isEditing != value) {
 					isEditing = value;
-					RaisePropertyChanged();
+					OnPropertyChanged();
 				}
 			}
 		}
@@ -468,7 +468,7 @@ namespace WinDirStat.Net.ViewModel.Files {
 					}
 				}
 
-				RaisePropertyChanged("IsChecked");
+				OnPropertyChanged("IsChecked");
 			}
 		}
 
@@ -539,7 +539,7 @@ namespace WinDirStat.Net.ViewModel.Files {
 				private set
 				{
 					isCut = value;
-					RaisePropertyChanged("IsCut");
+					OnPropertyChanged("IsCut");
 				}
 			}
 	
@@ -696,15 +696,15 @@ namespace WinDirStat.Net.ViewModel.Files {
 			case NotifyCollectionChangedAction.Add:
 				if (e.NewStartingIndex == Children.Count - 1) {
 					if (Children.Count > 1) {
-						Children[Children.Count - 2].RaisePropertyChanged("IsLast");
+						Children[Children.Count - 2].OnPropertyChanged("IsLast");
 					}
-					Children[Children.Count - 1].RaisePropertyChanged("IsLast");
+					Children[Children.Count - 1].OnPropertyChanged("IsLast");
 				}
 				break;
 			case NotifyCollectionChangedAction.Remove:
 				if (e.OldStartingIndex == Children.Count) {
 					if (Children.Count > 0) {
-						Children[Children.Count - 1].RaisePropertyChanged("IsLast");
+						Children[Children.Count - 1].OnPropertyChanged("IsLast");
 					}
 				}
 				break;
@@ -723,18 +723,18 @@ namespace WinDirStat.Net.ViewModel.Files {
 		}*/
 		/*public event PropertyChangedEventHandler PropertyChanged;
 
-		protected internal void RaisePropertyChanged(string name) {
-			//visualInfo?.RaisePropertyChanged(this, new PropertyChangedEventArgs(name));
+		protected internal void OnPropertyChanged(string name) {
+			//visualInfo?.OnPropertyChanged(this, new PropertyChangedEventArgs(name));
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 		}
 
 		protected internal void RaisePropertiesChanged(params string[] names) {
 			for (int i = 0; i < names.Length; i++)
-				RaisePropertyChanged(names[i]);
+				OnPropertyChanged(names[i]);
 		}
 
-		protected internal void AutoRaisePropertyChanged([CallerMemberName] string name = null) {
-			//visualInfo?.RaisePropertyChanged(this, new PropertyChangedEventArgs(name));
+		protected internal void AutoOnPropertyChanged([CallerMemberName] string name = null) {
+			//visualInfo?.OnPropertyChanged(this, new PropertyChangedEventArgs(name));
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 		}*/
 

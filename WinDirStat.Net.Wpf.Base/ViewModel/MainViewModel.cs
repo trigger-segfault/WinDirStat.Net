@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using GalaSoft.MvvmLight;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using WinDirStat.Net.Model.Files;
 using WinDirStat.Net.Rendering;
 using WinDirStat.Net.Services;
@@ -108,10 +108,7 @@ namespace WinDirStat.Net.ViewModel {
 			UpdateEmptyRecycleBin();
 			
 			GCRAMUsage = GC.GetTotalMemory(false);
-			if (IsInDesignMode) {
-				// Code runs in Blend --> create design time data.
-			}
-			else {
+            {
 				// Code runs "for real"
 				ramTimer = UI.StartTimer(Settings.RAMInterval, true, OnRAMUsageTick);
 				statusTimer = UI.CreateTimer(Settings.StatusInterval, true, OnStatusTick);
@@ -139,7 +136,7 @@ namespace WinDirStat.Net.ViewModel {
 		/// <summary>Gets the Garbage Collector's RAM Usage.</summary>
 		public long GCRAMUsage {
 			get => gcRAMUsage;
-			set => Set(ref gcRAMUsage, value);
+			set => SetProperty(ref gcRAMUsage, value);
 		}
 
 		/// <summary>Gets the root file tree item.</summary>
@@ -154,7 +151,7 @@ namespace WinDirStat.Net.ViewModel {
 						rootItem.Dispose();
 					}
 					rootItem = value;
-					RaisePropertyChanged();
+					OnPropertyChanged();
 				}
 			}
 		}
@@ -162,7 +159,7 @@ namespace WinDirStat.Net.ViewModel {
 		/// <summary>Gets treemap's root file tree item.</summary>
 		public RootItem GraphViewRootItem {
 			get => graphViewRootItem;
-			private set => Set(ref graphViewRootItem, value);
+			private set => SetProperty(ref graphViewRootItem, value);
 		}
 
 		#endregion
@@ -198,9 +195,9 @@ namespace WinDirStat.Net.ViewModel {
 				if (selectedExtension != value) {
 					bool hasSelectionChanged = ((selectedExtension == null) != (value == null));
 					selectedExtension = value;
-					RaisePropertyChanged();
+					OnPropertyChanged();
 					if (hasSelectionChanged)
-						RaisePropertyChanged(nameof(HasExtensionSelection));
+						OnPropertyChanged(nameof(HasExtensionSelection));
 				}
 			}
 		}
@@ -211,7 +208,7 @@ namespace WinDirStat.Net.ViewModel {
 		/// <summary>Gets the label to display for the empty recycle bin command.</summary>
 		public string EmptyRecycleBinLabel {
 			get => emptyRecycleBinLabel;
-			private set => Set(ref emptyRecycleBinLabel, value);
+			private set => SetProperty(ref emptyRecycleBinLabel, value);
 		}
 		
 		/// <summary>Gets if the UI refreshing should be supressed due to validation.</summary>
@@ -223,7 +220,7 @@ namespace WinDirStat.Net.ViewModel {
 					if (!Scanning.SuppressFileTreeRefresh) {
 						if (!suppressRefresh)
 							RootItem?.RaiseChildrenReset();
-						RaisePropertyChanged(nameof(SuppressFileTreeRefresh));
+						OnPropertyChanged(nameof(SuppressFileTreeRefresh));
 					}
 				}
 			}
@@ -235,16 +232,16 @@ namespace WinDirStat.Net.ViewModel {
 
 		/// <summary>Gets if the file types list should be hidden.</summary>
 		public bool HideFileTypes {
-			get => (!Settings.ShowFileTypes || (!Scanning.IsRefreshing && !Scanning.IsOpen)) && !IsInDesignMode;
+			get => !Settings.ShowFileTypes || (!Scanning.IsRefreshing && !Scanning.IsOpen);
 		}
 		/// <summary>Gets if the treemap view should be hidden.</summary>
 		public bool HideTreemap {
-			get => (!Settings.ShowTreemap || (!Scanning.IsRefreshing && !Scanning.IsOpen)) && !IsInDesignMode;
+			get => !Settings.ShowTreemap || (!Scanning.IsRefreshing && !Scanning.IsOpen);
 		}
 		/// <summary>Gets if the toolbar should be hidden.</summary>
-		public bool HideToolBar => !Settings.ShowToolBar && !IsInDesignMode;
+		public bool HideToolBar => !Settings.ShowToolBar;
 		/// <summary>Gets if the status bar should be hidden.</summary>
-		public bool HideStatusBar => !Settings.ShowStatusBar && !IsInDesignMode;
+		public bool HideStatusBar => !Settings.ShowStatusBar;
 		/// <summary>Gets if the graph view is enabled and able to refres.</summary>
 		public bool GraphViewEnabled => Settings.ShowTreemap && !Scanning.IsRefreshing && Scanning.IsOpen;
 		/// <summary>
@@ -261,8 +258,8 @@ namespace WinDirStat.Net.ViewModel {
 		}
 
 		private void OnStatusTick() {
-			RaisePropertyChanged(nameof(ScanTime));
-			RaisePropertyChanged(nameof(ScanProgress));
+			OnPropertyChanged(nameof(ScanTime));
+			OnPropertyChanged(nameof(ScanProgress));
 		}
 
 		private void OnSettingsPropertyChanged(object sender, PropertyChangedEventArgs e) {
@@ -275,17 +272,17 @@ namespace WinDirStat.Net.ViewModel {
 					statusTimer.Interval = Settings.StatusInterval;
 					break;
 				case nameof(SettingsService.ShowFileTypes):
-					RaisePropertyChanged(nameof(HideFileTypes));
+					OnPropertyChanged(nameof(HideFileTypes));
 					break;
 				case nameof(SettingsService.ShowTreemap):
-					RaisePropertyChanged(nameof(HideTreemap));
-					RaisePropertyChanged(nameof(GraphViewEnabled));
+					OnPropertyChanged(nameof(HideTreemap));
+					OnPropertyChanged(nameof(GraphViewEnabled));
 					break;
 				case nameof(SettingsService.ShowToolBar):
-					RaisePropertyChanged(nameof(HideToolBar));
+					OnPropertyChanged(nameof(HideToolBar));
 					break;
 				case nameof(SettingsService.ShowStatusBar):
-					RaisePropertyChanged(nameof(HideStatusBar));
+					OnPropertyChanged(nameof(HideStatusBar));
 					break;
 				}
 			});
@@ -325,41 +322,41 @@ namespace WinDirStat.Net.ViewModel {
 						//UpdateEmptyRecycleBin();
 						break;
 					}
-					RaisePropertyChanged(nameof(Title));
-					RaisePropertyChanged(nameof(ScanProgress));
+					OnPropertyChanged(nameof(Title));
+					OnPropertyChanged(nameof(ScanProgress));
 					break;
 				case nameof(ScanningService.ScanState):
-					RaisePropertyChanged(nameof(HideFileTypes));
-					RaisePropertyChanged(nameof(HideTreemap));
-					RaisePropertyChanged(nameof(HideToolBar));
-					RaisePropertyChanged(nameof(HideStatusBar));
+					OnPropertyChanged(nameof(HideFileTypes));
+					OnPropertyChanged(nameof(HideTreemap));
+					OnPropertyChanged(nameof(HideToolBar));
+					OnPropertyChanged(nameof(HideStatusBar));
 					break;
 				case nameof(ScanningService.ScanTime):
-					RaisePropertyChanged(nameof(ScanTime));
+					OnPropertyChanged(nameof(ScanTime));
 					break;
 				case nameof(ScanningService.Progress):
-					RaisePropertyChanged(nameof(ScanProgress));
+					OnPropertyChanged(nameof(ScanProgress));
 					break;
 				case nameof(ScanningService.CanDisplayProgress):
-					RaisePropertyChanged(nameof(CanDisplayScanProgress));
+					OnPropertyChanged(nameof(CanDisplayScanProgress));
 					break;
 				case nameof(ScanningService.IsOpen):
-					RaisePropertyChanged(nameof(IsOpen));
-					RaisePropertyChanged(nameof(GraphViewEnabled));
+					OnPropertyChanged(nameof(IsOpen));
+					OnPropertyChanged(nameof(GraphViewEnabled));
 					break;
 				case nameof(ScanningService.IsScanning):
-					RaisePropertyChanged(nameof(IsScanning));
+					OnPropertyChanged(nameof(IsScanning));
 					break;
 				case nameof(ScanningService.IsRefreshing):
-					RaisePropertyChanged(nameof(IsRefreshing));
-					RaisePropertyChanged(nameof(GraphViewEnabled));
+					OnPropertyChanged(nameof(IsRefreshing));
+					OnPropertyChanged(nameof(GraphViewEnabled));
 					//if (!Scanning.IsRefreshing)
 					//	UpdateEmptyRecycleBin();
 					break;
 				case nameof(ScanningService.SuppressFileTreeRefresh):
 					if (!suppressRefresh) {
 						RootItem?.RaiseChildrenReset();
-						RaisePropertyChanged(nameof(SuppressFileTreeRefresh));
+						OnPropertyChanged(nameof(SuppressFileTreeRefresh));
 					}
 					break;
 				}
@@ -370,9 +367,9 @@ namespace WinDirStat.Net.ViewModel {
 			FileItemViewModel newSelectedFile = SelectedFiles.FirstOrDefault();
 			if (SelectedFile != newSelectedFile) {
 				SelectedFile = newSelectedFile;
-				RaisePropertyChanged(nameof(SelectedFile));
+				OnPropertyChanged(nameof(SelectedFile));
 				if ((SelectedFile == null) != (newSelectedFile == null))
-					RaisePropertyChanged(nameof(HasFileSelection));
+					OnPropertyChanged(nameof(HasFileSelection));
 			}
 		}
 

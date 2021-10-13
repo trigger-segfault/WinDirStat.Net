@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using GalaSoft.MvvmLight;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Microsoft.Toolkit.Mvvm.Input;
 using WinDirStat.Net.Services;
-using WinDirStat.Net.ViewModel.Commands;
 
 namespace WinDirStat.Net.ViewModel {
 	/// <summary>An addition to the <see cref="ViewModelBase"/> class with extra helper functions.</summary>
-	public abstract class ViewModelRelayCommand : ViewModelBase {
+	public abstract class ViewModelRelayCommand : ObservableRecipient {
 
 		#region Fields
 		
@@ -82,10 +82,9 @@ namespace WinDirStat.Net.ViewModel {
 		/// <param name="canExecute">The optional canExecute method for the command.</param>
 		/// <param name="commandName">The name of the command to get or set.</param>
 		/// <returns>The existing or created command.</returns>
-		protected IRelayCommand GetCommand(Action execute, bool keepTargetAlive = false,
-			[CallerMemberName] string commandName = null)
+		protected IRelayCommand GetCommand(Action execute, [CallerMemberName] string commandName = null)
 		{
-			return GetCommand(execute, null, keepTargetAlive, commandName);
+			return GetCommand(execute, null, commandName);
 		}
 
 		/// <summary>Gets or creates a new command with the specified parameters.</summary>
@@ -94,10 +93,9 @@ namespace WinDirStat.Net.ViewModel {
 		/// <param name="canExecute">The optional canExecute method for the command.</param>
 		/// <param name="commandName">The name of the command to get or set.</param>
 		/// <returns>The existing or created command.</returns>
-		protected IRelayCommand GetCommand(Action execute, Func<bool> canExecute,
-			bool keepTargetAlive = false, [CallerMemberName] string commandName = null)
+		protected IRelayCommand GetCommand(Action execute, Func<bool> canExecute, [CallerMemberName] string commandName = null)
 		{
-			return GetCommand(() => relayFactory.Create(execute, canExecute, keepTargetAlive), commandName);
+			return GetCommand(() => relayFactory.Create(execute, canExecute), commandName);
 		}
 
 		#endregion
@@ -111,10 +109,9 @@ namespace WinDirStat.Net.ViewModel {
 		/// <param name="canExecute">The optional canExecute method for the command.</param>
 		/// <param name="commandName">The name of the command to get or set.</param>
 		/// <returns>The existing or created command.</returns>
-		protected IRelayCommand<T> GetCommand<T>(Action<T> execute, bool keepTargetAlive = false,
-			[CallerMemberName] string commandName = null)
+		protected IRelayCommand<T> GetCommand<T>(Action<T> execute, [CallerMemberName] string commandName = null)
 		{
-			return GetCommand(execute, null, keepTargetAlive, commandName);
+			return GetCommand(execute, null, commandName);
 		}
 
 		/// <summary>Gets or creates a new command with the specified parameters.</summary>
@@ -124,10 +121,9 @@ namespace WinDirStat.Net.ViewModel {
 		/// <param name="canExecute">The optional canExecute method for the command.</param>
 		/// <param name="commandName">The name of the command to get or set.</param>
 		/// <returns>The existing or created command.</returns>
-		protected IRelayCommand<T> GetCommand<T>(Action<T> execute, Func<T, bool> canExecute,
-			bool keepTargetAlive = false, [CallerMemberName] string commandName = null)
+		protected IRelayCommand<T> GetCommand<T>(Action<T> execute, Predicate<T> canExecute, [CallerMemberName] string commandName = null)
 		{
-			return GetCommand(() => relayFactory.Create(execute, canExecute, keepTargetAlive), commandName);
+			return GetCommand(() => relayFactory.Create(execute, canExecute), commandName);
 		}
 
 		#endregion

@@ -76,7 +76,7 @@ namespace WinDirStat.Net.ViewModel.Extensions {
 					isNotOpen = value;
 					if (extensions.Count > 0) {
 						UI.Invoke(() => {
-							RaisePropertyChanged(nameof(Count));
+							OnPropertyChanged(nameof(Count));
 							RaiseCollectionChanged(NotifyCollectionChangedAction.Reset);
 						});
 					}
