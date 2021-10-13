@@ -30,6 +30,7 @@
 	</ItemGroup>
 	<!-- NuGet References -->
 	<ItemGroup>
+		<PackageReference Include="Microsoft.Toolkit.HighPerformance" Version="7.1.0" />
 		<PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.1.0" />
 		<PackageReference Include="WriteableBitmapEx" Version="1.6.8" />
 		<PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.246501">
