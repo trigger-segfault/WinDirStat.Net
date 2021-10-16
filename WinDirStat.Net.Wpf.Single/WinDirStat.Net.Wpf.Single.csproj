@@ -1,326 +1,58 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DA620261-55E4-4382-8866-168D958A3BE7}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
-    <RootNamespace>WinDirStat.Net.Wpf</RootNamespace>
-    <AssemblyName>WinDirStat.Net</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <WarningLevel>4</WarningLevel>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationIcon>Resources\App.ico</ApplicationIcon>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationManifest>Properties\App.manifest</ApplicationManifest>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="PresentationFramework.Aero" />
-    <Reference Include="System" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Xaml">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="WindowsFormsIntegration" />
-  </ItemGroup>
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </ApplicationDefinition>
-    <Compile Include="Commands\IRelayInfoCommand.cs" />
-    <Compile Include="Commands\RelayInfo.Collection.cs" />
-    <Compile Include="Commands\RelayInfoCollection.cs" />
-    <Compile Include="Commands\RelayInfoCommand.Generic.cs" />
-    <Compile Include="Commands\RelayInfoCommandBinding.cs" />
-    <Compile Include="Commands\RelayInfo.cs" />
-    <Compile Include="Commands\RelayInfoCommand.cs" />
-    <Compile Include="Controls\CommandButton.cs" />
-    <Compile Include="Controls\CommandMenuItem.cs" />
-    <Compile Include="Controls\FileList\EditTextBox.cs" />
-    <Compile Include="Controls\FileList\ExtensionMethods.cs" />
-    <Compile Include="Controls\FileList\FileGridView.cs" />
-    <Compile Include="Controls\FileList\FileTreeNodeView.cs" />
-    <Compile Include="Controls\FileList\FileTreeView.cs" />
-    <Compile Include="Controls\FileList\FileTreeViewItem.cs" />
-    <Compile Include="Controls\FileList\GeneralAdorner.cs" />
-    <Compile Include="Controls\FileList\InsertMarker.cs" />
-    <Compile Include="Controls\FileList\LinesRenderer.cs" />
-    <Compile Include="Controls\FlashyProgressBar.cs" />
-    <None Include="Controls\FocusExtension - Copy.cs" />
-    <Compile Include="Controls\FocusBehavior.cs" />
-    <None Include="Controls\FocusExtension.cs" />
-    <Compile Include="Controls\GraphView.xaml.cs">
-      <DependentUpon>GraphView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\ImageButton.cs" />
-    <Compile Include="Controls\ImageMenuItem.cs" />
-    <Compile Include="Controls\ListSettings.cs" />
-    <Compile Include="Controls\PercentageBar.cs" />
-    <Compile Include="Controls\SortList\SortListView.cs" />
-    <Compile Include="Controls\SortList\SortView.cs" />
-    <Compile Include="Controls\SortList\SortViewColumn.cs" />
-    <Compile Include="Controls\SortList\SortViewKeys.cs" />
-    <Compile Include="Controls\SubtreePercentage.cs" />
-    <Compile Include="Controls\VisibleColumnDefinition.cs" />
-    <Compile Include="Controls\VisibleRowDefinition.cs" />
-    <Compile Include="Converters\AttributesFormatter.cs" />
-    <Compile Include="Converters\ByteFormatter.cs" />
-    <Compile Include="Converters\CollapsedWhenBoolean.cs" />
-    <Compile Include="Converters\DirectoryExistsToBoolean.cs" />
-    <Compile Include="Converters\FileTimeFormatter.cs" />
-    <Compile Include="Converters\InverseBoolean.cs" />
-    <Compile Include="Converters\ItemCountFormatter.cs" />
-    <Compile Include="Converters\RadioButtonConverter.cs" />
-    <Compile Include="Converters\ScaleConverter.cs" />
-    <Compile Include="Converters\ScanTimeFormatter.cs" />
-    <Compile Include="Converters\TextToHorizontalAlignment.cs" />
-    <None Include="Converters\ZeroGridLengthWhenBoolean.cs" />
-    <Compile Include="Converters\ZeroWhenBoolean.cs" />
-    <Compile Include="Input\AnyKeyGesture.cs" />
-    <Compile Include="Input\AnyKeyGestureConverter.cs" />
-    <Compile Include="Services\DialogService.cs" />
-    <Compile Include="Services\RelayInfoCommandFactory.cs" />
-    <Compile Include="Services\ResourceImagesService.cs" />
-    <Compile Include="Utils\WindowExtensions.cs" />
-    <Compile Include="Utils\DependencyObjectExtensions.cs" />
-    <Compile Include="Utils\WpfExtensions.cs" />
-    <Compile Include="ViewModel\ViewModelLocator.cs" />
-    <Compile Include="Windows\DriveSelectDialog.xaml.cs">
-      <DependentUpon>DriveSelectDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Windows\ErrorMessageBox.xaml.cs">
-      <DependentUpon>ErrorMessageBox.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Windows\FolderBrowserDialog.cs" />
-    <Compile Include="Windows\ConfigureDialog.xaml.cs">
-      <DependentUpon>ConfigureDialog.xaml</DependentUpon>
-    </Compile>
-    <Page Include="Controls\GraphView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Page Include="Themes\Generic.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Themes\RelayCommands.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Themes\SortView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Windows\DriveSelectDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Windows\ConfigureDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Windows\ErrorMessageBox.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <None Include="Properties\App.manifest" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\FunctionalFun.UI.Behaviours\FunctionalFun.UI.Behaviors.csproj">
-      <Project>{7da5a107-b474-4ac0-b861-63a489db0c02}</Project>
-      <Name>FunctionalFun.UI.Behaviors</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WinDirStat.Net.Wpf.Base\WinDirStat.Net.Wpf.Base.csproj">
-      <Project>{ef57db12-06c2-4441-ba5e-56aeb8e0b907}</Project>
-      <Name>WinDirStat.Net.Wpf.Base</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Cmd.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\CmdElevated.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Copy.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Cut.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Delete.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Close.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\EmptyRecycleBin.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Elevate.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Exit.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Expand.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Explore.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Open.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Paste.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\CopyPath.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\PowerShell.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\PowerShellElevated.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Properties.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\RecycleBin.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Redo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\RefreshSelected.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Reload.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Run.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Save.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Search.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Settings.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Undo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\FileIcons\FileCollection.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\FileIcons\FreeSpace.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\FileIcons\Shortcut.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\FileIcons\UnknownSpace.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\ShowTotalSpace.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\App.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\FileIcons\Missing.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\ShowTreemap.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\ShowFileTypes.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\StatusBar.png" />
-    <Resource Include="Resources\Icons\ToolBar.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Treemap.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\TotalSpace.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf">
-      <Version>1.0.1</Version>
-    </PackageReference>
-    <PackageReference Include="MvvmLight">
-      <Version>5.4.1.1</Version>
-    </PackageReference>
-    <PackageReference Include="TriggersTools.Build.BuildTime">
-      <Version>1.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="TriggersTools.Build.CopyrightYear">
-      <Version>1.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="WriteableBitmapEx">
-      <Version>1.6.2</Version>
-    </PackageReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<OutputType>WinExe</OutputType>
+		<RootNamespace>WinDirStat.Net.Wpf</RootNamespace>
+		<AssemblyName>WinDirStat.Net</AssemblyName>
+		<Title>WinDirStat.Net</Title>
+		<Company>Trigger's Tools &amp; Games</Company>
+		<Product>WinDirStat.Net</Product>
+		<Copyright>Copyright © Robert Jordan {YEAR}</Copyright>
+		<Version>0.0.1.0</Version>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<UseWPF>true</UseWPF>
+		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+	<PropertyGroup>
+		<ApplicationIcon>Resources\App.ico</ApplicationIcon>
+	</PropertyGroup>
+	<PropertyGroup>
+		<ApplicationManifest>Properties\App.manifest</ApplicationManifest>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Include="Controls\FocusExtension.cs" />
+		<None Include="Converters\ZeroGridLengthWhenBoolean.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\FunctionalFun.UI.Behaviours\FunctionalFun.UI.Behaviors.csproj" />
+		<ProjectReference Include="..\WinDirStat.Net.Wpf.Base\WinDirStat.Net.Wpf.Base.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\Icons\*.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\FileIcons\*.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\App.ico" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
+		<PackageReference Include="Ookii.Dialogs.Wpf" Version="4.0.0" />
+		<PackageReference Include="TriggersTools.Build.BuildTime">
+			<Version>2.0.0</Version>
+		</PackageReference>
+		<PackageReference Include="TriggersTools.Build.CopyrightYear">
+			<Version>1.0.2</Version>
+		</PackageReference>
+		<PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.246501">
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.37" />
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Remove="Controls\FocusExtension.cs" />
+		<Compile Remove="Converters\ZeroGridLengthWhenBoolean.cs" />
+	</ItemGroup>
 </Project>

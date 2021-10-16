@@ -1,21 +1,18 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
-using GalaSoft.MvvmLight;
 using WinDirStat.Net.Model.Files;
 using WinDirStat.Net.Services;
 using WinDirStat.Net.Utils;
 using WinDirStat.Net.ViewModel.Extensions;
 
 namespace WinDirStat.Net.ViewModel.Files {
-	/// <summary>A view model for displaying <see cref="FileItem"/> models.</summary>
-	public partial class FileItemViewModel : ObservableObject, IDisposable {
+    /// <summary>A view model for displaying <see cref="FileItem"/> models.</summary>
+    public partial class FileItemViewModel : ObservableObject, IDisposable {
 
 		#region Constants
 
@@ -76,12 +73,12 @@ namespace WinDirStat.Net.ViewModel.Files {
 		/// <summary>Gets the parent of the item.</summary>
 		public FileItemViewModel Parent {
 			get => parent;
-			private set => Set(ref parent, value);
+			private set => SetProperty(ref parent, value);
 		}
 		/// <summary>Gets the icon of the item.</summary>
 		public ImageSource Icon {
 			get => icon;
-			private set => Set(ref icon, value);
+			private set => SetProperty(ref icon, value);
 		}
 
 		/// <summary>Gets the overlay icon if there is one.</summary>
@@ -99,8 +96,8 @@ namespace WinDirStat.Net.ViewModel.Files {
 		public string DisplayName {
 			get => displayName;
 			private set {
-				if (Set(ref displayName, value))
-					RaisePropertyChanged(nameof(Header));
+				if (SetProperty(ref displayName, value))
+					OnPropertyChanged(nameof(Header));
 			}
 		}
 
@@ -199,8 +196,8 @@ namespace WinDirStat.Net.ViewModel.Files {
 			private set {
 				if (exists != value) {
 					exists = value;
-					RaisePropertyChanged();
-					RaisePropertyChanged(nameof(OverlayIcon));
+					OnPropertyChanged();
+					OnPropertyChanged(nameof(OverlayIcon));
 				}
 			}
 		}
@@ -235,8 +232,11 @@ namespace WinDirStat.Net.ViewModel.Files {
 				if (cacheMode >= IconCacheMode.FileType) {
 					SetIcon(ExtensionItem.Icon);
 					if (cacheMode >= IconCacheMode.Individual) {
-						IconCache.CacheIconAsync(FullName, OnCacheFileIcon);
-					}
+                        UI.BeginInvoke(() => {
+                            var namedIcon = IconCache.CacheIconAndDisplayName(FullName);
+                            OnCacheFileIcon(namedIcon.Icon);
+                        }, false);
+                    }
 					else if (ExtensionItem.CacheState != IconCacheState.Cached) {
 						// Hook an event to wait for the cache state to change
 						isWaitingForExtensionIcon = true;
@@ -249,8 +249,12 @@ namespace WinDirStat.Net.ViewModel.Files {
 				break;
 			case FileItemType.Directory:
 				SetIcon(IconCache.FolderIcon);
-				if (cacheMode >= IconCacheMode.Individual)
-					IconCache.CacheIconAsync(FullName, OnCacheFolderIcon);
+                    if (cacheMode >= IconCacheMode.Individual) {
+                        UI.BeginInvoke(() => {
+                            var namedIcon = IconCache.CacheIconAndDisplayName(FullName);
+                            OnCacheFolderIcon(namedIcon.Icon);
+                        }, false);
+                    }
 				break;
 			case FileItemType.Volume:
 				if (cacheMode >= IconCacheMode.Individual) {
@@ -301,7 +305,7 @@ namespace WinDirStat.Net.ViewModel.Files {
 		private bool SetIcon(ImageSource icon) {
 			if (icon != null) {
 				this.icon = icon;
-				RaisePropertyChanged(nameof(Icon));
+				OnPropertyChanged(nameof(Icon));
 				return true;
 			}
 			return false;
@@ -315,12 +319,12 @@ namespace WinDirStat.Net.ViewModel.Files {
 		private bool SetIcon(ImageSource icon, ImageSource defaultIcon) {
 			if (icon != null) {
 				this.icon = icon;
-				RaisePropertyChanged(nameof(Icon));
+				OnPropertyChanged(nameof(Icon));
 				return true;
 			}
 			else if (defaultIcon != null) {
 				icon = defaultIcon;
-				RaisePropertyChanged(nameof(Icon));
+				OnPropertyChanged(nameof(Icon));
 			}
 			return false;
 		}
@@ -335,20 +339,20 @@ namespace WinDirStat.Net.ViewModel.Files {
 			if (iconName != null) {
 				icon = iconName.Icon;
 				displayName = iconName.Name;
-				RaisePropertyChanged(nameof(Icon));
-				RaisePropertyChanged(nameof(DisplayName));
-				RaisePropertyChanged(nameof(Header));
+				OnPropertyChanged(nameof(Icon));
+				OnPropertyChanged(nameof(DisplayName));
+				OnPropertyChanged(nameof(Header));
 				return true;
 			}
 			else {
 				if (defaultIcon != null) {
 					icon = defaultIcon;
-					RaisePropertyChanged(nameof(Icon));
+					OnPropertyChanged(nameof(Icon));
 				}
 				if (defaultName != null) {
 					displayName = defaultName;
-					RaisePropertyChanged(nameof(DisplayName));
-					RaisePropertyChanged(nameof(Header));
+					OnPropertyChanged(nameof(DisplayName));
+					OnPropertyChanged(nameof(Header));
 				}
 			}
 			return false;
@@ -377,8 +381,8 @@ namespace WinDirStat.Net.ViewModel.Files {
 			else {
 				displayName = Name;
 			}
-			RaisePropertyChanged(nameof(Icon));
-			RaisePropertyChanged(nameof(Header));
+			OnPropertyChanged(nameof(Icon));
+			OnPropertyChanged(nameof(Header));
 		}*/
 
 		#endregion
@@ -457,18 +461,18 @@ namespace WinDirStat.Net.ViewModel.Files {
 		/// <summary>Raises changes in the view model due to model validation.</summary>
 		private void OnModelValidated(bool sortOrder) {
 			UI.Invoke(() => {
-				RaisePropertyChanged(nameof(Percent));
-				RaisePropertyChanged(nameof(Size));
-				RaisePropertyChanged(nameof(LastWriteTime));
+				OnPropertyChanged(nameof(Percent));
+				OnPropertyChanged(nameof(Size));
+				OnPropertyChanged(nameof(LastWriteTime));
 				if (Model.IsContainerType) {
-					RaisePropertyChanged(nameof(ItemCount));
-					RaisePropertyChanged(nameof(FileCount));
-					RaisePropertyChanged(nameof(SubdirCount));
+					OnPropertyChanged(nameof(ItemCount));
+					OnPropertyChanged(nameof(FileCount));
+					OnPropertyChanged(nameof(SubdirCount));
 				}
 				if (children != null) {
 					int count = children.Count;
 					for (int i = 0; i < count; i++)
-						children[i].RaisePropertyChanged(nameof(Percent));
+						children[i].OnPropertyChanged(nameof(Percent));
 					if (sortOrder && isExpanded)
 						children.Sort(ViewModel.FileComparer.Compare);
 				}
@@ -489,7 +493,7 @@ namespace WinDirStat.Net.ViewModel.Files {
 			}
 			else if (newChildren.Count == Model.ChildCount) {
 				// We had no children before
-				UI.Invoke(() => RaisePropertyChanged(nameof(ShowExpander)));
+				UI.Invoke(() => OnPropertyChanged(nameof(ShowExpander)));
 			}
 		}
 
@@ -509,7 +513,7 @@ namespace WinDirStat.Net.ViewModel.Files {
 			}
 			else if (oldChildren.Count > 0 && Model.ChildCount == 0) {
 				// We have no children now
-				UI.Invoke(() => RaisePropertyChanged(nameof(ShowExpander)));
+				UI.Invoke(() => OnPropertyChanged(nameof(ShowExpander)));
 			}
 		}
 
@@ -520,7 +524,7 @@ namespace WinDirStat.Net.ViewModel.Files {
 					if (children != null)
 						children.Clear();
 				}
-				RaisePropertyChanged(nameof(ShowExpander));
+				OnPropertyChanged(nameof(ShowExpander));
 			});
 		}
 

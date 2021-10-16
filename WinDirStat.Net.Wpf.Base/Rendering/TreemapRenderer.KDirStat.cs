@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WinDirStat.Net.Structures;
 
 #if DOUBLE
@@ -13,9 +10,9 @@ using Number = System.Single;
 #endif
 
 namespace WinDirStat.Net.Rendering {
-	unsafe partial class TreemapRenderer {
+    partial class TreemapRenderer {
 
-		private void KDirStat_DrawChildren(Rgba32Color* bitmap, ITreemapItem parent, Number[] surface, Number h, uint flags) {
+		private void KDirStat_DrawChildren(Span<Rgba32Color> bitmap, ITreemapItem parent, Number[] surface, Number h, uint flags) {
 			Debug.Assert(parent.ChildCount > 0);
 
 			Rectangle2I rc = parent.Rectangle;

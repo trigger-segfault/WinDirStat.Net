@@ -4,19 +4,14 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using GalaSoft.MvvmLight;
-using WinDirStat.Net.Model.Extensions;
-using WinDirStat.Net.Model.Files;
-using WinDirStat.Net.Services;
-using WinDirStat.Net.Utils;
-using WinDirStat.Net.Native;
 using System.Runtime.InteropServices;
+using System.Threading;
+using WinDirStat.Net.Model.Files;
+using WinDirStat.Net.Native;
+using WinDirStat.Net.Utils;
 
 namespace WinDirStat.Net.Services {
-	partial class ScanningService {
+    partial class ScanningService {
 
 		#region Private Classes
 
@@ -183,8 +178,8 @@ namespace WinDirStat.Net.Services {
 		/// <param name="path">The full path of the file.</param>
 		/// <returns>True if the file should be skipped.</returns>
 		private bool SkipFile(ScanningState state, string name, string path) {
-			if (name.Length == 0)
-				Console.WriteLine("WHAT");
+            Debug.Assert(name.Length > 0);
+
 			// We still want to see all those delicious files that were thrown away
 			if (name[0] == '$' && !path.StartsWith(state.RecycleBinPath))
 				return true;

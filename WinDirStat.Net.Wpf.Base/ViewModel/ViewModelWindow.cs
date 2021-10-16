@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
+﻿using System.Windows;
 using WinDirStat.Net.Services;
 
 namespace WinDirStat.Net.ViewModel {
-	/// <summary>An addition to the <see cref="ViewModelBase"/> class with extra helper functions.</summary>
-	public abstract class ViewModelWindow : ViewModelRelayCommand {
+    /// <summary>An addition to the <see cref="ViewModelBase"/> class with extra helper functions.</summary>
+    public abstract class ViewModelWindow : ViewModelRelayCommand {
 
 		#region Fields
 
@@ -37,7 +30,7 @@ namespace WinDirStat.Net.ViewModel {
 		/// <summary>Gets or sets the window owning this view model.</summary>
 		public Window WindowOwner {
 			get => windowOwner;
-			set => Set(ref windowOwner, value);
+			set => SetProperty(ref windowOwner, value);
 		}
 		
 		#endregion

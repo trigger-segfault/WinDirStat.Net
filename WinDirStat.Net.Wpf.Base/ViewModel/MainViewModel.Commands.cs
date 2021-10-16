@@ -1,21 +1,14 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Mvvm.Input;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media;
 using WinDirStat.Net.Model.Drives;
 using WinDirStat.Net.Model.Files;
 using WinDirStat.Net.Services;
-using WinDirStat.Net.ViewModel.Commands;
 
 namespace WinDirStat.Net.ViewModel {
-	partial class MainViewModel {
+    partial class MainViewModel {
 		
 		#region File Menu
 		
@@ -145,7 +138,7 @@ namespace WinDirStat.Net.ViewModel {
 		private void OnCancel() {
 			Scanning.Cancel(false);
 		}
-		private void OnElevate() {
+		private async void OnElevate() {
 			// Dialog warn progress will be lost.
 			// If yes, close then start new process.
 			MessageBoxResult result = MessageBoxResult.Yes;
@@ -158,16 +151,16 @@ namespace WinDirStat.Net.ViewModel {
 				try {
 					OS.StartNewElevated();
 					UI.Shutdown();
-					Dispose();
+					await DisposeAsync();
 				}
 				catch {
 					Dialogs.ShowError(WindowOwner, "Failed to start elevated process!", "Error");
 				}
 			}
 		}
-		private void OnExit() {
+		private async void OnExit() {
 			UI.Shutdown();
-			Dispose();
+			await DisposeAsync();
 		}
 
 		#endregion
