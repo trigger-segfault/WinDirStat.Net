@@ -13,7 +13,6 @@ using System.Windows.Media;
 using System.Windows.Navigation;
 using System.Windows.Threading;
 using WinDirStat.Net.Utils;
-using WinFormsApplication = System.Windows.Forms.Application;
 
 namespace WinDirStat.Net.Wpf.Windows {
 	/// <summary>Shows an error that occured in the program.</summary>
@@ -208,8 +207,6 @@ namespace WinDirStat.Net.Wpf.Windows {
 				OnAppDomainUnhandledException;
 			TaskScheduler.UnobservedTaskException +=
 				OnTaskSchedulerUnobservedTaskException;
-			WinFormsApplication.ThreadException +=
-				OnWinFormsThreadException;
 			app.Exit += OnAppShutdown;
 		}
 
@@ -225,8 +222,6 @@ namespace WinDirStat.Net.Wpf.Windows {
 				OnAppDomainUnhandledException;
 			TaskScheduler.UnobservedTaskException -=
 				OnTaskSchedulerUnobservedTaskException;
-			WinFormsApplication.ThreadException -=
-				OnWinFormsThreadException;
 		}
 
 		/// <summary>Show an exception window for an exception that occurred in a
@@ -250,15 +245,6 @@ namespace WinDirStat.Net.Wpf.Windows {
 		/// <summary>Show an exception window for an exception that occurred in a task.</summary>
 		private static void OnTaskSchedulerUnobservedTaskException(object sender,
 			UnobservedTaskExceptionEventArgs e)
-		{
-			Application.Current.Dispatcher.Invoke(
-				() => ShowErrorMessageBox(e.Exception));
-		}
-
-		/// <summary>Show an exception window for an exception that occurred in
-		/// winforms.</summary>
-		private static void OnWinFormsThreadException(object sender,
-			ThreadExceptionEventArgs e)
 		{
 			Application.Current.Dispatcher.Invoke(
 				() => ShowErrorMessageBox(e.Exception));

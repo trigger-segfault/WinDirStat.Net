@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Ookii.Dialogs.Wpf;
 using System.Media;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using WinDirStat.Net.Model.Drives;
 using WinDirStat.Net.Services;
 using WinDirStat.Net.Wpf.Windows;
 
 namespace WinDirStat.Net.Wpf.Services {
-	/// <summary>A service for launching dialogs and showing messages.</summary>
-	public class DialogService : IMyDialogService {
+    /// <summary>A service for launching dialogs and showing messages.</summary>
+    public class DialogService : IMyDialogService {
 
 		/// <summary>Shows the dialog for selecting paths to scan.</summary>
 		/// 
@@ -29,25 +25,22 @@ namespace WinDirStat.Net.Wpf.Services {
 		/// <param name="selectedPath">The currently selected path. Use an empty string for nothing.</param>
 		/// <returns>The selected path on success, otherwise null.</returns>
 		public string ShowFolderBrowser(Window owner, string description, bool showNewFolder, string selectedPath = "") {
-			FolderBrowserDialog dialog = new FolderBrowserDialog() {
+			var dialog = new VistaFolderBrowserDialog() {
 				Description = description,
 				ShowNewFolderButton = showNewFolder,
 				SelectedPath = selectedPath,
 			};
-			bool? result = dialog.ShowDialog(owner);
-			if (result ?? false) {
-				return dialog.SelectedPath;
-			}
-			return null;
-		}
 
-		/// <summary>Shows a message with no icon.</summary>
-		/// 
-		/// <param name="owner">The owner window for this dialog message.</param>
-		/// <param name="message">The text message.</param>
-		/// <param name="title">The message window title.</param>
-		/// <param name="button">The message buttons to display.</param>
-		public MessageBoxResult ShowMessage(Window owner, string message, string title, MessageBoxButton button = MessageBoxButton.OK) {
+            return (dialog.ShowDialog() ?? false) ? dialog.SelectedPath : null;
+        }
+
+        /// <summary>Shows a message with no icon.</summary>
+        /// 
+        /// <param name="owner">The owner window for this dialog message.</param>
+        /// <param name="message">The text message.</param>
+        /// <param name="title">The message window title.</param>
+        /// <param name="button">The message buttons to display.</param>
+        public MessageBoxResult ShowMessage(Window owner, string message, string title, MessageBoxButton button = MessageBoxButton.OK) {
 			return MessageBox.Show(owner, message, title, button);
 		}
 

@@ -1,22 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using GalaSoft.MvvmLight;
-using WinDirStat.Net.Model.Extensions;
-using WinDirStat.Net.Model.Files;
-using WinDirStat.Net.Services;
-using WinDirStat.Net.Utils;
-using WinDirStat.Net.Native;
 using System.Runtime.InteropServices;
+using System.Threading;
+using WinDirStat.Net.Model.Files;
+using WinDirStat.Net.Native;
+using WinDirStat.Net.Utils;
 
 namespace WinDirStat.Net.Services {
-	partial class ScanningService {
+    partial class ScanningService {
 
 		#region Private Classes
 

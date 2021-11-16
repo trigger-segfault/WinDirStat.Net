@@ -1,21 +1,13 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Mvvm.Input;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media;
 using WinDirStat.Net.Model.Drives;
 using WinDirStat.Net.Model.Files;
 using WinDirStat.Net.Services;
-using WinDirStat.Net.ViewModel.Commands;
 
 namespace WinDirStat.Net.ViewModel {
-	partial class MainViewModel {
+    partial class MainViewModel {
 		
 		#region File Menu
 		

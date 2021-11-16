@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using GalaSoft.MvvmLight;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using WinDirStat.Net.Wpf.Input;
 
 namespace WinDirStat.Net.Wpf.Commands {
@@ -32,40 +32,40 @@ namespace WinDirStat.Net.Wpf.Commands {
 		/// <summary>Gets the display the name of the command to assign this info to.</summary>
 		public string Name {
 			get => name;
-			set => Set(ref name, value);
+			set => SetProperty(ref name, value);
 		}
 		/// <summary>Gets the display text for the command.</summary>
 		public string Text {
 			get => text;
-			set => Set(ref text, value);
+			set => SetProperty(ref text, value);
 		}
 		/// <summary>Gets the display icon for the command.</summary>
 		public ImageSource Icon {
 			get => icon;
-			set => Set(ref icon, value);
+			set => SetProperty(ref icon, value);
 		}
 		/// <summary>Gets or sets the key for <see cref="InputGesture"/>.</summary>
 		public Key Key {
 			get => key;
 			set {
-				if (Set(ref key, value))
-					RaisePropertyChanged(nameof(InputGesture));
+				if (SetProperty(ref key, value))
+                    OnPropertyChanged(nameof(InputGesture));
 			}
 		}
 		/// <summary>Gets or sets the modifier keys for <see cref="InputGesture"/>.</summary>
 		public ModifierKeys Modifiers {
 			get => modifiers;
 			set {
-				if (Set(ref modifiers, value))
-					RaisePropertyChanged(nameof(InputGesture));
+				if (SetProperty(ref modifiers, value))
+                    OnPropertyChanged(nameof(InputGesture));
 			}
 		}
 		/// <summary>Gets or sets the override display text for <see cref="InputGesture"/>.</summary>
 		public string InputGestureDisplayText {
 			get => inputGestureDisplayText;
 			set {
-				if (Set(ref inputGestureDisplayText, value))
-					RaisePropertyChanged(nameof(InputGesture));
+				if (SetProperty(ref inputGestureDisplayText, value))
+					OnPropertyChanged(nameof(InputGesture));
 			}
 		}
 

@@ -1,21 +1,17 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using GalaSoft.MvvmLight;
 using WinDirStat.Net.Model.Drives;
 using WinDirStat.Net.Rendering;
 using WinDirStat.Net.Structures;
 
 namespace WinDirStat.Net.Services {
-	/// <summary>The service for containing all program settings.</summary>
-	public partial class SettingsService : ObservableObjectEx {
+    /// <summary>The service for containing all program settings.</summary>
+    public partial class SettingsService : ObservableObjectEx {
 
 		#region Fields
 
@@ -104,7 +100,7 @@ namespace WinDirStat.Net.Services {
 		/// <summary>Gets or sets the default mode for selecting paths to scan.</summary>
 		public DriveSelectMode DriveSelectMode {
 			get => driveSelectMode;
-			set => Set(ref driveSelectMode, value);
+			set => SetProperty(ref driveSelectMode, value);
 		}
 
 		/// <summary>Gets or sets the selected drives from the individual list.</summary>
@@ -113,14 +109,14 @@ namespace WinDirStat.Net.Services {
 			set {
 				if (value == null || value.Any(s => string.IsNullOrEmpty(s)))
 					throw new ArgumentNullException(nameof(SelectedDrives));
-				Set(ref selectedDrives, value);
+                SetProperty(ref selectedDrives, value);
 			}
 		}
 
 		/// <summary>Gets or sets the selected folder path.</summary>
 		public string SelectedFolderPath {
 			get => selectedFolderPath;
-			set => Set(ref selectedFolderPath, value);
+			set => SetProperty(ref selectedFolderPath, value);
 		}
 
 		#endregion
@@ -130,31 +126,31 @@ namespace WinDirStat.Net.Services {
 		/// <summary>Gets or sets the thread priority for scanning the file tree.</summary>
 		public ThreadPriority ScanPriority {
 			get => scanPriority;
-			set => Set(ref scanPriority, value);
+			set => SetProperty(ref scanPriority, value);
 		}
 
 		/// <summary>Gets or sets the thread priority for rendering the treemap.</summary>
 		public ThreadPriority RenderPriority {
 			get => renderPriority;
-			set => Set(ref renderPriority, value);
+			set => SetProperty(ref renderPriority, value);
 		}
 
 		/// <summary>Gets or sets how often the RAM Usage is updated.</summary>
 		public TimeSpan RAMInterval {
 			get => ramInterval;
-			set => Set(ref ramInterval, value);
+			set => SetProperty(ref ramInterval, value);
 		}
 
 		/// <summary>Gets or sets how often the scan status is updated.</summary>
 		public TimeSpan StatusInterval {
 			get => statusInterval;
-			set => Set(ref statusInterval, value);
+			set => SetProperty(ref statusInterval, value);
 		}
 
 		/// <summary>Gets or sets how often the scanned file tree is updated in the UI.</summary>
 		public TimeSpan ValidateInterval {
 			get => validateInterval;
-			set => Set(ref validateInterval, value);
+			set => SetProperty(ref validateInterval, value);
 		}
 
 		#endregion
@@ -164,13 +160,13 @@ namespace WinDirStat.Net.Services {
 		/// <summary>Gets or sets if free space items are displayed for drives.</summary>
 		public bool ShowFreeSpace {
 			get => showFreeSpace;
-			set => Set(ref showFreeSpace, value);
+			set => SetProperty(ref showFreeSpace, value);
 		}
 
 		/// <summary>Gets or sets if unknown space items are displayed for drives.</summary>
 		public bool ShowUnknown {
 			get => showUnknown;
-			set => Set(ref showUnknown, value);
+			set => SetProperty(ref showUnknown, value);
 		}
 
 		/// <summary>
@@ -179,7 +175,7 @@ namespace WinDirStat.Net.Services {
 		/// </summary>
 		public bool ShowTotalSpace {
 			get => showTotalSpace;
-			set => Set(ref showTotalSpace, value);
+			set => SetProperty(ref showTotalSpace, value);
 		}
 
 		#endregion
@@ -189,31 +185,31 @@ namespace WinDirStat.Net.Services {
 		/// <summary>Gets or sets if the file types list should be shown.</summary>
 		public bool ShowFileTypes {
 			get => showFileTypes;
-			set => Set(ref showFileTypes, value);
+			set => SetProperty(ref showFileTypes, value);
 		}
 
 		/// <summary>Gets or sets if the treemap should be shown.</summary>
 		public bool ShowTreemap {
 			get => showTreemap;
-			set => Set(ref showTreemap, value);
+			set => SetProperty(ref showTreemap, value);
 		}
 
 		/// <summary>Gets or sets if the tool bar should be shown.</summary>
 		public bool ShowToolBar {
 			get => showToolBar;
-			set => Set(ref showToolBar, value);
+			set => SetProperty(ref showToolBar, value);
 		}
 
 		/// <summary>Gets or sets if the status bar should be shown.</summary>
 		public bool ShowStatusBar {
 			get => showStatusBar;
-			set => Set(ref showStatusBar, value);
+			set => SetProperty(ref showStatusBar, value);
 		}
 
 		/// <summary>Gets or sets the setting for how icons are cached for file tree items.</summary>
 		public IconCacheMode IconCacheMode {
 			get => iconCacheMode;
-			set => Set(ref iconCacheMode, value);
+			set => SetProperty(ref iconCacheMode, value);
 		}
 
 		#endregion
@@ -226,14 +222,14 @@ namespace WinDirStat.Net.Services {
 			set {
 				treemapOptions = value;
 				UpdateFilePalettePreviews();
-				RaisePropertyChanged();
+				OnPropertyChanged();
 			}
 		}
 
 		/// <summary>Gets or sets the treemap highlight color.</summary>
 		public Rgba32Color HighlightColor {
 			get => highlightColor;
-			set => Set(ref highlightColor, value);
+			set => SetProperty(ref highlightColor, value);
 		}
 
 		/// <summary>Gets the array of the prepared (equalized) file palette colors.</summary>
@@ -274,8 +270,8 @@ namespace WinDirStat.Net.Services {
 			this.filePalette = filePalette.ToArray();
 			this.equalizedFilePalette = ColorSpace.EqualizeColors(filePalette);
 			UpdateFilePalettePreviews();
-			RaisePropertyChanged(nameof(FilePalette));
-			RaisePropertyChanged(nameof(OriginalFilePalette));
+			OnPropertyChanged(nameof(FilePalette));
+			OnPropertyChanged(nameof(OriginalFilePalette));
 		}
 
 		#endregion
@@ -300,7 +296,7 @@ namespace WinDirStat.Net.Services {
 		/// <param name="subtreePalette">The new collection of colors to use.</param>
 		public void SetSubtreePalette(IEnumerable<Rgb24Color> subtreePalette) {
 			this.subtreePalette = subtreePalette.ToArray();
-			RaisePropertyChanged(nameof(SubtreePalette));
+			OnPropertyChanged(nameof(SubtreePalette));
 		}
 
 		#endregion
@@ -316,7 +312,7 @@ namespace WinDirStat.Net.Services {
 			for (int i = 0; i < filePalettePreviews.Length; i++) {
 				DrawFilePalettePreview(ref filePalettePreviews[i], equalizedFilePalette[i]);
 			}
-			RaisePropertyChanged(nameof(FilePalettePreviews));
+			OnPropertyChanged(nameof(FilePalettePreviews));
 		}
 
 		/// <summary>Draws a single file palette preview.</summary>
